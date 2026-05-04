@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fluid Dynamics Simulation</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <style>
@@ -13,10 +13,15 @@
             overflow: hidden;
             background-color: #050505;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* Prevents pull-to-refresh and system gestures on mobile */
+            touch-action: none;
+            -webkit-overflow-scrolling: none;
         }
 
         canvas {
             display: block;
+            /* Ensures touch interactions don't trigger browser scrolling */
+            touch-action: none;
         }
 
         .controls {
@@ -32,19 +37,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             user-select: none;
             max-width: 250px;
-        }
-
-        .controls h1 {
-            margin: 0 0 10px 0;
-            font-size: 18px;
-            font-weight: 500;
-        }
-
-        .controls p {
-            margin: 5px 0;
-            font-size: 13px;
-            opacity: 0.8;
-            line-height: 1.4;
+            z-index: 10;
         }
 
         .perf-badge {
@@ -230,33 +223,44 @@
             calculateLayout();
             fluid = new Fluid(0.15, 0.0000001, 0.00000001);
             frameRate(60);
+
+            // Prevent scrolling on touch devices manually
+            document.addEventListener('touchstart', (e) => {
+                if (e.target.tagName === 'CANVAS') e.preventDefault();
+            }, { passive: false });
+            document.addEventListener('touchmove', (e) => {
+                if (e.target.tagName === 'CANVAS') e.preventDefault();
+            }, { passive: false });
         }
 
         function draw() {
             background(5);
 
-            // Simulation grid coordinates
-            let cx = floor((mouseX - offsetX) / scale);
-            let cy = floor((mouseY - offsetY) / scale);
-            let vX = (mouseX - pmouseX) * 0.15;
-            let vY = (mouseY - pmouseY) * 0.15;
+            // Use mouse or touch coordinates
+            let inputX = (touches.length > 0) ? touches[0].x : mouseX;
+            let inputY = (touches.length > 0) ? touches[0].y : mouseY;
+            let pInputX = (touches.length > 0) ? inputX : pmouseX;
+            let pInputY = (touches.length > 0) ? inputY : pmouseY;
 
-            // Physics step
+            // Simulation grid coordinates
+            let cx = floor((inputX - offsetX) / scale);
+            let cy = floor((inputY - offsetY) / scale);
+            let vX = (inputX - pInputX) * 0.15;
+            let vY = (inputY - pInputY) * 0.15;
+
             let currentTime = millis();
             let elapsed = currentTime - lastUpdateTime;
             let updateThreshold = 1000 / targetFPS;
 
             if (elapsed >= updateThreshold) {
-                // Interaction logic: Loop through a radius to create a "broader brush"
-                let brushRadius = 1; // 1 means a 3x3 square of cells
+                let brushRadius = 1;
                 for (let i = -brushRadius; i <= brushRadius; i++) {
                     for (let j = -brushRadius; j <= brushRadius; j++) {
                         let tx = cx + i;
                         let ty = cy + j;
 
-                        // Check bounds for each cell in the brush
                         if (tx >= 0 && tx < N && ty >= 0 && ty < N) {
-                            if (mouseIsPressed || (abs(vX) > 0.01 || abs(vY) > 0.01)) {
+                            if (mouseIsPressed || touches.length > 0 || (abs(vX) > 0.01 || abs(vY) > 0.01)) {
                                 fluid.addDensity(tx, ty, 150);
                                 fluid.addVelocity(tx, ty, vX, vY);
                             }
@@ -270,13 +274,11 @@
                 document.getElementById('stats').innerText = `Sim: ${targetFPS}Hz | Render: ${floor(frameRate())}FPS`;
             }
 
-            // Draw fluid
             fluid.render();
 
-            // DRAW DEAD ZONES (Non-interactive areas)
+            // DRAW DEAD ZONES
             fill(0, 0, 200, 100);
             noStroke();
-
             rect(0, 0, offsetX, height);
             rect(offsetX + N * scale, 0, width - (offsetX + N * scale), height);
             rect(offsetX, 0, N * scale, offsetY);
