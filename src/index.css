@@ -5,7 +5,7 @@
   --surface-color-hover: #252b3b;
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  
+
   /* Accents - Electric Cyan & Purple Gradient */
   --accent-color: #06b6d4;
   --accent-glow: rgba(6, 182, 212, 0.5);
@@ -39,7 +39,12 @@ body {
   flex-direction: column;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   line-height: 1.2;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -82,7 +87,6 @@ a:hover {
 }
 
 .card:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-md);
   border-color: rgba(255, 255, 255, 0.15);
   background: var(--surface-color-hover);
