@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export function Project1() {
   return (
-    <main style={{ flex: 1, padding: '5rem 0' }}>
+    <main style={{ flex: 1, padding: '2rem 0' }}>
       <div className="container">
         <Link to="/" style={{ display: 'inline-block', marginBottom: '2rem', color: 'var(--text-secondary)' }}>
           &larr; Back to Portfolio
