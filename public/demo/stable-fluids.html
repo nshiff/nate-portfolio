@@ -247,13 +247,23 @@
             let updateThreshold = 1000 / targetFPS;
 
             if (elapsed >= updateThreshold) {
-                // Only interact if within bounds
-                if (cx >= 0 && cx < N && cy >= 0 && cy < N) {
-                    if (mouseIsPressed || (abs(vX) > 0.01 || abs(vY) > 0.01)) {
-                        fluid.addDensity(cx, cy, 200);
-                        fluid.addVelocity(cx, cy, vX, vY);
+                // Interaction logic: Loop through a radius to create a "broader brush"
+                let brushRadius = 1; // 1 means a 3x3 square of cells
+                for (let i = -brushRadius; i <= brushRadius; i++) {
+                    for (let j = -brushRadius; j <= brushRadius; j++) {
+                        let tx = cx + i;
+                        let ty = cy + j;
+
+                        // Check bounds for each cell in the brush
+                        if (tx >= 0 && tx < N && ty >= 0 && ty < N) {
+                            if (mouseIsPressed || (abs(vX) > 0.01 || abs(vY) > 0.01)) {
+                                fluid.addDensity(tx, ty, 150);
+                                fluid.addVelocity(tx, ty, vX, vY);
+                            }
+                        }
                     }
                 }
+
                 fluid.step();
                 fluid.fade();
                 lastUpdateTime = currentTime;
@@ -264,21 +274,16 @@
             fluid.render();
 
             // DRAW DEAD ZONES (Non-interactive areas)
-            fill(0, 0, 200, 100); // Light gray, slightly transparent
+            fill(0, 0, 200, 100);
             noStroke();
 
-            // Left side
             rect(0, 0, offsetX, height);
-            // Right side
             rect(offsetX + N * scale, 0, width - (offsetX + N * scale), height);
-            // Top side
             rect(offsetX, 0, N * scale, offsetY);
-            // Bottom side
             rect(offsetX, offsetY + N * scale, N * scale, height - (offsetY + N * scale));
 
-            // Visual outline for the interactive square
             noFill();
-            stroke(0, 0, 100); // White stroke for visibility on light gray
+            stroke(0, 0, 100);
             strokeWeight(2);
             rect(offsetX, offsetY, N * scale, N * scale);
         }
