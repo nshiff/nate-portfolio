@@ -4,34 +4,10 @@ export function Home() {
   return (
     <>
       <main style={{ flex: 1 }}>
-        {/* Hero Section */}
-        <section id="about">
-          <div className="container" style={{ textAlign: 'center', maxWidth: '800px' }}>
-            <h1 style={{ fontSize: '3.5rem', marginBottom: '1.5rem' }}>
-              Hi, I build <span className="text-gradient">amazing things</span> for the web.
-            </h1>
-            <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>
-              I'm a software engineer passionate about creating beautiful, responsive, and user-centric digital experiences.
-              Currently exploring modern web technologies and building scalable applications.
-            </p>
-            <a href="#projects" style={{
-              display: 'inline-block',
-              padding: '1rem 2rem',
-              background: 'var(--gradient-primary)',
-              color: 'white',
-              borderRadius: '8px',
-              fontWeight: 'bold',
-              boxShadow: 'var(--shadow-sm)'
-            }}>
-              View My Work
-            </a>
-          </div>
-        </section>
 
         {/* Projects Section */}
         <section id="projects" style={{ background: 'rgba(255,255,255,0.02)' }}>
           <div className="container">
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem', textAlign: 'center' }}>Selected Projects</h2>
 
             <div style={{
               display: 'grid',

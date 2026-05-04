@@ -23,7 +23,6 @@ function Layout() {
           </Link>
           <nav>
             <ul style={{ listStyle: 'none', display: 'flex', gap: '1.5rem' }}>
-              <li><Link to="/#about" style={{ color: 'var(--text-primary)' }}>About</Link></li>
               <li><Link to="/#projects" style={{ color: 'var(--text-primary)' }}>Projects</Link></li>
               <li><a href="#contact" style={{ color: 'var(--text-primary)' }}>Contact</a></li>
             </ul>
@@ -37,15 +36,23 @@ function Layout() {
       {/* Footer */}
       <footer id="contact" style={{ padding: '3rem 0', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
         <div className="container">
+
           <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Let's Connect</h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-            I'm always open to discussing new projects, creative ideas or opportunities to be part of your visions.
-          </p>
-          <a href="mailto:hello@example.com" style={{ fontSize: '1.25rem', fontWeight: 'bold', borderBottom: '2px solid var(--accent-color)' }}>
-            hello@example.com
-          </a>
-          <div style={{ marginTop: '3rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            &copy; {new Date().getFullYear()} Your Name. All rights reserved.
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginBottom: '3rem' }}>
+            <a href="https://www.linkedin.com/in/nate-shiff/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', fontWeight: '500' }}>
+              LinkedIn
+            </a>
+            <a href="https://x.com/nateradetunes" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', fontWeight: '500' }}>
+              X (Twitter)
+            </a>
+            <a href="https://github.com/nshiff" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', fontWeight: '500' }}>
+              GitHub
+            </a>
+          </div>
+
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+            &copy; {new Date().getFullYear()} Nate Shiff. All rights reserved.
           </div>
         </div>
       </footer>
