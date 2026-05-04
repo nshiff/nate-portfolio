@@ -14,11 +14,11 @@ export function Home() {
               gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
               gap: '2rem'
             }}>
-              {/* Project Stub 1 */}
+              {/* Project 1: Stable Fluids */}
               <Link to="/project/1" className="card" style={{ display: 'block', color: 'inherit' }}>
                 <div style={{
                   height: '200px',
-                  background: 'rgba(255,255,255,0.05)',
+                  background: 'linear-gradient(45deg, #050505, #1a1a2e)',
                   borderRadius: '8px',
                   marginBottom: '1.5rem',
                   display: 'flex',
@@ -26,11 +26,11 @@ export function Home() {
                   justifyContent: 'center',
                   color: 'var(--text-secondary)'
                 }}>
-                  [Project Image Stub]
+                  <span style={{ fontSize: '2rem' }}>🌊</span>
                 </div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Project Title 1</h3>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Stable Fluids</h3>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                  A brief description of the project goes here. Explain what it does and the tech stack used.
+                  An interactive real-time fluid simulation leveraging WebGL, based on Jos Stam's Stable Fluids paper.
                 </p>
                 <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
               </Link>

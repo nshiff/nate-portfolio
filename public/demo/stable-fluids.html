@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluid Dynamics Simulation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #050505;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            pointer-events: none;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            user-select: none;
+            max-width: 250px;
+        }
+
+        .controls h1 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .controls p {
+            margin: 5px 0;
+            font-size: 13px;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .perf-badge {
+            font-family: monospace;
+            font-size: 11px;
+            color: #00ffcc;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="controls">
+        <div id="stats" class="perf-badge">Initializing...</div>
+    </div>
+
+    <script>
+        let fluid;
+        let N = 32;
+        let iter = 4;
+        let scale = 10;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        let targetFPS = 30;
+        let lastUpdateTime = 0;
+
+        function IX(x, y) {
+            x = constrain(x, 0, N - 1);
+            y = constrain(y, 0, N - 1);
+            return x + y * N;
+        }
+
+        class Fluid {
+            constructor(dt, diffusion, viscosity) {
+                this.size = N;
+                this.dt = dt;
+                this.diff = diffusion;
+                this.visc = viscosity;
+
+                this.s = new Float32Array(N * N);
+                this.density = new Float32Array(N * N);
+                this.Vx = new Float32Array(N * N);
+                this.Vy = new Float32Array(N * N);
+                this.Vx0 = new Float32Array(N * N);
+                this.Vy0 = new Float32Array(N * N);
+            }
+
+            addDensity(x, y, amount) {
+                this.density[IX(x, y)] += amount;
+            }
+
+            addVelocity(x, y, amountX, amountY) {
+                let index = IX(x, y);
+                this.Vx[index] += amountX;
+                this.Vy[index] += amountY;
+            }
+
+            step() {
+                let visc = this.visc;
+                let diff = this.diff;
+                let dt = this.dt;
+                let Vx = this.Vx;
+                let Vy = this.Vy;
+                let Vx0 = this.Vx0;
+                let Vy0 = this.Vy0;
+                let s = this.s;
+                let density = this.density;
+
+                diffuse(1, Vx0, Vx, visc, dt);
+                diffuse(2, Vy0, Vy, visc, dt);
+                project(Vx0, Vy0, Vx, Vy);
+
+                advect(1, Vx, Vx0, Vx0, Vy0, dt);
+                advect(2, Vy, Vy0, Vx0, Vy0, dt);
+                project(Vx, Vy, Vx0, Vy0);
+
+                diffuse(0, s, density, diff, dt);
+                advect(0, density, s, Vx, Vy, dt);
+            }
+
+            render() {
+                noStroke();
+                push();
+                translate(offsetX, offsetY);
+                for (let i = 0; i < N; i++) {
+                    for (let j = 0; j < N; j++) {
+                        let d = this.density[IX(i, j)];
+                        if (d > 0.5) {
+                            fill((frameCount * 0.5 + d) % 255, 180, constrain(d * 2.5, 0, 255), d);
+                            rect(i * scale, j * scale, scale + 1, scale + 1);
+                        }
+                    }
+                }
+                pop();
+            }
+
+            fade() {
+                for (let i = 0; i < this.density.length; i++) {
+                    this.density[i] *= 0.985;
+                }
+            }
+        }
+
+        function diffuse(b, x, x0, diff, dt) {
+            let a = dt * diff * (N - 2) * (N - 2);
+            lin_solve(b, x, x0, a, 1 + 6 * a);
+        }
+
+        function lin_solve(b, x, x0, a, c) {
+            let cRecip = 1.0 / c;
+            for (let k = 0; k < iter; k++) {
+                for (let j = 1; j < N - 1; j++) {
+                    for (let i = 1; i < N - 1; i++) {
+                        x[IX(i, j)] = (x0[IX(i, j)] + a * (x[IX(i + 1, j)] + x[IX(i - 1, j)] + x[IX(i, j + 1)] + x[IX(i, j - 1)])) * cRecip;
+                    }
+                }
+                set_bnd(b, x);
+            }
+        }
+
+        function project(velocX, velocY, p, div) {
+            for (let j = 1; j < N - 1; j++) {
+                for (let i = 1; i < N - 1; i++) {
+                    div[IX(i, j)] = (-0.5 * (velocX[IX(i + 1, j)] - velocX[IX(i - 1, j)] + velocY[IX(i, j + 1)] - velocY[IX(i, j - 1)])) / N;
+                    p[IX(i, j)] = 0;
+                }
+            }
+            set_bnd(0, div);
+            set_bnd(0, p);
+            lin_solve(0, p, div, 1, 6);
+            for (let j = 1; j < N - 1; j++) {
+                for (let i = 1; i < N - 1; i++) {
+                    velocX[IX(i, j)] -= 0.5 * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) * N;
+                    velocY[IX(i, j)] -= 0.5 * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) * N;
+                }
+            }
+            set_bnd(1, velocX);
+            set_bnd(2, velocY);
+        }
+
+        function advect(b, d, d0, velocX, velocY, dt) {
+            let i0, i1, j0, j1, dtx = dt * (N - 2), dty = dt * (N - 2), s0, s1, t0, t1, tmp1, tmp2, x, y, Nfloat = N;
+            for (let j = 1; j < N - 1; j++) {
+                for (let i = 1; i < N - 1; i++) {
+                    tmp1 = dtx * velocX[IX(i, j)];
+                    tmp2 = dty * velocY[IX(i, j)];
+                    x = i - tmp1; y = j - tmp2;
+                    if (x < 0.5) x = 0.5; if (x > Nfloat + 0.5) x = Nfloat + 0.5;
+                    i0 = floor(x); i1 = i0 + 1.0;
+                    if (y < 0.5) y = 0.5; if (y > Nfloat + 0.5) y = Nfloat + 0.5;
+                    j0 = floor(y); j1 = j0 + 1.0;
+                    s1 = x - i0; s0 = 1.0 - s1; t1 = y - j0; t0 = 1.0 - t1;
+                    d[IX(i, j)] = s0 * (t0 * d0[IX(floor(i0), floor(j0))] + t1 * d0[IX(floor(i0), floor(j1))]) + s1 * (t0 * d0[IX(floor(i1), floor(j0))] + t1 * d0[IX(floor(i1), floor(j1))]);
+                }
+            }
+            set_bnd(b, d);
+        }
+
+        function set_bnd(b, x) {
+            for (let i = 1; i < N - 1; i++) {
+                x[IX(i, 0)] = b == 2 ? -x[IX(i, 1)] : x[IX(i, 1)];
+                x[IX(i, N - 1)] = b == 2 ? -x[IX(i, N - 2)] : x[IX(i, N - 2)];
+            }
+            for (let j = 1; j < N - 1; j++) {
+                x[IX(0, j)] = b == 1 ? -x[IX(1, j)] : x[IX(1, j)];
+                x[IX(N - 1, j)] = b == 1 ? -x[IX(N - 2, j)] : x[IX(N - 2, j)];
+            }
+            x[IX(0, 0)] = 0.5 * (x[IX(1, 0)] + x[IX(0, 1)]);
+            x[IX(0, N - 1)] = 0.5 * (x[IX(1, N - 1)] + x[IX(0, N - 2)]);
+            x[IX(N - 1, 0)] = 0.5 * (x[IX(N - 2, 0)] + x[IX(N - 1, 1)]);
+            x[IX(N - 1, N - 1)] = 0.5 * (x[IX(N - 2, N - 1)] + x[IX(N - 1, N - 2)]);
+        }
+
+        function calculateLayout() {
+            scale = min(width, height) / N;
+            offsetX = (width - (N * scale)) / 2;
+            offsetY = (height - (N * scale)) / 2;
+        }
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            colorMode(HSB, 255);
+            calculateLayout();
+            fluid = new Fluid(0.15, 0.0000001, 0.00000001);
+            frameRate(60);
+        }
+
+        function draw() {
+            background(5);
+
+            // Simulation grid coordinates
+            let cx = floor((mouseX - offsetX) / scale);
+            let cy = floor((mouseY - offsetY) / scale);
+            let vX = (mouseX - pmouseX) * 0.15;
+            let vY = (mouseY - pmouseY) * 0.15;
+
+            // Physics step
+            let currentTime = millis();
+            let elapsed = currentTime - lastUpdateTime;
+            let updateThreshold = 1000 / targetFPS;
+
+            if (elapsed >= updateThreshold) {
+                // Only interact if within bounds
+                if (cx >= 0 && cx < N && cy >= 0 && cy < N) {
+                    if (mouseIsPressed || (abs(vX) > 0.01 || abs(vY) > 0.01)) {
+                        fluid.addDensity(cx, cy, 200);
+                        fluid.addVelocity(cx, cy, vX, vY);
+                    }
+                }
+                fluid.step();
+                fluid.fade();
+                lastUpdateTime = currentTime;
+                document.getElementById('stats').innerText = `Sim: ${targetFPS}Hz | Render: ${floor(frameRate())}FPS`;
+            }
+
+            // Draw fluid
+            fluid.render();
+
+            // DRAW DEAD ZONES (Non-interactive areas)
+            fill(0, 0, 200, 100); // Light gray, slightly transparent
+            noStroke();
+
+            // Left side
+            rect(0, 0, offsetX, height);
+            // Right side
+            rect(offsetX + N * scale, 0, width - (offsetX + N * scale), height);
+            // Top side
+            rect(offsetX, 0, N * scale, offsetY);
+            // Bottom side
+            rect(offsetX, offsetY + N * scale, N * scale, height - (offsetY + N * scale));
+
+            // Visual outline for the interactive square
+            noFill();
+            stroke(0, 0, 100); // White stroke for visibility on light gray
+            strokeWeight(2);
+            rect(offsetX, offsetY, N * scale, N * scale);
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+            calculateLayout();
+        }
+    </script>
+</body>
+
+</html>
