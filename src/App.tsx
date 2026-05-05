@@ -40,6 +40,8 @@ function Layout() {
       <footer id="contact" style={{ padding: '3rem 0', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
         <div className="container">
 
+          <h2>Let's Connect</h2>
+
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginBottom: '3rem' }}>
             <a href="https://www.linkedin.com/in/nate-shiff/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', fontWeight: '500' }}>
               LinkedIn

@@ -46,6 +46,9 @@ export function Project1() {
           <p>
             You can interact with the demo above by clicking or touching and dragging across the container to create colorful fluid vortices.
           </p>
+          <p>
+            This project was created using AI-assisted development with Gemini Canvas.
+          </p>
         </div>
       </div>
     </main>

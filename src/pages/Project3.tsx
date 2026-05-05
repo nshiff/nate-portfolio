@@ -41,6 +41,9 @@ export function Project3() {
           <p>
             You can dynamically add modules like Oscillators (VCO), Filters (VCF), and LFOs, then physically "patch" them together using the drag-and-drop cable system to design custom sounds in real-time.
           </p>
+          <p>
+            This project was created using AI-assisted development with Gemini Canvas.
+          </p>
         </div>
       </div>
     </main>

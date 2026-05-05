@@ -47,6 +47,9 @@ export function Project2() {
           <p>
             You can load various pre-defined programs, control the execution speed, and watch the state machine evaluate the input tape step-by-step.
           </p>
+          <p>
+            This project was created using AI-assisted development with <a href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Claude</a>.
+          </p>
         </div>
       </div>
     </main>
