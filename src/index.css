@@ -1,3 +1,6 @@
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
 :root.dark {
   /* Color Palette - Premium Dark */
   --bg-color: #0b0f19;
@@ -42,8 +45,6 @@
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {

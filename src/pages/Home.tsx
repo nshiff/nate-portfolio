@@ -56,23 +56,26 @@ export function Home() {
                 <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
               </Link>
 
-              {/* Project Stub 3 */}
+              {/* Project 3: WebModular Synth */}
               <Link to="/project/3" className="card" style={{ display: 'block', color: 'inherit' }}>
                 <div style={{
                   height: '200px',
-                  background: 'rgba(255,255,255,0.05)',
+                  background: 'linear-gradient(to right, #1f2937, #111827)',
                   borderRadius: '8px',
                   marginBottom: '1.5rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--text-secondary)'
+                  color: 'var(--text-secondary)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}>
-                  [Project Image Stub]
+                  <div style={{ position: 'absolute', inset: 0, opacity: 0.2, backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                  <span style={{ fontSize: '3rem', zIndex: 10 }}>🎛️</span>
                 </div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Project Title 3</h3>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>WebModular Synth</h3>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                  A brief description of the project goes here. Explain what it does and the tech stack used.
+                  A browser-based modular synthesizer built with React and the Web Audio API, featuring dynamic routing and interactive modules.
                 </p>
                 <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
               </Link>

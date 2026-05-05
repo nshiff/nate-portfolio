@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import ModularSynth from '../components/ModularSynth';
 
 export function Project3() {
   return (
@@ -9,32 +10,33 @@ export function Project3() {
         </Link>
 
         <div style={{
-          height: '400px',
+          position: 'relative',
+          width: '100%',
+          height: '70vh',
+          minHeight: '600px',
           background: 'rgba(255,255,255,0.05)',
           borderRadius: '12px',
           marginBottom: '3rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--text-secondary)',
-          fontSize: '1.5rem'
+          overflow: 'hidden',
         }}>
-          [Project 3 Hero Image]
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }} className="synth-wrapper">
+            <ModularSynth />
+          </div>
         </div>
 
-        <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>Project Title 3</h1>
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 700, lineHeight: 1.2 }}>WebModular Synth</h1>
 
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
           <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>React</span>
-          <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>TypeScript</span>
+          <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>Web Audio API</span>
         </div>
 
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
           <p style={{ marginBottom: '1.5rem' }}>
-            This is the dedicated page for Project 3. Here you can elaborate on the problem you were trying to solve, the technologies you chose, and the challenges you faced during development.
+            This project is a browser-based modular synthesizer built entirely with React and the native Web Audio API. 
           </p>
           <p>
-            You can add more sections here like "Key Features", "Architecture", or links to the live demo and GitHub repository.
+            You can dynamically add modules like Oscillators (VCO), Filters (VCF), and LFOs, then physically "patch" them together using the drag-and-drop cable system to design custom sounds in real-time.
           </p>
         </div>
       </div>
