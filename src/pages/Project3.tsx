@@ -32,7 +32,7 @@ export function Project3() {
         </div>
 
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
-          <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ marginBottom: '2rem' }}>
             <iframe width="560" height="315" src="https://www.youtube.com/embed/wvhzOU9Uss0?si=AHQ95lmpvu0iLlft" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
           </div>
           <p style={{ marginBottom: '1.5rem' }}>
@@ -42,7 +42,7 @@ export function Project3() {
             You can dynamically add modules like Oscillators (VCO), Filters (VCF), and LFOs, then physically "patch" them together using the drag-and-drop cable system to design custom sounds in real-time.
           </p>
           <p>
-            This project was created using AI-assisted development with Gemini Canvas.
+            This project was created using AI-assisted development with <a href="https://gemini.google/overview/canvas/" target="_blank" rel="noopener noreferrer">Gemini Canvas</a>.
           </p>
         </div>
       </div>

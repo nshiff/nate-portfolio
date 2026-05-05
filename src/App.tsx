@@ -24,10 +24,6 @@ function Layout() {
             Nate's Portfolio
           </Link>
           <nav style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <ul style={{ listStyle: 'none', display: 'flex', gap: '1rem', margin: 0, padding: 0 }}>
-              <li><Link to="/#projects" style={{ color: 'var(--text-primary)' }}>Projects</Link></li>
-              <li><a href="#contact" style={{ color: 'var(--text-primary)' }}>Contact</a></li>
-            </ul>
             <ThemeToggle />
           </nav>
         </div>
