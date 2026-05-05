@@ -35,11 +35,11 @@ export function Home() {
                 <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
               </Link>
 
-              {/* Project Stub 2 */}
+              {/* Project 2: Turing Machine Simulator */}
               <Link to="/project/2" className="card" style={{ display: 'block', color: 'inherit' }}>
                 <div style={{
                   height: '200px',
-                  background: 'rgba(255,255,255,0.05)',
+                  background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
                   borderRadius: '8px',
                   marginBottom: '1.5rem',
                   display: 'flex',
@@ -47,11 +47,11 @@ export function Home() {
                   justifyContent: 'center',
                   color: 'var(--text-secondary)'
                 }}>
-                  [Project Image Stub]
+                  <span style={{ fontSize: '2.5rem', fontFamily: 'monospace', color: '#3C3489', fontWeight: 'bold' }}>{'[ q0 ]'}</span>
                 </div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Project Title 2</h3>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Turing Machine</h3>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                  A brief description of the project goes here. Explain what it does and the tech stack used.
+                  An interactive visualization of a Turing Machine, featuring state transitions and an animated tape execution.
                 </p>
                 <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
               </Link>
