@@ -32,8 +32,11 @@ export function Project3() {
         </div>
 
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
+          <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/wvhzOU9Uss0?si=AHQ95lmpvu0iLlft" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          </div>
           <p style={{ marginBottom: '1.5rem' }}>
-            This project is a browser-based modular synthesizer built entirely with React and the native Web Audio API. 
+            This project is a browser-based modular synthesizer built entirely with React and the native Web Audio API.
           </p>
           <p>
             You can dynamically add modules like Oscillators (VCO), Filters (VCF), and LFOs, then physically "patch" them together using the drag-and-drop cable system to design custom sounds in real-time.
