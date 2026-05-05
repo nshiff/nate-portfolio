@@ -33,7 +33,7 @@ export function Project3() {
 
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
           <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
-            <iframe width="560" height="315" src="https://www.youtube.com/embed/wvhzOU9Uss0?si=AHQ95lmpvu0iLlft" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/wvhzOU9Uss0?si=AHQ95lmpvu0iLlft" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
           </div>
           <p style={{ marginBottom: '1.5rem' }}>
             This project is a browser-based modular synthesizer built entirely with React and the native Web Audio API.
