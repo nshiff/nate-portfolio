@@ -35,7 +35,8 @@ export function Project3() {
           <div style={{ marginBottom: '2rem' }}>
             <iframe width="560" height="315" src="https://www.youtube.com/embed/wvhzOU9Uss0?si=AHQ95lmpvu0iLlft" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
           </div>
-          <p style={{ marginBottom: '1.5rem' }}>
+          <p><a href="https://github.com/nshiff/nate-portfolio/blob/main/src/components/ModularSynth.jsx" target="_blank" rel="noopener noreferrer">Source code</a></p>
+          <p>
             This project is a browser-based modular synthesizer built entirely with React and the native Web Audio API.
           </p>
           <p>

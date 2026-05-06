@@ -40,7 +40,8 @@ export function Project1() {
         </div>
 
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
-          <p style={{ marginBottom: '1.5rem' }}>
+          <p><a href="https://github.com/nshiff/nate-portfolio/blob/main/public/demo/stable-fluids.html" target="_blank" rel="noopener noreferrer">Source code</a></p>
+          <p>
             This project is an interactive fluid simulation based on Jos Stam's "Stable Fluids" paper. It utilizes WebGL to compute the complex Navier-Stokes equations in real-time, achieving high-performance physics simulations directly in the browser.
           </p>
           <p>
