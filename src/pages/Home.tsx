@@ -79,6 +79,26 @@ export function Home() {
                 </p>
                 <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
               </Link>
+              {/* Project 4: Coming Soon */}
+              <Link to="/project/4" className="card" style={{ display: 'block', color: 'inherit' }}>
+                <div style={{
+                  height: '200px',
+                  background: 'linear-gradient(135deg, #2b5876 0%, #4e4376 100%)',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-secondary)'
+                }}>
+                  <span style={{ fontSize: '3rem' }}>🚀</span>
+                </div>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Project 4</h3>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                  A placeholder for an upcoming project. Stay tuned!
+                </p>
+                <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>

@@ -9,6 +9,7 @@ import { Home } from './pages/Home';
 import { Project1 } from './pages/Project1';
 import { Project2 } from './pages/Project2';
 import { Project3 } from './pages/Project3';
+import { Project4 } from './pages/Project4';
 import { ThemeProvider } from './components/theme-provider';
 import { ThemeToggle } from './components/ThemeToggle';
 
@@ -77,6 +78,10 @@ const router = createBrowserRouter([
       {
         path: "/project/3",
         element: <Project3 />,
+      },
+      {
+        path: "/project/4",
+        element: <Project4 />,
       },
     ],
   },
