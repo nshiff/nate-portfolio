@@ -8,11 +8,47 @@ export function Project4() {
           &larr; Back to Portfolio
         </Link>
 
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 700, lineHeight: 1.2 }}>Project 4</h1>
+        <div style={{
+          position: 'relative',
+          width: '100%',
+          height: '60vh',
+          minHeight: '400px',
+          background: 'rgba(255,255,255,0.05)',
+          borderRadius: '12px',
+          marginBottom: '3rem',
+          overflow: 'hidden',
+        }}>
+          <iframe
+            src="/demo/lorenz-attractor.html"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              border: 'none',
+            }}
+            title="Lorenz Attractor Demo"
+          />
+        </div>
+
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 700, lineHeight: 1.2 }}>Lorenz Attractor</h1>
+
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>HTML5 Canvas</span>
+          <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>JavaScript</span>
+        </div>
 
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
+          <p><a href="https://github.com/nshiff/nate-portfolio/blob/main/public/demo/lorenz-attractor.html" target="_blank" rel="noopener noreferrer">Source code</a></p>
           <p>
-            This is a stub for Project 4. Content coming soon!
+            This project is an interactive 3D visualization of the Lorenz Attractor, a system of ordinary differential equations known for having chaotic solutions.
+          </p>
+          <p>
+            You can interact with the demo above to rotate and zoom the 3D visualization, or use the controls to adjust the simulation parameters.
+          </p>
+          <p>
+            This project was created using AI-assisted development with <a href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Claude</a>.
           </p>
         </div>
       </div>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lorenz Attractor</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Cormorant+Garamond:ital,wght@1,300&display=swap');
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #080a10;
+            --border: #1e2330;
+            --muted: #b0bcd8;
+            --accent: #5ba4f5;
+            --glow: rgba(91, 164, 245, 0.15);
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            color: #c8cfe8;
+            font-family: 'DM Mono', monospace;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #top-left {
+            position: fixed;
+            top: 16px;
+            left: 18px;
+            font-size: 0.78rem;
+            color: #8a9abf;
+            letter-spacing: 0.06em;
+            line-height: 1.8;
+            pointer-events: none;
+            font-style: italic;
+            font-weight: 700;
+        }
+
+        #ui {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 18px 20px 24px;
+            background: linear-gradient(to top, rgba(8, 10, 16, 0.97) 60%, transparent);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        #title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-weight: 300;
+            font-size: 1.35rem;
+            color: var(--accent);
+            letter-spacing: 0.02em;
+        }
+
+        #subtitle {
+            font-size: 0.62rem;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        #sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sg {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .sl {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.62rem;
+            letter-spacing: 0.06em;
+            font-weight: 700;
+        }
+
+        .sl .name {
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .sl .val {
+            color: var(--accent);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 2px;
+            background: var(--border);
+            border-radius: 1px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 6px var(--glow);
+            cursor: pointer;
+        }
+
+        input[type=range]::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border: none;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        #controls-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.62rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 7px 14px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            border-radius: 2px;
+            transition: color 0.15s, border-color 0.15s, background 0.15s;
+        }
+
+        button.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: var(--glow);
+        }
+
+        #hint {
+            margin-left: auto;
+            font-size: 0.6rem;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="c"></canvas>
+
+    <div id="top-left">
+        <div>dx/dt = σ(y − x)</div>
+        <div>dy/dt = x(ρ − z) − y</div>
+        <div>dz/dt = xy − βz</div>
+    </div>
+
+    <div id="ui">
+        <div id="sliders">
+            <div class="sg">
+                <div class="sl"><span class="name">Steps</span><span class="val" id="vSteps">12000</span></div>
+                <input type="range" id="sSteps" min="1000" max="40000" step="1000" value="12000">
+            </div>
+            <div class="sg">
+                <div class="sl"><span class="name">Step Size</span><span class="val" id="vDT">0.005</span></div>
+                <input type="range" id="sDT" min="0.001" max="0.024" step="0.001" value="0.005">
+            </div>
+        </div>
+
+        <div id="controls-row">
+            <span id="hint">drag to rotate · pinch to zoom</span>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // ── Canvas ────────────────────────────────────────────────────
+            var canvas = document.getElementById('c');
+            var ctx = canvas.getContext('2d');
+            var W, H, cx, cy;
+
+            function setSize() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+                cx = W / 2;
+                cy = H / 2;
+            }
+
+            // ── State ─────────────────────────────────────────────────────
+            var sigma = 10;
+            var rho = 28;
+            var beta = 8 / 3;
+            var useColor = false;
+            var rotX = 0.3;
+            var rotY = 0.3;
+            var scale = 10;
+
+            // ── Simulation ────────────────────────────────────────────────
+            var STEPS = 12000;
+            var DT = 0.005;
+
+            function buildCurve() {
+                var x = 0.1, y = 0, z = 0;
+                var pts = [];
+                var sumZ = 0;
+                for (var i = 0; i < STEPS; i++) {
+                    var dx = sigma * (y - x);
+                    var dy = x * (rho - z) - y;
+                    var dz = x * y - beta * z;
+                    x += dx * DT;
+                    y += dy * DT;
+                    z += dz * DT;
+                    pts.push([x, y, z]);
+                    sumZ += z;
+                }
+                return { pts: pts, cz: sumZ / STEPS };
+            }
+
+            // ── Projection ────────────────────────────────────────────────
+            function project(px, py, pz, cz) {
+                var az = pz - cz;
+                var cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+                var rx = px * cosY - az * sinY;
+                var ry = py;
+                var rz = px * sinY + az * cosY;
+                var cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+                return [
+                    cx + rx * scale,
+                    cy + (ry * cosX - rz * sinX) * scale
+                ];
+            }
+
+            // ── Draw ──────────────────────────────────────────────────────
+            function draw() {
+                var result = buildCurve();
+                var pts = result.pts;
+                var cz = result.cz;
+                var n = pts.length;
+
+                ctx.clearRect(0, 0, W, H);
+                ctx.fillStyle = '#080a10';
+                ctx.fillRect(0, 0, W, H);
+
+                for (var i = 1; i < n; i++) {
+                    var t = i / n;
+                    var p0 = project(pts[i - 1][0], pts[i - 1][1], pts[i - 1][2], cz);
+                    var p1 = project(pts[i][0], pts[i][1], pts[i][2], cz);
+
+                    ctx.beginPath();
+                    ctx.moveTo(p0[0], p0[1]);
+                    ctx.lineTo(p1[0], p1[1]);
+                    ctx.lineWidth = 0.4 + t * 0.8;
+                    ctx.globalAlpha = 0.25 + t * 0.6;
+                    ctx.strokeStyle = useColor
+                        ? 'hsl(' + (200 + t * 60) + ',70%,' + (45 + t * 25) + '%)'
+                        : '#5ba4f5';
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            // ── Init ──────────────────────────────────────────────────────
+            setSize();
+            draw();
+
+            window.addEventListener('resize', function () { setSize(); draw(); });
+
+            // ── Sliders ───────────────────────────────────────────────────
+            function bindSlider(sliderId, valId, setter, decimals) {
+                var sl = document.getElementById(sliderId);
+                var vl = document.getElementById(valId);
+                sl.addEventListener('input', function () {
+                    var v = parseFloat(this.value);
+                    setter(v);
+                    vl.textContent = decimals === 0 ? Math.round(v).toString() : v.toFixed(decimals !== undefined ? decimals : 3);
+                    draw();
+                });
+            }
+
+            bindSlider('sSteps', 'vSteps', function (v) { STEPS = Math.round(v); }, 0);
+            bindSlider('sDT', 'vDT', function (v) { DT = v; }, 3);
+
+            // ── Mouse ─────────────────────────────────────────────────────
+            var dragging = false, lastMX = 0, lastMY = 0;
+
+            canvas.addEventListener('mousedown', function (e) {
+                dragging = true; lastMX = e.clientX; lastMY = e.clientY;
+            });
+            window.addEventListener('mouseup', function () { dragging = false; });
+            window.addEventListener('mousemove', function (e) {
+                if (!dragging) return;
+                rotY += (e.clientX - lastMX) * 0.005;
+                rotX += (e.clientY - lastMY) * 0.005;
+                lastMX = e.clientX; lastMY = e.clientY;
+                draw();
+            });
+
+            canvas.addEventListener('wheel', function (e) {
+                scale *= e.deltaY > 0 ? 0.95 : 1.05;
+                scale = Math.max(3, Math.min(40, scale));
+                e.preventDefault();
+                draw();
+            }, { passive: false });
+
+            // ── Touch ─────────────────────────────────────────────────────
+            var touchDragging = false, lastTX = 0, lastTY = 0, lastPinch = null;
+
+            canvas.addEventListener('touchstart', function (e) {
+                if (e.touches.length === 1) {
+                    touchDragging = true;
+                    lastTX = e.touches[0].clientX;
+                    lastTY = e.touches[0].clientY;
+                } else if (e.touches.length === 2) {
+                    touchDragging = false;
+                    lastPinch = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+                e.preventDefault();
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', function (e) {
+                if (e.touches.length === 1 && touchDragging) {
+                    rotY += (e.touches[0].clientX - lastTX) * 0.006;
+                    rotX += (e.touches[0].clientY - lastTY) * 0.006;
+                    lastTX = e.touches[0].clientX;
+                    lastTY = e.touches[0].clientY;
+                    draw();
+                } else if (e.touches.length === 2 && lastPinch !== null) {
+                    var dist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    scale *= dist / lastPinch;
+                    scale = Math.max(3, Math.min(40, scale));
+                    lastPinch = dist;
+                    draw();
+                }
+                e.preventDefault();
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', function () {
+                touchDragging = false;
+                lastPinch = null;
+            });
+
+        }());
+    </script>
+</body>
+
+</html>
