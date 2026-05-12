@@ -68,18 +68,27 @@ class SynthEngine {
         let core = [];
         let inputs = {};
         let outputs = {};
+        let analyser = null;
+        let dataArray = null;
 
         switch (type) {
             case 'MASTER': {
                 // Master output uses a compressor to act as a limiter, preventing harsh digital clipping.
                 const gain = this.ctx.createGain();
                 const comp = this.ctx.createDynamicsCompressor();
-                gain.connect(comp);
+
+                // Create an Analyser to visualize the final output
+                analyser = this.ctx.createAnalyser();
+                analyser.fftSize = 2048; // Controls the resolution of the waveform slice
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+                gain.connect(analyser);
+                analyser.connect(comp);
                 comp.connect(this.ctx.destination); // this.ctx.destination represents the computer's speakers
 
                 gain.gain.value = params.volume;
 
-                core = [gain, comp];
+                core = [gain, comp, analyser];
                 inputs = { In: gain };
                 break;
             }
@@ -137,7 +146,7 @@ class SynthEngine {
             }
         }
 
-        this.nodes[id] = { type, core, inputs, outputs, params };
+        this.nodes[id] = { type, core, inputs, outputs, params, analyser, dataArray };
     }
 
     removeModule(id) {
@@ -210,7 +219,91 @@ class SynthEngine {
             delete this.connections[connId];
         }
     }
+
+    // Extracts the current waveform frame from the Analyser node
+    getVisualizerData(id) {
+        const node = this.nodes[id];
+        if (node && node.analyser && node.dataArray) {
+            node.analyser.getByteTimeDomainData(node.dataArray);
+            return node.dataArray;
+        }
+        return null;
+    }
 }
+
+// --- Oscilloscope UI Component ---
+const Oscilloscope = ({ engine, moduleId, isPlaying }) => {
+    const canvasRef = useRef(null);
+
+    useEffect(() => {
+        let requestRef;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const draw = () => {
+            // Only request data if the engine is running
+            const dataArray = isPlaying ? engine.getVisualizerData(moduleId) : null;
+
+            // Draw background screen
+            ctx.fillStyle = '#171717'; // neutral-900
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw faint background grid
+            ctx.strokeStyle = '#262626'; // neutral-800
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let i = 0; i < canvas.width; i += 20) { ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); }
+            for (let i = 0; i < canvas.height; i += 20) { ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); }
+            ctx.stroke();
+
+            // Setup the waveform line
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = isPlaying ? '#34d399' : '#059669'; // Bright emerald when playing, dimmed when off
+            ctx.beginPath();
+
+            if (dataArray && isPlaying) {
+                const sliceWidth = canvas.width * 1.0 / dataArray.length;
+                let x = 0;
+
+                for (let i = 0; i < dataArray.length; i++) {
+                    // dataArray values range from 0 to 255, where 128 is the center line
+                    const v = dataArray[i] / 128.0;
+                    const y = v * (canvas.height / 2);
+
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+
+                    x += sliceWidth;
+                }
+            } else {
+                // Draw a flat line through the center when stopped
+                ctx.moveTo(0, canvas.height / 2);
+                ctx.lineTo(canvas.width, canvas.height / 2);
+            }
+
+            ctx.stroke();
+
+            if (isPlaying) {
+                requestRef = requestAnimationFrame(draw);
+            }
+        };
+
+        draw(); // Trigger initial frame
+
+        return () => {
+            if (requestRef) cancelAnimationFrame(requestRef);
+        };
+    }, [isPlaying, engine, moduleId]);
+
+    return (
+        <div className="w-full h-20 bg-neutral-950 rounded border border-neutral-700 overflow-hidden mb-4 shadow-inner relative">
+            {/* Decorative scanline overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(transparent_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px]" />
+            <canvas ref={canvasRef} width={200} height={80} className="w-full h-full" />
+        </div>
+    );
+};
 
 // --- Main Application Component ---
 export default function ModularSynth() {
@@ -576,6 +669,7 @@ export default function ModularSynth() {
             case 'MASTER':
                 return (
                     <>
+                        <Oscilloscope engine={engineRef.current} moduleId={module.id} isPlaying={isPlaying} />
                         <div className="flex justify-between mb-4">
                             {renderPort(module.id, 'In', 'in')}
                         </div>
@@ -668,7 +762,7 @@ export default function ModularSynth() {
     };
 
     return (
-        <div className="h-full w-full bg-neutral-900 text-neutral-100 flex flex-col overflow-hidden font-sans select-none">
+        <div className="h-[100dvh] w-full bg-neutral-900 text-neutral-100 flex flex-col overflow-hidden font-sans select-none">
             {/* Top Toolbar - Mobile optimized with horizontal scroll / wrapping */}
             <div className="h-16 sm:h-14 bg-neutral-950 border-b border-neutral-800 flex items-center justify-between px-3 sm:px-6 z-20 shrink-0">
                 <div className="flex items-center gap-2 sm:gap-4 shrink-0">
@@ -710,7 +804,7 @@ export default function ModularSynth() {
                     style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }}
                 />
 
-                {/* Cable Canvas */}
+                {/* Established Cables Canvas (Behind Modules) */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.5))' }}>
                     {cablePaths.map((c) => (
                         <path
@@ -723,20 +817,6 @@ export default function ModularSynth() {
                             className="opacity-80 drop-shadow-md transition-all duration-100"
                         />
                     ))}
-                    {cableDrag && (
-                        <path
-                            d={generateBezierPath(
-                                { x: cableDrag.startX, y: cableDrag.startY },
-                                { x: cableDrag.currX, y: cableDrag.currY }
-                            )}
-                            stroke="#fbbf24"
-                            strokeWidth="5"
-                            strokeDasharray="8 4"
-                            fill="none"
-                            strokeLinecap="round"
-                            className="opacity-90 animate-pulse"
-                        />
-                    )}
                 </svg>
 
                 {/* Modules Container */}
@@ -779,6 +859,24 @@ export default function ModularSynth() {
                         </div>
                     </div>
                 ))}
+
+                {/* Active Dragging Cable Canvas (In Front of Modules) */}
+                {cableDrag && (
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-30" style={{ filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.5))' }}>
+                        <path
+                            d={generateBezierPath(
+                                { x: cableDrag.startX, y: cableDrag.startY },
+                                { x: cableDrag.currX, y: cableDrag.currY }
+                            )}
+                            stroke="#fbbf24"
+                            strokeWidth="5"
+                            strokeDasharray="8 4"
+                            fill="none"
+                            strokeLinecap="round"
+                            className="opacity-90 animate-pulse"
+                        />
+                    </svg>
+                )}
 
                 {/* Initial Prompt Overlay */}
                 {!isPlaying && (
