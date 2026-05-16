@@ -240,11 +240,21 @@ export default function DoubleSlitVisualization() {
 
         let animationId;
         let time = 0;
-        let lastTimestamp = performance.now();
 
-        const resizeCanvas = () => {
-            const displayWidth = canvas.clientWidth * window.devicePixelRatio;
-            const displayHeight = canvas.clientHeight * window.devicePixelRatio;
+        // Performance Optimization Variables
+        let lastPhysicsTime = performance.now();
+        let lastRenderTime = 0;
+        const FPS_CAP = 30; // "Unix nice": Limit to 30 frames per second
+        const frameInterval = 1000 / FPS_CAP;
+        let isVisible = true;
+
+        // 1. Fix Layout Thrashing: Only resize when the element actually changes size
+        const handleResize = () => {
+            // Cap pixel ratio to 1.5 to save GPU fill-rate on Retina/4K displays
+            const pixelRatio = Math.min(window.devicePixelRatio, 1.5);
+            const displayWidth = Math.floor(canvas.clientWidth * pixelRatio);
+            const displayHeight = Math.floor(canvas.clientHeight * pixelRatio);
+
             if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
                 canvas.width = displayWidth;
                 canvas.height = displayHeight;
@@ -252,11 +262,36 @@ export default function DoubleSlitVisualization() {
             }
         };
 
-        const render = (timestamp) => {
-            resizeCanvas();
+        const resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(canvas);
+        handleResize(); // Initial sizing
 
-            const deltaTime = timestamp - lastTimestamp;
-            lastTimestamp = timestamp;
+        // 2. Intersection Observer: Pause rendering when scrolled out of view
+        const intersectionObserver = new IntersectionObserver(([entry]) => {
+            isVisible = entry.isIntersecting;
+        });
+        intersectionObserver.observe(canvas);
+
+        const render = (timestamp) => {
+            // Always queue the next frame
+            animationId = requestAnimationFrame(render);
+
+            // If off-screen, do absolutely nothing (saves 100% CPU/GPU)
+            if (!isVisible) {
+                lastPhysicsTime = timestamp; // Prevent simulation from jumping forward when scrolling back
+                return;
+            }
+
+            // 3. FPS Capping: Throttle the render loop
+            const elapsed = timestamp - lastRenderTime;
+            if (elapsed < frameInterval) return;
+
+            // Adjust lastRenderTime to prevent frame drift
+            lastRenderTime = timestamp - (elapsed % frameInterval);
+
+            // Calculate delta time for smooth physics regardless of frame drops
+            const deltaTime = timestamp - lastPhysicsTime;
+            lastPhysicsTime = timestamp;
 
             const currentParams = paramsRef.current;
 
@@ -276,14 +311,14 @@ export default function DoubleSlitVisualization() {
             gl.uniform3f(uColor, colorRGB[0], colorRGB[1], colorRGB[2]);
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-            animationId = requestAnimationFrame(render);
         };
 
         animationId = requestAnimationFrame(render);
 
         return () => {
             cancelAnimationFrame(animationId);
+            resizeObserver.disconnect();
+            intersectionObserver.disconnect();
             gl.deleteProgram(program);
         };
     }, []);
