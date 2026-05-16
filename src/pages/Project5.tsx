@@ -9,10 +9,9 @@ export function Project5() {
           &larr; Back to Portfolio
         </Link>
 
-        <div style={{
+        <div className="viz-container" style={{
           position: 'relative',
           width: '100%',
-          height: '70vh',
           minHeight: '600px',
           background: 'rgba(255,255,255,0.05)',
           borderRadius: '12px',

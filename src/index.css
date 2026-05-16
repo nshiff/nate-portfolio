@@ -115,3 +115,14 @@ a:hover {
 section {
   padding: 2rem 0;
 }
+
+/* Visualization Container */
+.viz-container {
+  height: 100vh;
+}
+
+@media (min-width: 768px) {
+  .viz-container {
+    height: 70vh;
+  }
+}
