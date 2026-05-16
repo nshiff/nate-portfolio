@@ -99,6 +99,26 @@ export function Home() {
                 </p>
                 <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
               </Link>
+              {/* Project 5: Double Slit Experiment */}
+              <Link to="/project/5" className="card" style={{ display: 'block', color: 'inherit' }}>
+                <div style={{
+                  height: '200px',
+                  background: 'linear-gradient(135deg, #09203f 0%, #537895 100%)',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-secondary)'
+                }}>
+                  <span style={{ fontSize: '3rem' }}>〰️</span>
+                </div>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Double Slit Experiment</h3>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                  An interactive visualization of wave interference in the famous double slit experiment.
+                </p>
+                <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>
