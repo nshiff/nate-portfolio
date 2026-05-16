@@ -248,18 +248,26 @@ export default function DoubleSlitVisualization() {
         const frameInterval = 1000 / FPS_CAP;
         let isVisible = true;
 
-        // 1. Fix Layout Thrashing: Only resize when the element actually changes size
+        // 1. Fix Layout Thrashing & ResizeObserver Errors
+        let resizeReq;
         const handleResize = () => {
-            // Cap pixel ratio to 1.5 to save GPU fill-rate on Retina/4K displays
-            const pixelRatio = Math.min(window.devicePixelRatio, 1.5);
-            const displayWidth = Math.floor(canvas.clientWidth * pixelRatio);
-            const displayHeight = Math.floor(canvas.clientHeight * pixelRatio);
+            // Defer the DOM mutation to prevent "ResizeObserver loop" errors
+            if (resizeReq) cancelAnimationFrame(resizeReq);
 
-            if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-                canvas.width = displayWidth;
-                canvas.height = displayHeight;
-                gl.viewport(0, 0, canvas.width, canvas.height);
-            }
+            resizeReq = requestAnimationFrame(() => {
+                if (!canvasRef.current) return;
+
+                // Cap pixel ratio to 1.5 to save GPU fill-rate on Retina/4K displays
+                const pixelRatio = Math.min(window.devicePixelRatio, 1.5);
+                const displayWidth = Math.floor(canvas.clientWidth * pixelRatio);
+                const displayHeight = Math.floor(canvas.clientHeight * pixelRatio);
+
+                if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+                    canvas.width = displayWidth;
+                    canvas.height = displayHeight;
+                    gl.viewport(0, 0, canvas.width, canvas.height);
+                }
+            });
         };
 
         const resizeObserver = new ResizeObserver(handleResize);
@@ -317,6 +325,7 @@ export default function DoubleSlitVisualization() {
 
         return () => {
             cancelAnimationFrame(animationId);
+            if (resizeReq) cancelAnimationFrame(resizeReq);
             resizeObserver.disconnect();
             intersectionObserver.disconnect();
             gl.deleteProgram(program);
