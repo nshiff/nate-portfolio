@@ -139,6 +139,26 @@ export function Home() {
                 </p>
                 <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
               </Link>
+              {/* Project 7: TI-83 Fortune Teller */}
+              <Link to="/project/7" className="card" style={{ display: 'block', color: 'inherit' }}>
+                <div style={{
+                  height: '200px',
+                  background: 'linear-gradient(135deg, #8ba888 0%, #363a3f 100%)',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-secondary)'
+                }}>
+                  <span style={{ fontSize: '3rem' }}>🖩</span>
+                </div>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>TI-83 Fortune Teller</h3>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                  A retro TI-83 calculator styled Magic 8-Ball program built with HTML, CSS, and jQuery.
+                </p>
+                <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>

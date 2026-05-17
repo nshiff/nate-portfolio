@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTUNE - TI-83 Plus Edition</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --lcd-bg: #8ba888;
+            /* Classic TI-83 green/grey screen */
+            --lcd-text: #1a2421;
+            /* Dark pixel color */
+            --calc-body: #2c2f33;
+            /* Dark grey plastic */
+            --calc-bezel: #1a1c1e;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            /* Light background to make the calculator pop */
+            font-family: 'VT323', monospace;
+            /* Pixelated font */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            /* Prevent scrolling if possible */
+        }
+
+        /* Calculator body styling */
+        .calculator {
+            background: linear-gradient(145deg, #363a3f, #1a1c1e);
+            border-radius: 20px 20px 40px 40px;
+            box-shadow:
+                10px 10px 30px rgba(0, 0, 0, 0.5),
+                -5px -5px 15px rgba(255, 255, 255, 0.1),
+                inset 2px 2px 5px rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 380px;
+            padding: 20px 20px 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+
+        /* The indented area around the screen */
+        .screen-bezel {
+            background: var(--calc-bezel);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: inset 3px 3px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        /* The actual LCD screen */
+        .lcd-screen {
+            background-color: var(--lcd-bg);
+            color: var(--lcd-text);
+            border-radius: 5px;
+            height: 200px;
+            padding: 10px;
+            box-shadow:
+                inset 2px 2px 5px rgba(0, 0, 0, 0.2),
+                inset -2px -2px 5px rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+            /* Large enough to read, small enough to fit */
+            line-height: 1.1;
+            /* Subtle grid to mimic pixels */
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+            background-size: 4px 4px;
+        }
+
+        /* LCD Text Glow / Bleed effect */
+        .lcd-text {
+            text-shadow: 1px 1px 0px rgba(26, 36, 33, 0.2);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Blinking cursor for that authentic basic prompt */
+        .cursor {
+            display: inline-block;
+            width: 12px;
+            height: 20px;
+            background-color: var(--lcd-text);
+            animation: blink 1s step-end infinite;
+            vertical-align: bottom;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Keypad area styling */
+        .keypad {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px;
+        }
+
+        /* Physical looking ENTER button */
+        .btn-enter {
+            background: linear-gradient(145deg, #4a4d52, #2a2c30);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 15px 25px;
+            border-radius: 5px 5px 15px 5px;
+            /* Quirky shape like classic TI buttons */
+            border: none;
+            box-shadow:
+                4px 4px 8px rgba(0, 0, 0, 0.6),
+                -1px -1px 3px rgba(255, 255, 255, 0.1),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.1s;
+            text-transform: uppercase;
+            user-select: none;
+        }
+
+        .btn-enter:active {
+            box-shadow:
+                inset 4px 4px 8px rgba(0, 0, 0, 0.6),
+                inset -1px -1px 3px rgba(255, 255, 255, 0.1);
+            transform: translateY(2px);
+        }
+
+        /* Brand Label */
+        .brand {
+            color: #888;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.9rem;
+            font-style: italic;
+            font-weight: bold;
+            text-align: left;
+            margin-bottom: -10px;
+            padding-left: 10px;
+        }
+
+        .brand span {
+            font-size: 0.75rem;
+            font-weight: normal;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="calculator">
+
+        <!-- Calculator Brand/Model -->
+        <div class="brand">
+            SHIFF INDUSTRIES <span>Model A</span>
+        </div>
+
+        <!-- Screen Area -->
+        <div class="screen-bezel">
+            <div class="lcd-screen" id="screen">
+                <div id="output" class="lcd-text"></div>
+                <div id="cursor" class="cursor"></div>
+            </div>
+        </div>
+
+        <!-- Keypad Area (Simplified for the Web App) -->
+        <div class="keypad">
+            <button id="enterBtn" class="btn-enter" aria-label="Enter Button">ENTER</button>
+        </div>
+
+    </div>
+
+    <script>
+        $(function () {
+            // Magic 8-Ball classic responses
+            const fortunes = [
+                "IT IS CERTAIN",
+                "IT IS DECIDEDLY SO",
+                "WITHOUT A DOUBT",
+                "YES - DEFINITELY",
+                "YOU MAY RELY ON IT",
+                "AS I SEE IT, YES",
+                "MOST LIKELY",
+                "OUTLOOK GOOD",
+                "YES",
+                "SIGNS POINT TO YES",
+                "REPLY HAZY, TRY AGAIN",
+                "ASK AGAIN LATER",
+                "BETTER NOT TELL YOU NOW",
+                "CANNOT PREDICT NOW",
+                "CONCENTRATE AND ASK AGAIN",
+                "DON'T COUNT ON IT",
+                "MY REPLY IS NO",
+                "MY SOURCES SAY NO",
+                "OUTLOOK NOT SO GOOD",
+                "VERY DOUBTFUL"
+            ];
+
+            // Program States
+            const STATES = {
+                START: 'START',
+                WAITING_FOR_QUESTION: 'WAITING_FOR_QUESTION',
+                THINKING: 'THINKING',
+                SHOWING_ANSWER: 'SHOWING_ANSWER'
+            };
+
+            let currentState = STATES.START;
+            let outputText = "";
+
+            // jQuery DOM Elements
+            const $outputDiv = $('#output');
+            const $enterBtn = $('#enterBtn');
+            const $cursor = $('#cursor');
+
+            // Function to update the screen
+            function renderScreen() {
+                $outputDiv.text(outputText);
+            }
+
+            // Simulates the Disp command in TI-BASIC
+            function disp(text) {
+                if (outputText !== "") {
+                    outputText += "\n";
+                }
+                outputText += text;
+                renderScreen();
+            }
+
+            // Clears the screen (ClrHome)
+            function clrHome() {
+                outputText = "";
+                renderScreen();
+            }
+
+            // Delay function to simulate computation time
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            // The main logic triggered by pressing ENTER
+            async function handleEnter() {
+                switch (currentState) {
+                    case STATES.START:
+                        // Initialize the program
+                        clrHome();
+                        disp("prgmFORTUNE");
+                        disp("----------------");
+                        disp("WHAT IS YOUR QUESTION?");
+                        disp("");
+                        disp("PRESS ENTER TO");
+                        disp("CONTINUE");
+                        currentState = STATES.WAITING_FOR_QUESTION;
+                        break;
+
+                    case STATES.WAITING_FOR_QUESTION:
+                        // User has asked a question and pressed enter
+                        currentState = STATES.THINKING;
+                        $cursor.hide(); // Hide cursor while thinking
+
+                        // Artificial delay for dramatic effect
+                        await sleep(100);
+
+                        clrHome();
+
+                        // Pick a random fortune
+                        const randomIndex = Math.floor(Math.random() * fortunes.length);
+                        const answer = fortunes[randomIndex];
+
+                        disp("ANSWER:");
+                        disp(answer);
+                        disp("");
+                        disp("PRESS ENTER TO ASK AGAIN");
+
+                        $cursor.css('display', 'inline-block'); // Show cursor again
+                        currentState = STATES.SHOWING_ANSWER;
+                        break;
+
+                    case STATES.SHOWING_ANSWER:
+                        // Reset to the prompt
+                        clrHome();
+                        disp("WHAT IS YOUR QUESTION?");
+                        disp("");
+                        disp("PRESS ENTER TO");
+                        disp("CONTINUE");
+                        currentState = STATES.WAITING_FOR_QUESTION;
+                        break;
+                }
+            }
+
+            // Listen for the on-screen ENTER button
+            $enterBtn.on('click', function () {
+                handleEnter();
+            });
+
+            // Listen for the physical keyboard Enter key
+            $(document).on('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    // Prevent default behavior to avoid triggering buttons if focused
+                    event.preventDefault();
+
+                    // Simulate button press visually
+                    $enterBtn.css({
+                        'transform': 'translateY(2px)',
+                        'box-shadow': 'inset 4px 4px 8px rgba(0,0,0,0.6), inset -1px -1px 3px rgba(255,255,255,0.1)'
+                    });
+
+                    handleEnter();
+
+                    // Reset button visual state after a short delay
+                    setTimeout(() => {
+                        $enterBtn.css({
+                            'transform': '',
+                            'box-shadow': ''
+                        });
+                    }, 100);
+                }
+            });
+
+            // Start the program on load
+            // Initial boot screen simulation
+            disp("NATE-OS V1.0");
+            disp("RAM CLEARED");
+            disp("");
+            disp("PRESS ENTER TO");
+            disp("RUN PRGM: FORTUNE");
+        });
+    </script>
+</body>
+
+</html>
