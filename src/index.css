@@ -117,12 +117,22 @@ section {
 }
 
 /* Visualization Container */
-.viz-container {
+.viz-container-5 {
   height: 100vh;
 }
 
 @media (min-width: 768px) {
-  .viz-container {
+  .viz-container-5 {
     height: 70vh;
+  }
+}
+
+.viz-container-6 {
+  height: 80vh;
+}
+
+@media (min-width: 768px) {
+  .viz-container-6 {
+    height: 73vh;
   }
 }

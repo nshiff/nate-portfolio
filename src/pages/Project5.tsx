@@ -9,7 +9,7 @@ export function Project5() {
           &larr; Back to Portfolio
         </Link>
 
-        <div className="viz-container" style={{
+        <div className="viz-container-5" style={{
           position: 'relative',
           width: '100%',
           minHeight: '600px',

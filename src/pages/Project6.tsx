@@ -8,10 +8,9 @@ export function Project6() {
           &larr; Back to Portfolio
         </Link>
 
-        <div style={{
+        <div className="viz-container-6" style={{
           position: 'relative',
           width: '100%',
-          height: '73vh',
           minHeight: '400px',
           background: 'rgba(255,255,255,0.05)',
           borderRadius: '12px',
