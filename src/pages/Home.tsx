@@ -151,7 +151,7 @@ export function Home() {
                   justifyContent: 'center',
                   color: 'var(--text-secondary)'
                 }}>
-                  <span style={{ fontSize: '3rem' }}>🖩</span>
+                  <span style={{ fontSize: '3rem' }}>🔮</span>
                 </div>
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>TI-83 Fortune Teller</h3>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
