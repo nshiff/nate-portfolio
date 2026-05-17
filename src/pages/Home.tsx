@@ -119,6 +119,26 @@ export function Home() {
                 </p>
                 <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
               </Link>
+              {/* Project 6: Maxwell's Demon */}
+              <Link to="/project/6" className="card" style={{ display: 'block', color: 'inherit' }}>
+                <div style={{
+                  height: '200px',
+                  background: 'linear-gradient(135deg, #cc2b5e 0%, #753a88 100%)',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-secondary)'
+                }}>
+                  <span style={{ fontSize: '3rem' }}>👹</span>
+                </div>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Maxwell's Demon</h3>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                  An interactive simulation exploring entropy and the second law of thermodynamics.
+                </p>
+                <span style={{ fontWeight: 'bold', color: 'var(--accent-color)' }}>View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>
