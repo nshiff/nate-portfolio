@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platonic Solids Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            /* Prevent scrollbars */
+            background-color: #1a1a1a;
+            /* Dark background */
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        #ui-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            /* Ensure UI is on top of the canvas */
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            color: #e0e0e0;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+
+        select {
+            padding: 8px 15px;
+            border-radius: 6px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        select:hover {
+            background-color: #444;
+            border-color: #777;
+        }
+
+        select:focus {
+            border-color: #4caf50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        #canvas-container {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Information overlay */
+        #info-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        .solid-stats {
+            margin-top: 5px;
+            color: #aaa;
+        }
+    </style>
+    <!-- Include Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Include OrbitControls for user interaction (mouse rotation/zoom) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+
+<body>
+
+    <div id="ui-container">
+        <h1>Platonic Solids</h1>
+        <div class="control-group">
+            <label for="solid-select">Shape:</label>
+            <select id="solid-select">
+                <option value="tetrahedron">Tetrahedron</option>
+                <option value="hexahedron">Cube</option>
+                <option value="octahedron">Octahedron</option>
+                <option value="dodecahedron" selected>Dodecahedron</option>
+                <option value="icosahedron">Icosahedron</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div id="info-overlay">
+        <div id="solid-name">Dodecahedron</div>
+        <div class="solid-stats" id="solid-stats">Faces: 12 | Vertices: 20 | Edges: 30</div>
+    </div>
+
+    <script>
+        // Scene Setup
+        const $container = $('#canvas-container');
+        const scene = new THREE.Scene();
+        // Add a subtle fog for depth
+        scene.fog = new THREE.FogExp2(0x1a1a1a, 0.05);
+
+        // Camera Setup
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0, 5);
+
+        // Renderer Setup
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        // Enable shadows
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        $container.append(renderer.domElement);
+
+        // OrbitControls (allows user to rotate, zoom, and pan)
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // Adds inertia to movement
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = false; // We'll handle rotation manually for more control
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        // Main directional light (key light)
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 5, 5);
+        dirLight.castShadow = true;
+        // Improve shadow quality
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        scene.add(dirLight);
+
+        // Fill light (blueish)
+        const fillLight = new THREE.DirectionalLight(0x88bbff, 0.5);
+        fillLight.position.set(-5, 0, -5);
+        scene.add(fillLight);
+
+        // Back light (warm)
+        const backLight = new THREE.DirectionalLight(0xffaa55, 0.4);
+        backLight.position.set(0, -5, -5);
+        scene.add(backLight);
+
+        // Variables to hold the current mesh
+        let currentMesh;
+        let edgesMesh; // To hold the wireframe edges
+
+        // Material for the solids
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x4caf50,
+            roughness: 0.3,
+            metalness: 0.2,
+            polygonOffset: true,
+            polygonOffsetFactor: 1, // Push faces back a bit to avoid z-fighting with edges
+            polygonOffsetUnits: 1
+        });
+
+        // Line material for the edges
+        const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0xffffff,
+            linewidth: 2,
+            transparent: true,
+            opacity: 0.5
+        });
+
+        // Dictionary to store geometry creators and their stats
+        const solids = {
+            'tetrahedron': {
+                createGeometry: () => new THREE.TetrahedronGeometry(1.5),
+                name: 'Tetrahedron',
+                stats: 'Faces: 4 | Vertices: 4 | Edges: 6',
+                color: 0xe91e63 // Pink
+            },
+            'hexahedron': {
+                createGeometry: () => new THREE.BoxGeometry(2, 2, 2),
+                name: 'Cube',
+                stats: 'Faces: 6 | Vertices: 8 | Edges: 12',
+                color: 0x4caf50 // Green
+            },
+            'octahedron': {
+                createGeometry: () => new THREE.OctahedronGeometry(1.5),
+                name: 'Octahedron',
+                stats: 'Faces: 8 | Vertices: 6 | Edges: 12',
+                color: 0x2196f3 // Blue
+            },
+            'dodecahedron': {
+                createGeometry: () => new THREE.DodecahedronGeometry(1.5),
+                name: 'Dodecahedron',
+                stats: 'Faces: 12 | Vertices: 20 | Edges: 30',
+                color: 0xff9800 // Orange
+            },
+            'icosahedron': {
+                createGeometry: () => new THREE.IcosahedronGeometry(1.5),
+                name: 'Icosahedron',
+                stats: 'Faces: 20 | Vertices: 12 | Edges: 30',
+                color: 0x9c27b0 // Purple
+            }
+        };
+
+        // UI Elements
+        const $selectElement = $('#solid-select');
+        const $nameElement = $('#solid-name');
+        const $statsElement = $('#solid-stats');
+
+        // Function to create and display a solid
+        function setSolid(type) {
+            // Remove existing mesh if it exists
+            if (currentMesh) {
+                scene.remove(currentMesh);
+                // Dispose of geometries to free memory
+                currentMesh.geometry.dispose();
+                if (currentMesh.children.length > 0) {
+                    currentMesh.children[0].geometry.dispose();
+                }
+            }
+
+            const solidData = solids[type];
+            const geometry = solidData.createGeometry();
+
+            // Update material color
+            material.color.setHex(solidData.color);
+
+            // Create main mesh
+            currentMesh = new THREE.Mesh(geometry, material);
+            currentMesh.castShadow = true;
+            currentMesh.receiveShadow = true;
+
+            // Create wireframe edges for better definition
+            const edgesGeometry = new THREE.EdgesGeometry(geometry);
+            const edges = new THREE.LineSegments(edgesGeometry, lineMaterial);
+            currentMesh.add(edges); // Add edges as a child of the main mesh
+
+            scene.add(currentMesh);
+
+            // Update UI info
+            $nameElement.text(solidData.name);
+            $statsElement.text(solidData.stats);
+
+            // Optional: reset rotation when switching shapes
+            // currentMesh.rotation.set(0, 0, 0);
+        }
+
+        // Initialize the default solid (Dodecahedron)
+        setSolid($selectElement.val());
+
+        // Event listener for dropdown changes
+        $selectElement.on('change', function () {
+            setSolid($(this).val());
+        });
+
+        // Handle window resize
+        $(window).on('resize', function () {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Slowly rotate the mesh
+            if (currentMesh) {
+                // Determine rotation speed.  Slow down if user is interacting via OrbitControls
+                const isInteracting = controls.state !== -1; // -1 means no state
+                const speedMult = isInteracting ? 0.1 : 1;
+
+                currentMesh.rotation.x += 0.005 * speedMult;
+                currentMesh.rotation.y += 0.007 * speedMult;
+            }
+
+            // Update controls (required for damping)
+            controls.update();
+
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+
+        // Start the animation loop
+        $(window).on('load', function () {
+            animate();
+        });
+    </script>
+</body>
+
+</html>

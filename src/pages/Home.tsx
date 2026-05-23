@@ -94,6 +94,17 @@ export function Home() {
                 </p>
                 <span className="card-action">View Details &rarr;</span>
               </Link>
+              {/* Project 8: Platonic Solids */}
+              <Link to="/project/8" className="card card-link">
+                <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)' }}>
+                  <span style={{ fontSize: '3rem' }}>🧊</span>
+                </div>
+                <h3 className="card-title">Platonic Solids Viewer</h3>
+                <p className="card-description">
+                  An interactive 3D viewer for the five Platonic solids, built using Three.js.
+                </p>
+                <span className="card-action">View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>
