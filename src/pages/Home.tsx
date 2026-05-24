@@ -105,6 +105,17 @@ export function Home() {
                 </p>
                 <span className="card-action">View Details &rarr;</span>
               </Link>
+              {/* Project 9: Galton Board */}
+              <Link to="/project/9" className="card card-link">
+                <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #020617 100%)' }}>
+                  <span style={{ fontSize: '3rem' }}>🎯</span>
+                </div>
+                <h3 className="card-title">Galton Board Simulation</h3>
+                <p className="card-description">
+                  An interactive physics simulation of a Galton Board demonstrating the Central Limit Theorem.
+                </p>
+                <span className="card-action">View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>

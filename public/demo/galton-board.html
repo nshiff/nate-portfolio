@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Galton Board Simulation</title>
+
+    <!-- Fonts and jQuery -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        :root {
+            --bg-top: #0f172a;
+            --bg-bottom: #020617;
+            --accent: #38bdf8;
+            --accent-hover: #7dd3fc;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            touch-action: none;
+            /* Prevents scroll bounce on mobile */
+        }
+
+        /* Container scales based on viewport while maintaining strict aspect ratio */
+        #board-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-height: 100vh;
+            max-width: calc(100vh * (800 / 1400));
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            background-color: transparent;
+        }
+
+        /* Fallback max-dimensions for ultra-wide mobile screens */
+        @media (max-aspect-ratio: 800/1400) {
+            #board-wrapper {
+                max-width: 100vw;
+                max-height: calc(100vw * (1400 / 800));
+            }
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+
+        #controls-top {
+            position: absolute;
+            top: 4vh;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 16px;
+            z-index: 10;
+        }
+
+        .action-btn {
+            background: rgba(56, 189, 248, 0.05);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 12px 28px;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            outline: none;
+        }
+
+        .action-btn:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: var(--accent-hover);
+            color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.15);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="board-wrapper">
+        <canvas id="galton-canvas"></canvas>
+        <div id="controls-top">
+            <button class="action-btn" id="drop-50-btn">Drop 50</button>
+            <button class="action-btn" id="clear-btn">Clear</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            const canvas = document.getElementById('galton-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Internal high-resolution rendering dimensions (independent of screen size)
+            const width = 800;
+            const height = 1400;
+            canvas.width = width;
+            canvas.height = height;
+
+            // Pre-rendered background canvas for maximum rendering performance
+            const bgCanvas = document.createElement('canvas');
+            bgCanvas.width = width;
+            bgCanvas.height = height;
+            const bgCtx = bgCanvas.getContext('2d');
+
+            // Physics Constants
+            const gravity = 0.16;
+            const maxVelocityY = 16;
+            const maxVelocityX = 12;
+            const restitution = 0.5; // Bounciness dampening
+
+            // Board Configuration
+            const rows = 20;
+            const pegRadius = 4.5;
+            const ballRadius = 4.5;
+            const pegXSpacing = 32;
+            const pegYSpacing = 36;
+            const pegYStart = 120;
+
+            const maxBalls = 2500;
+            let ballsToSpawn = 0;
+            let frameCount = 0;
+            let animationId;
+
+            // Bins Configuration (Now dynamically spanning the entire width)
+            const binWidth = pegXSpacing;
+            const numBins = Math.ceil(width / binWidth) + 1;
+            const totalBinWidth = numBins * binWidth;
+            const binStartX = (width - totalBinWidth) / 2;
+            const binStartY = pegYStart + (rows - 1) * pegYSpacing + 50;
+
+            // Calculate max capacity for bins to prevent overlapping with pegs
+            const maxBallsPerBin = Math.floor(((height - 6) - binStartY) / (ballRadius * 2)) - 1;
+
+            let pegs = [];
+            let balls = [];
+            let bins = new Array(numBins).fill(0);
+
+            function initializeBoard() {
+                pegs = [];
+                let pegsPerRow = Math.ceil(width / pegXSpacing) + 2;
+
+                for (let i = 0; i < rows; i++) {
+                    // Stagger alternate rows
+                    let offsetX = (i % 2 === 0) ? 0 : pegXSpacing / 2;
+                    let startX = -pegXSpacing + offsetX;
+
+                    for (let j = 0; j < pegsPerRow; j++) {
+                        pegs.push({
+                            x: startX + j * pegXSpacing,
+                            y: pegYStart + i * pegYSpacing,
+                            radius: pegRadius
+                        });
+                    }
+                }
+                drawBackground();
+            }
+
+            function drawBackground() {
+                // Background Gradient
+                let grad = bgCtx.createLinearGradient(0, 0, 0, height);
+                grad.addColorStop(0, '#0f172a');
+                grad.addColorStop(1, '#020617');
+                bgCtx.fillStyle = grad;
+                bgCtx.fillRect(0, 0, width, height);
+
+                // Draw solid base line
+                bgCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                bgCtx.lineWidth = 2;
+                bgCtx.beginPath();
+                bgCtx.moveTo(binStartX - 20, height - 4);
+                bgCtx.lineTo(binStartX + totalBinWidth + 20, height - 4);
+                bgCtx.stroke();
+
+                // Draw bin anchor points (subtle UI detail)
+                bgCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+                for (let i = 0; i < numBins; i++) {
+                    let centerX = binStartX + i * binWidth + binWidth / 2;
+                    bgCtx.beginPath();
+                    bgCtx.arc(centerX, height - 4, 3, 0, Math.PI * 2);
+                    bgCtx.fill();
+                }
+
+                // Draw Pegs with a subtle neon styling
+                bgCtx.fillStyle = '#1e293b';
+                bgCtx.strokeStyle = '#38bdf8'; // Cyan outline
+                bgCtx.lineWidth = 1.5;
+
+                for (let peg of pegs) {
+                    bgCtx.beginPath();
+                    bgCtx.arc(peg.x, peg.y, peg.radius, 0, Math.PI * 2);
+                    bgCtx.fill();
+                    bgCtx.stroke();
+                }
+            }
+
+            function spawnBall() {
+                if (balls.length >= maxBalls) return;
+
+                balls.push({
+                    // Spawn with slight microscopic offset to prevent infinitely perfect vertical stacks
+                    x: width / 2 + (Math.random() - 0.5) * 3,
+                    y: -10,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: 2,
+                    radius: ballRadius,
+                    settled: false,
+                    color: `hsl(${Math.floor(Math.random() * 360)}, 80%, 65%)`, // Pre-assign random color
+                    binIndex: -1
+                });
+            }
+
+            function updatePhysics() {
+                // Process Gravity, Movement & Peg Collisions
+                for (let i = 0; i < balls.length; i++) {
+                    let ball = balls[i];
+                    if (ball.settled) continue;
+
+                    ball.vy += gravity;
+
+                    // Clamp velocity to prevent physics tunnelling
+                    if (ball.vy > maxVelocityY) ball.vy = maxVelocityY;
+                    if (ball.vx > maxVelocityX) ball.vx = maxVelocityX;
+                    if (ball.vx < -maxVelocityX) ball.vx = -maxVelocityX;
+
+                    ball.x += ball.vx;
+                    ball.y += ball.vy;
+
+                    // Lateral Canvas Wall Bounce
+                    if (ball.x < ballRadius) {
+                        ball.x = ballRadius;
+                        ball.vx *= -0.8;
+                    } else if (ball.x > width - ballRadius) {
+                        ball.x = width - ballRadius;
+                        ball.vx *= -0.8;
+                    }
+
+                    // --- Peg Collisions (Active Zone) ---
+                    if (ball.y < binStartY) {
+                        for (let peg of pegs) {
+                            // Quick AABB (Bounding Box) check for massive optimization
+                            if (Math.abs(ball.x - peg.x) > 15 || Math.abs(ball.y - peg.y) > 15) continue;
+
+                            let dx = ball.x - peg.x;
+                            let dy = ball.y - peg.y;
+                            let distSq = dx * dx + dy * dy;
+                            let minDist = ball.radius + peg.radius;
+
+                            if (distSq < minDist * minDist) {
+                                let dist = Math.sqrt(distSq);
+                                let nx = dx / dist;
+                                let ny = dy / dist;
+
+                                // Separate objects completely to prevent sticky penetration
+                                let overlap = minDist - dist;
+                                ball.x += nx * overlap;
+                                ball.y += ny * overlap;
+
+                                // Bounce using Dot Product
+                                let dot = ball.vx * nx + ball.vy * ny;
+                                ball.vx = (ball.vx - 2 * dot * nx) * restitution;
+                                ball.vy = (ball.vy - 2 * dot * ny) * restitution;
+
+                                // Inject micro-chaos to ensure binomial distribution (breaks infinite stalls)
+                                ball.vx += (Math.random() - 0.5) * 0.6;
+                            }
+                        }
+                    }
+                    // --- Bin Sorting Logic (Below Pegs) ---
+                    else {
+                        // Calculate which bin the ball lands in
+                        let bIndex = Math.floor((ball.x - binStartX) / binWidth);
+
+                        // Clamp to extremes just in case
+                        if (bIndex < 0) bIndex = 0;
+                        if (bIndex >= numBins) bIndex = numBins - 1;
+
+                        let isFull = bins[bIndex] >= maxBallsPerBin;
+                        let effectiveBinCount = isFull ? maxBallsPerBin : bins[bIndex];
+
+                        // Calculate resting height based on how many balls are in that column
+                        let targetY = height - 6 - (effectiveBinCount * ballRadius * 2) - ballRadius;
+
+                        if (ball.y >= targetY) {
+                            if (isFull) {
+                                // If the bin is fully stacked, destroy ball to prevent it from entering the peg area
+                                balls.splice(i, 1);
+                                i--; // Adjust index since array shifted
+                                continue;
+                            } else {
+                                // Settle the ball perfectly into position
+                                ball.settled = true;
+                                ball.y = targetY;
+                                ball.x = binStartX + bIndex * binWidth + binWidth / 2;
+                                ball.vx = 0;
+                                ball.vy = 0;
+                                bins[bIndex]++;
+                            }
+                        } else {
+                            // Funnel effect: smoothly vacuum falling balls horizontally into perfect columns
+                            let targetX = binStartX + bIndex * binWidth + binWidth / 2;
+                            ball.x += (targetX - ball.x) * 0.12;
+                        }
+                    }
+                }
+
+                // Process collisions only between active balls that haven't reached the funnel zone
+                for (let i = 0; i < balls.length; i++) {
+                    let b1 = balls[i];
+                    if (b1.settled || b1.y > binStartY) continue;
+
+                    for (let j = i + 1; j < balls.length; j++) {
+                        let b2 = balls[j];
+                        if (b2.settled || b2.y > binStartY) continue;
+
+                        if (Math.abs(b1.x - b2.x) > 12 || Math.abs(b1.y - b2.y) > 12) continue;
+
+                        let dx = b1.x - b2.x;
+                        let dy = b1.y - b2.y;
+                        let distSq = dx * dx + dy * dy;
+                        let minDist = b1.radius + b2.radius;
+
+                        if (distSq < minDist * minDist) {
+                            let dist = Math.sqrt(distSq);
+                            let nx = dx / dist;
+                            let ny = dy / dist;
+
+                            let overlap = (minDist - dist) / 2;
+                            b1.x += nx * overlap;
+                            b1.y += ny * overlap;
+                            b2.x -= nx * overlap;
+                            b2.y -= ny * overlap;
+
+                            // Momentum transfer
+                            let p = (b1.vx - b2.vx) * nx + (b1.vy - b2.vy) * ny;
+                            p = p * 0.7; // Dampening
+
+                            b1.vx -= p * nx;
+                            b1.vy -= p * ny;
+                            b2.vx += p * nx;
+                            b2.vy += p * ny;
+                        }
+                    }
+                }
+            }
+
+            function render() {
+                // Restore fresh background
+                ctx.drawImage(bgCanvas, 0, 0);
+
+                // Draw all balls (Active & Settled)
+                for (let ball of balls) {
+                    ctx.beginPath();
+                    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+
+                    // Ball colors are now statically defined and randomized upon spawn
+                    ctx.fillStyle = ball.color;
+                    ctx.fill();
+
+                    // Fake 3D Lighting Highlight on the ball
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.beginPath();
+                    ctx.arc(ball.x - 1.5, ball.y - 1.5, ball.radius * 0.35, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function gameLoop() {
+                frameCount++;
+
+                // Process the manual spawn queue incrementally to preserve performance and physics stability
+                if (ballsToSpawn > 0 && frameCount % 2 === 0 && balls.length < maxBalls) {
+                    spawnBall();
+                    ballsToSpawn--;
+                }
+
+                updatePhysics();
+                render();
+
+                animationId = requestAnimationFrame(gameLoop);
+            }
+
+            $('#drop-50-btn').on('click', function () {
+                ballsToSpawn += 50;
+            });
+
+            $('#clear-btn').on('click', function () {
+                balls = [];
+                bins.fill(0);
+                ballsToSpawn = 0;
+            });
+
+            // Initialize and Boot
+            initializeBoard();
+            gameLoop();
+        });
+    </script>
+</body>
+
+</html>
