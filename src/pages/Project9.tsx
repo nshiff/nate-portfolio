@@ -42,10 +42,7 @@ export function Project9() {
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
           <p><a href="https://github.com/nshiff/nate-portfolio/blob/main/public/demo/galton-board.html" target="_blank" rel="noopener noreferrer">Source code</a></p>
           <p>
-            This is an interactive simulation of a Galton Board (also known as a quincunx or bean machine), demonstrating the Central Limit Theorem. As balls are dropped through an array of pegs, their paths approximate a normal distribution (bell curve).
-          </p>
-          <p>
-            Each time a ball hits a peg, there is a 50% chance it will fall to the left and a 50% chance it will fall to the right. After many trials, the distribution of balls in the bins at the bottom approximates a bell curve, illustrating how the sum of random variables tends toward a normal distribution. The simulation also includes a real-time histogram to visualize the distribution of the balls.
+            This interactive Galton Board simulation provides a real-time visualization of probability and statistics in action. As each ball drops, it encounters a series of pegs, with an equal chance of bouncing left or right at each collision. While the path of any single ball is governed by simulated physics—making its exact trajectory chaotic and effectively unpredictable—the collective behavior of the balls is entirely predictable. As they settle into the bins below, they inevitably form a classic bell curve, or normal distribution. It is a mesmerizing, visual demonstration of the Central Limit Theorem, revealing how profound mathematical order naturally emerges from underlying randomness.
           </p>
           <p>
             This project was created using AI-assisted development with <a href="https://gemini.google/overview/canvas/" target="_blank" rel="noopener noreferrer">Gemini Canvas</a>.
