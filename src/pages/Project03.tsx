@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import ModularSynth from '../components/ModularSynth';
 
-export function Project3() {
+export function Project03() {
   return (
     <main style={{ flex: 1, padding: '2rem 0' }}>
       <div className="container">

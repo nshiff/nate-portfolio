@@ -6,15 +6,15 @@ import {
   ScrollRestoration
 } from 'react-router-dom';
 import { Home } from './pages/Home';
-import { Project1 } from './pages/Project1';
-import { Project2 } from './pages/Project2';
-import { Project3 } from './pages/Project3';
-import { Project4 } from './pages/Project4';
-import { Project5 } from './pages/Project5';
-import { Project6 } from './pages/Project6';
-import { Project7 } from './pages/Project7';
-import { Project8 } from './pages/Project8';
-import { Project9 } from './pages/Project9';
+import { Project01 } from './pages/Project01';
+import { Project02 } from './pages/Project02';
+import { Project03 } from './pages/Project03';
+import { Project04 } from './pages/Project04';
+import { Project05 } from './pages/Project05';
+import { Project06 } from './pages/Project06';
+import { Project07 } from './pages/Project07';
+import { Project08 } from './pages/Project08';
+import { Project09 } from './pages/Project09';
 import { ThemeProvider } from './components/theme-provider';
 import { ThemeToggle } from './components/ThemeToggle';
 
@@ -73,40 +73,40 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/project/1",
-        element: <Project1 />,
+        path: "/project/01",
+        element: <Project01 />,
       },
       {
-        path: "/project/2",
-        element: <Project2 />,
+        path: "/project/02",
+        element: <Project02 />,
       },
       {
-        path: "/project/3",
-        element: <Project3 />,
+        path: "/project/03",
+        element: <Project03 />,
       },
       {
-        path: "/project/4",
-        element: <Project4 />,
+        path: "/project/04",
+        element: <Project04 />,
       },
       {
-        path: "/project/5",
-        element: <Project5 />,
+        path: "/project/05",
+        element: <Project05 />,
       },
       {
-        path: "/project/6",
-        element: <Project6 />,
+        path: "/project/06",
+        element: <Project06 />,
       },
       {
-        path: "/project/7",
-        element: <Project7 />,
+        path: "/project/07",
+        element: <Project07 />,
       },
       {
-        path: "/project/8",
-        element: <Project8 />,
+        path: "/project/08",
+        element: <Project08 />,
       },
       {
-        path: "/project/9",
-        element: <Project9 />,
+        path: "/project/09",
+        element: <Project09 />,
       },
     ],
   },

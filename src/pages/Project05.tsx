@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import DoubleSlitVisualization from '../components/DoubleSlitVisualization';
 
-export function Project5() {
+export function Project05() {
   return (
     <main style={{ flex: 1, padding: '2rem 0' }}>
       <div className="container">

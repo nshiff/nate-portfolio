@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export function Project8() {
+export function Project08() {
   return (
     <main style={{ flex: 1, padding: '2rem 0' }}>
       <div className="container">

@@ -15,7 +15,7 @@ export function Home() {
               gap: '2rem'
             }}>
               {/* Project 1: Stable Fluids */}
-              <Link to="/project/1" className="card card-link">
+              <Link to="/project/01" className="card card-link">
                 <div className="card-image-wrapper" style={{ background: 'linear-gradient(45deg, #050505, #1a1a2e)' }}>
                   <span style={{ fontSize: '2rem' }}>🌊</span>
                 </div>
@@ -27,7 +27,7 @@ export function Home() {
               </Link>
 
               {/* Project 2: Turing Machine Simulator */}
-              <Link to="/project/2" className="card card-link">
+              <Link to="/project/02" className="card card-link">
                 <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
                   <span style={{ fontSize: '2.5rem', fontFamily: 'monospace', color: '#3C3489', fontWeight: 'bold' }}>{'[ q0 ]'}</span>
                 </div>
@@ -39,7 +39,7 @@ export function Home() {
               </Link>
 
               {/* Project 3: WebModular Synth */}
-              <Link to="/project/3" className="card card-link">
+              <Link to="/project/03" className="card card-link">
                 <div className="card-image-wrapper" style={{ background: 'linear-gradient(to right, #1f2937, #111827)' }}>
                   <div style={{ position: 'absolute', inset: 0, opacity: 0.2, backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                   <span style={{ fontSize: '3rem', zIndex: 10 }}>🎛️</span>
@@ -51,7 +51,7 @@ export function Home() {
                 <span className="card-action">View Details &rarr;</span>
               </Link>
               {/* Project 4: Lorenz Attractor */}
-              <Link to="/project/4" className="card card-link">
+              <Link to="/project/04" className="card card-link">
                 <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #080a10 0%, #1e2330 100%)' }}>
                   <span style={{ fontSize: '3rem' }}>🦋</span>
                 </div>
@@ -62,7 +62,7 @@ export function Home() {
                 <span className="card-action">View Details &rarr;</span>
               </Link>
               {/* Project 5: Double Slit Experiment */}
-              <Link to="/project/5" className="card card-link">
+              <Link to="/project/05" className="card card-link">
                 <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #09203f 0%, #537895 100%)' }}>
                   <span style={{ fontSize: '3rem' }}>〰️</span>
                 </div>
@@ -73,7 +73,7 @@ export function Home() {
                 <span className="card-action">View Details &rarr;</span>
               </Link>
               {/* Project 6: Maxwell's Demon */}
-              <Link to="/project/6" className="card card-link">
+              <Link to="/project/06" className="card card-link">
                 <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #cc2b5e 0%, #753a88 100%)' }}>
                   <span style={{ fontSize: '3rem' }}>👹</span>
                 </div>
@@ -84,7 +84,7 @@ export function Home() {
                 <span className="card-action">View Details &rarr;</span>
               </Link>
               {/* Project 7: TI-83 Fortune Teller */}
-              <Link to="/project/7" className="card card-link">
+              <Link to="/project/07" className="card card-link">
                 <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #8ba888 0%, #363a3f 100%)' }}>
                   <span style={{ fontSize: '3rem' }}>🔮</span>
                 </div>
@@ -95,7 +95,7 @@ export function Home() {
                 <span className="card-action">View Details &rarr;</span>
               </Link>
               {/* Project 8: Platonic Solids */}
-              <Link to="/project/8" className="card card-link">
+              <Link to="/project/08" className="card card-link">
                 <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)' }}>
                   <span style={{ fontSize: '3rem' }}>🧊</span>
                 </div>
@@ -106,7 +106,7 @@ export function Home() {
                 <span className="card-action">View Details &rarr;</span>
               </Link>
               {/* Project 9: Galton Board */}
-              <Link to="/project/9" className="card card-link">
+              <Link to="/project/09" className="card card-link">
                 <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #020617 100%)' }}>
                   <span style={{ fontSize: '3rem' }}>🎯</span>
                 </div>
