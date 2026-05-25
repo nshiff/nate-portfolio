@@ -137,6 +137,22 @@ section {
   }
 }
 
+.viz-container-10 {
+  height: 1560px
+}
+
+@media (min-width: 768px) {
+  .viz-container-10 {
+    height: 1110px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .viz-container-10 {
+    height: 835px;
+  }
+}
+
 /* Card Interior Components */
 .card-link {
   display: block;

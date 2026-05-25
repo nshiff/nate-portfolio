@@ -116,6 +116,17 @@ export function Home() {
                 </p>
                 <span className="card-action">View Details &rarr;</span>
               </Link>
+              {/* Project 10: Navigator Dashboard */}
+              <Link to="/project/10" className="card card-link">
+                <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #164e63 100%)' }}>
+                  <span style={{ fontSize: '3rem' }}>💻</span>
+                </div>
+                <h3 className="card-title">Navigator Dashboard</h3>
+                <p className="card-description">
+                  A real-time dashboard visualizing system metrics exposed by the browser's navigator APIs.
+                </p>
+                <span className="card-action">View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>
