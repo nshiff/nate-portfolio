@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caretaker</title>
+    <title>Alien Caretaker</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Nunito:wght@400;600;800&display=swap"
         rel="stylesheet">
@@ -445,8 +445,7 @@
 
     <div class="device">
         <div class="device-header">
-            <span class="app-title" id="appTitle">Caretaker v1.0</span>
-            <span class="day-counter" id="dayCounter">day 1</span>
+            <span class="app-title" id="appTitle">Alien Caretaker</span>
         </div>
 
         <div class="screen" id="screen">
@@ -810,7 +809,7 @@
             state = {
                 seed,
                 hunger: 80,
-                happiness: 80,
+                happiness: 50,
                 sleeping: false,
                 daysAlive: 1,
                 born: Date.now(),
@@ -880,8 +879,6 @@
             document.getElementById('happyBar').style.width = hp + '%';
             document.getElementById('happyBar').style.background = statColor(hp);
             document.getElementById('happyVal').textContent = hp + '%';
-
-            document.getElementById('dayCounter').textContent = `day ${state.daysAlive}`;
 
             const dot = document.getElementById('statusDot');
             dot.className = 'status-dot' + (state.sleeping ? ' sleeping' : (mood === 'critical' ? ' critical' : ''));
