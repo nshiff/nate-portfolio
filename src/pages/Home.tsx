@@ -127,6 +127,17 @@ export function Home() {
                 </p>
                 <span className="card-action">View Details &rarr;</span>
               </Link>
+              {/* Project 11: Alien Caretaker */}
+              <Link to="/project/11" className="card card-link">
+                <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #0d0d14 0%, #a78bfa 100%)' }}>
+                  <span style={{ fontSize: '3rem' }}>👽</span>
+                </div>
+                <h3 className="card-title">Alien Caretaker</h3>
+                <p className="card-description">
+                  A virtual pet simulation featuring procedurally generated SVG aliens.
+                </p>
+                <span className="card-action">View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>
