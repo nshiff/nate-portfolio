@@ -69,10 +69,20 @@
             color: var(--accent);
         }
 
-        .day-counter {
-            font-family: 'Space Mono', monospace;
-            font-size: 13px;
-            color: var(--text-muted);
+        .pause-btn {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .pause-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
         .screen {
@@ -446,6 +456,7 @@
     <div class="device">
         <div class="device-header">
             <span class="app-title" id="appTitle">Alien Caretaker</span>
+            <button class="pause-btn" id="btnPause" onclick="togglePause()">⏸️</button>
         </div>
 
         <div class="screen" id="screen">
@@ -525,6 +536,9 @@
         const DECAY_RATE_PER_HOUR = 8;
         const SLEEP_RESTORE_PER_HOUR = 12;
 
+        // Shared cooldown (in seconds) applied to Feed and Play after either is used.
+        const ACTION_COOLDOWN_SECONDS = 5;
+
         // ─── Data: names, palettes, trait options ────────────────────────────────────
 
         // One name per letter of the alphabet. Selected deterministically from the pet's
@@ -547,8 +561,9 @@
             { body: '#e879f9', accent: '#34d399', spot: '#fbbf24' },
         ];
 
-        // The six independent trait axes. Each is selected via the seeded RNG so the
-        // same seed always generates the same alien. 4×4×4×4×3×3 = 2,304 combinations.
+        // The five visual trait axes. Each is selected via the seeded RNG so the same
+        // seed always generates the same alien. Name and palette (defined above) are
+        // also seeded, multiplying the total combinations further.
         const BODY_SHAPES = ['hex', 'circle', 'square', 'diamond'];
         const ANTENNA_STYLES = ['dual', 'single', 'droopy', 'none'];
         const EYE_STYLES = ['round', 'dot', 'oval', 'slit'];
@@ -800,6 +815,7 @@
         // Both are set by newPet() before anything else runs.
         let state = null;
         let traits = null;
+        let paused = false;
 
         // Initializes a fresh pet with a random seed. The seed is stored on state so
         // it can be displayed as part of the pet's unique identifier (e.g. "Xorv-325").
@@ -814,9 +830,19 @@
                 daysAlive: 1,
                 born: Date.now(),
             };
+            lastActionTime = 0;
         }
 
         // ─── UI helpers ──────────────────────────────────────────────────────────────
+
+        // Toggles the paused flag and updates the button icon.
+        // While paused, stepCooldown still runs but skips ticks and freezes the bar.
+        function togglePause() {
+            paused = !paused;
+            document.getElementById('btnPause').textContent = paused ? '▶️' : '⏸️';
+            if (!paused) startCooldown(); // reset bar so elapsed time while paused doesn't trigger an instant tick
+            render();
+        }
 
         // Swaps the footer for an inline confirmation bar to avoid browser confirm().
         function showConfirm() {
@@ -887,9 +913,11 @@
             document.getElementById('btnSleep').querySelector('.icon').textContent = state.sleeping ? '☀️' : '💤';
             document.getElementById('sleepLabel').textContent = state.sleeping ? 'Wake' : 'Sleep';
 
-            // Feed and Play are disabled while the pet is sleeping.
-            document.getElementById('btnFeed').disabled = state.sleeping;
-            document.getElementById('btnPlay').disabled = state.sleeping;
+            // Feed and Play are disabled while sleeping, paused, or within the action cooldown window.
+            const onActionCooldown = (Date.now() - lastActionTime) / 1000 < ACTION_COOLDOWN_SECONDS;
+            document.getElementById('btnFeed').disabled = state.sleeping || paused || onActionCooldown;
+            document.getElementById('btnPlay').disabled = state.sleeping || paused || onActionCooldown;
+            document.getElementById('btnSleep').disabled = paused;
         }
 
         // ─── Player actions ──────────────────────────────────────────────────────────
@@ -902,12 +930,14 @@
                 state.hunger = clamp(state.hunger + 25, 0, 100);
                 setMessage(pickMessage('fed'));
                 triggerAnim('bounce');
+                lastActionTime = Date.now();
                 startCooldown();
             } else if (action === 'play' && !state.sleeping) {
                 state.happiness = clamp(state.happiness + 20, 0, 100);
                 state.hunger = clamp(state.hunger - 5, 0, 100);   // playing is tiring
                 setMessage(pickMessage('played'));
                 triggerAnim('bounce');
+                lastActionTime = Date.now();
                 startCooldown();
             } else if (action === 'sleep') {
                 state.sleeping = !state.sleeping;
@@ -956,15 +986,20 @@
         // wall-clock time (Date.now delta) rather than a counter so it's immune to
         // interval drift or tab throttling affecting the visual progress.
         let tickStart = Date.now();
+        let lastActionTime = 0; // timestamp of last Feed or Play; 0 means no cooldown active
 
         function startCooldown() {
             tickStart = Date.now();
         }
 
         function stepCooldown() {
+            if (paused) return;
             const elapsed = (Date.now() - tickStart) / 1000;
             const pct = Math.min(elapsed / TICK_SECONDS * 100, 100);
             document.getElementById('cooldownBar').style.width = pct + '%';
+            // Re-render during an active action cooldown so buttons re-enable the moment it expires.
+            const actionElapsed = (Date.now() - lastActionTime) / 1000;
+            if (actionElapsed < ACTION_COOLDOWN_SECONDS) render();
             if (elapsed >= TICK_SECONDS) {
                 tickStart = Date.now();
                 tick();
