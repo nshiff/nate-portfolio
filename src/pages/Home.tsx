@@ -150,6 +150,18 @@ export function Home() {
                 </p>
                 <span className="card-action">View Details &rarr;</span>
               </Link>
+
+              {/* Project 13: Monte Carlo Pi */}
+              <Link to="/project/13" className="card card-link">
+                <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #1e1e1e 0%, #121212 100%)' }}>
+                  <span style={{ fontSize: '3rem' }}>🥧</span>
+                </div>
+                <h3 className="card-title">Monte Carlo Pi Estimation</h3>
+                <p className="card-description">
+                  A high-performance visual simulation estimating Pi by randomly scattering points.
+                </p>
+                <span className="card-action">View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>

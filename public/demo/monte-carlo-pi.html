@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Monte Carlo Pi</title>
+    <style>
+        /* Vanilla CSS - Mobile First & Dark Mode */
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --text-color: #f5f5f5;
+            --text-muted: #a0a0a0;
+            --accent: #4a90e2;
+            --dot-in: #2ecc71;
+            --dot-out: #3498db;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            /* Constrains width on desktop, full width on mobile */
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background-color: var(--surface-color);
+            padding: 16px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-value.pi-highlight {
+            color: var(--accent);
+            font-size: 1.4rem;
+        }
+
+        /* Canvas Wrapper to maintain 1:1 Aspect Ratio */
+        .canvas-wrapper {
+            width: 100%;
+            position: relative;
+            background-color: #000;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            /* This ensures a perfect square responsive layout */
+            aspect-ratio: 1 / 1;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Overlay to keep the circle clearly visible */
+        .circle-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            /* Let clicks pass through */
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        #btn-toggle {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        #btn-reset {
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border: 1px solid #333;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.in {
+            background-color: var(--dot-in);
+        }
+
+        .dot.out {
+            background-color: var(--dot-out);
+        }
+
+        /* Speed Slider */
+        .speed-control {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .speed-control label {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-label">Total Dots (Square)</span>
+                <span class="stat-value" id="stat-total">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Dots in Circle</span>
+                <span class="stat-value" style="color: var(--dot-in);" id="stat-inside">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Estimated PI</span>
+                <span class="stat-value pi-highlight" id="stat-pi">0.000000</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Accuracy Error</span>
+                <span class="stat-value" id="stat-error">0.000%</span>
+            </div>
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="sim-canvas"></canvas>
+            <div class="circle-overlay"></div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="dot in"></div> Inside (r² ≤ 1)
+            </div>
+            <div class="legend-item">
+                <div class="dot out"></div> Outside (r² > 1)
+            </div>
+        </div>
+
+        <div class="speed-control">
+            <label for="speed-slider">Speed: <span id="speed-display">15</span> dots/frame</label>
+            <input type="range" id="speed-slider" min="1" max="200" value="15">
+        </div>
+
+        <div class="controls">
+            <button id="btn-toggle">Start</button>
+            <button id="btn-reset">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Application State ---
+        let totalDots = 0;
+        let dotsInside = 0;
+        let isRunning = false;
+        let animationId = null;
+        let dotsPerFrame = 15; // Now a dynamic variable
+
+        // Simulation configuration
+        const CANVAS_SIZE = 800;    // Internal resolution (high-res for crisp dots)
+        const RADIUS = CANVAS_SIZE / 2;
+
+        // --- DOM Elements ---
+        const canvas = document.getElementById('sim-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Optimize for no transparency background
+
+        const elTotal = document.getElementById('stat-total');
+        const elInside = document.getElementById('stat-inside');
+        const elPi = document.getElementById('stat-pi');
+        const elError = document.getElementById('stat-error');
+
+        const btnToggle = document.getElementById('btn-toggle');
+        const btnReset = document.getElementById('btn-reset');
+
+        const speedSlider = document.getElementById('speed-slider');
+        const speedDisplay = document.getElementById('speed-display');
+
+        // --- Initialization ---
+        function initCanvas() {
+            canvas.width = CANVAS_SIZE;
+            canvas.height = CANVAS_SIZE;
+            clearCanvas();
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        }
+
+        function resetSimulation() {
+            pauseSimulation();
+            totalDots = 0;
+            dotsInside = 0;
+            dotsPerFrame = 15;
+            speedSlider.value = 15;
+            speedDisplay.textContent = '15';
+            updateStatsUI();
+            clearCanvas();
+            btnToggle.textContent = 'Start';
+        }
+
+        // --- Simulation Logic ---
+        function drawDots() {
+            for (let i = 0; i < dotsPerFrame; i++) {
+                // Generate random coordinates between 0 and CANVAS_SIZE
+                const x = Math.random() * CANVAS_SIZE;
+                const y = Math.random() * CANVAS_SIZE;
+
+                // Calculate distance from center (RADIUS, RADIUS)
+                const dx = x - RADIUS;
+                const dy = y - RADIUS;
+
+                // Check if point is inside the circle (x^2 + y^2 <= r^2)
+                const isInside = (dx * dx + dy * dy) <= (RADIUS * RADIUS);
+
+                totalDots++;
+                if (isInside) {
+                    dotsInside++;
+                    ctx.fillStyle = '#2ecc71'; // Green for inside
+                } else {
+                    ctx.fillStyle = '#3498db'; // Blue for outside
+                }
+
+                // Draw a small 2x2 rectangle for the dot (fillRect is faster than drawing paths)
+                ctx.fillRect(x, y, 2, 2);
+            }
+        }
+
+        function simulationLoop() {
+            if (!isRunning) return;
+
+            drawDots();
+            updateStatsUI();
+
+            // Request next frame
+            animationId = requestAnimationFrame(simulationLoop);
+        }
+
+        // --- UI Updates ---
+        function updateStatsUI() {
+            // Format numbers with commas
+            elTotal.textContent = totalDots.toLocaleString();
+            elInside.textContent = dotsInside.toLocaleString();
+
+            if (totalDots > 0) {
+                // Formula: Pi / 4 = dotsInside / totalDots
+                const approxPi = 4 * (dotsInside / totalDots);
+                elPi.textContent = approxPi.toFixed(6);
+
+                // Calculate percentage error from actual Math.PI
+                const error = Math.abs(Math.PI - approxPi) / Math.PI * 100;
+                elError.textContent = error.toFixed(3) + '%';
+            } else {
+                elPi.textContent = '0.000000';
+                elError.textContent = '0.000%';
+            }
+        }
+
+        // --- Controls ---
+        function startSimulation() {
+            isRunning = true;
+            btnToggle.textContent = 'Pause';
+            btnToggle.style.backgroundColor = '#e67e22'; // Change to orange
+            simulationLoop();
+        }
+
+        function pauseSimulation() {
+            isRunning = false;
+            btnToggle.textContent = 'Resume';
+            btnToggle.style.backgroundColor = 'var(--accent)'; // Change back to blue
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        // --- Event Listeners ---
+        btnToggle.addEventListener('click', () => {
+            if (isRunning) {
+                pauseSimulation();
+            } else {
+                startSimulation();
+            }
+        });
+
+        btnReset.addEventListener('click', resetSimulation);
+
+        speedSlider.addEventListener('input', (e) => {
+            dotsPerFrame = parseInt(e.target.value, 10);
+            speedDisplay.textContent = dotsPerFrame;
+        });
+
+        // Bootstrap app
+        initCanvas();
+
+    </script>
+</body>
+
+</html>
