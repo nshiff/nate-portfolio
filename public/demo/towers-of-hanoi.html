@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Towers of Hanoi</title>
+    <style>
+        :root {
+            --bg-top: #1a1a2e;
+            --bg-bottom: #16213e;
+            --peg-color: rgba(255, 255, 255, 0.2);
+            --base-color: #0f3460;
+            --text-color: #e94560;
+
+            /* Disk Colors for n=5 */
+            --disk-1: #ff3366;
+            --disk-2: #ff9933;
+            --disk-3: #ffd700;
+            --disk-4: #33cc99;
+            --disk-5: #3399ff;
+
+            --disk-height: max(4vh, 25px);
+        }
+
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            /* Prevents 300ms tap delay on mobile */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-top), var(--bg-bottom));
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 1rem 0.5rem;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: var(--text-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s, background-color 0.2s;
+            outline: none;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .stats {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        /* Game Board Area */
+        #game-board {
+            flex-grow: 1;
+            position: relative;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+        }
+
+        /* Visual Pegs */
+        .peg-visual {
+            position: absolute;
+            bottom: 15%;
+            width: 12px;
+            height: 60%;
+            background-color: var(--peg-color);
+            border-radius: 6px 6px 0 0;
+            transform: translateX(-50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* The common base for all pegs */
+        .base-visual {
+            position: absolute;
+            bottom: 15%;
+            left: 5%;
+            width: 90%;
+            height: 15px;
+            background-color: var(--base-color);
+            border-radius: 8px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Clickable areas for each column */
+        .hit-area {
+            flex: 1;
+            height: 100%;
+            z-index: 10;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        /* Hover effect for clickable columns to indicate interactability */
+        .hit-area:hover {
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.05), transparent 50%);
+        }
+
+        /* Disks */
+        .disk {
+            position: absolute;
+            height: var(--disk-height);
+            border-radius: calc(var(--disk-height) / 2);
+            z-index: 5;
+            transition: all 0.35s ease-in-out;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            pointer-events: none;
+            /* Let clicks pass through to the hit-area */
+        }
+
+        /* Selection Animation */
+        .disk.selected {
+            box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            filter: brightness(1.2);
+            z-index: 6;
+            /* Bring above other disks */
+        }
+
+        /* Messages */
+        #message {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(233, 69, 96, 0.9);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #message.visible {
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.2rem;
+            }
+
+            button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="controls">
+            <button id="btn-reset">Reset</button>
+            <button id="btn-auto">Auto Solve</button>
+        </div>
+        <div class="stats">
+            Moves: <span id="move-count">0</span> / Optimal: 31
+        </div>
+    </header>
+
+    <div id="game-board">
+        <!-- Visual Base -->
+        <div class="base-visual"></div>
+
+        <!-- Visual Pegs (Calculated positions based on 16.6%, 50%, 83.3%) -->
+        <div class="peg-visual" style="left: 16.66%;"></div>
+        <div class="peg-visual" style="left: 50%;"></div>
+        <div class="peg-visual" style="left: 83.33%;"></div>
+
+        <!-- Invisible Hit Areas for tap/click interactions -->
+        <div class="hit-area" data-peg="0"></div>
+        <div class="hit-area" data-peg="1"></div>
+        <div class="hit-area" data-peg="2"></div>
+
+        <!-- Win Message -->
+        <div id="message">Puzzle Solved!</div>
+    </div>
+
+    <script>
+        // --- Game Configuration & State ---
+        const NUM_DISKS = 5;
+        const state = [[], [], []];
+        const disksDOM = {}; // Maps disk size (1-5) to its DOM element
+
+        let selectedPeg = null;
+        let movesCount = 0;
+        let isAutoPlaying = false;
+        let autoPlayTimeout = null;
+
+        // DOM Elements
+        const boardEl = document.getElementById('game-board');
+        const moveCountEl = document.getElementById('move-count');
+        const btnReset = document.getElementById('btn-reset');
+        const btnAuto = document.getElementById('btn-auto');
+        const messageEl = document.getElementById('message');
+        const hitAreas = document.querySelectorAll('.hit-area');
+
+        // Disk visual properties
+        const diskColors = ['var(--disk-1)', 'var(--disk-2)', 'var(--disk-3)', 'var(--disk-4)', 'var(--disk-5)'];
+
+        // --- Initialization ---
+        function initGame() {
+            // Clear existing disks from DOM if any
+            Object.values(disksDOM).forEach(el => el.remove());
+            for (let key in disksDOM) delete disksDOM[key];
+
+            state[0] = [];
+            state[1] = [];
+            state[2] = [];
+
+            // Populate the first peg (index 0) with disks (largest at bottom, smallest at top)
+            // Array stores sizes: [5, 4, 3, 2, 1]
+            for (let i = NUM_DISKS; i >= 1; i--) {
+                state[0].push(i);
+                createDiskDOM(i);
+            }
+
+            movesCount = 0;
+            selectedPeg = null;
+            isAutoPlaying = false;
+            messageEl.classList.remove('visible');
+            updateUI();
+            renderDisks();
+        }
+
+        function createDiskDOM(size) {
+            const disk = document.createElement('div');
+            disk.className = 'disk';
+            disk.style.backgroundColor = diskColors[size - 1];
+
+            // Calculate width: Min width 12%, Max width 28% of the board
+            const minWidth = 12;
+            const maxWidth = 28;
+            const step = (maxWidth - minWidth) / (NUM_DISKS - 1);
+            const width = minWidth + (size - 1) * step;
+
+            disk.style.width = `${width}%`;
+            boardEl.appendChild(disk);
+            disksDOM[size] = disk;
+        }
+
+        // --- Rendering Engine ---
+        function renderDisks() {
+            // Calculate pixel height of base and disk gap
+            const boardHeight = boardEl.clientHeight;
+            const baseBottomPercent = 15; // From CSS
+
+            // Calculate positions for all disks based on current state
+            state.forEach((peg, pegIndex) => {
+                peg.forEach((diskSize, diskIndex) => {
+                    const el = disksDOM[diskSize];
+
+                    // X Position (Left):
+                    // Peg centers are at 16.66%, 50%, 83.33%
+                    const pegCenterPercent = (pegIndex * 33.33) + 16.66;
+
+                    // We need to offset the left position by half the disk's width
+                    // The width was defined inline, we can read it or recalculate
+                    const widthPercent = parseFloat(el.style.width);
+                    el.style.left = `calc(${pegCenterPercent}% - ${widthPercent / 2}%)`;
+
+                    // Y Position (Bottom):
+                    // Base is at 15%. Disks stack on top.
+                    // We'll use absolute CSS bottom + calc() relative to the disk height
+                    // The first disk sits exactly at the top of the base. Base is 15px high in CSS, placed at bottom: 15%.
+                    // To keep it simple, we use a calc block.
+                    const bottomOffset = `calc(15% + 15px + ${diskIndex} * var(--disk-height) + ${diskIndex * 2}px)`;
+
+                    // Apply selection visual "lift"
+                    if (selectedPeg === pegIndex && diskIndex === peg.length - 1) {
+                        el.style.bottom = `calc(${bottomOffset} + 20px)`;
+                        el.classList.add('selected');
+                    } else {
+                        el.style.bottom = bottomOffset;
+                        el.classList.remove('selected');
+                    }
+                });
+            });
+        }
+
+        function updateUI() {
+            moveCountEl.innerText = movesCount;
+            btnAuto.disabled = isAutoPlaying;
+        }
+
+        // --- Game Logic ---
+        function handlePegClick(e) {
+            if (isAutoPlaying) return;
+
+            const clickedPeg = parseInt(e.currentTarget.getAttribute('data-peg'));
+
+            // If no peg selected, try to pick up a disk
+            if (selectedPeg === null) {
+                if (state[clickedPeg].length > 0) {
+                    selectedPeg = clickedPeg;
+                    renderDisks(); // Re-render to show selection lift
+                }
+            }
+            // If a peg is already selected, try to move or deselect
+            else {
+                if (selectedPeg === clickedPeg) {
+                    // Clicked the same peg again, just deselect
+                    selectedPeg = null;
+                } else if (isValidMove(selectedPeg, clickedPeg)) {
+                    // Valid move
+                    moveDisk(selectedPeg, clickedPeg);
+                    selectedPeg = null;
+                    movesCount++;
+                    updateUI();
+                    checkWin();
+                } else {
+                    // Invalid move, shake animation could go here, but for now we just deselect
+                    // Or switch selection if they clicked a peg with a movable disk
+                    if (state[clickedPeg].length > 0) {
+                        selectedPeg = clickedPeg;
+                    } else {
+                        selectedPeg = null;
+                    }
+                }
+                renderDisks();
+            }
+        }
+
+        function isValidMove(fromIdx, toIdx) {
+            if (state[fromIdx].length === 0) return false;
+            if (state[toIdx].length === 0) return true;
+
+            const movingDiskSize = state[fromIdx][state[fromIdx].length - 1];
+            const topDiskSizeTarget = state[toIdx][state[toIdx].length - 1];
+
+            return movingDiskSize < topDiskSizeTarget;
+        }
+
+        function moveDisk(fromIdx, toIdx) {
+            const disk = state[fromIdx].pop();
+            state[toIdx].push(disk);
+        }
+
+        function checkWin() {
+            // Win condition: All 5 disks on the last peg
+            if (state[2].length === NUM_DISKS) {
+                messageEl.classList.add('visible');
+            }
+        }
+
+        // --- Auto Solver ---
+        let autoMoveSequence = [];
+
+        function generateHanoiMoves(n, source, target, aux) {
+            if (n > 0) {
+                generateHanoiMoves(n - 1, source, aux, target);
+                autoMoveSequence.push({ from: source, to: target });
+                generateHanoiMoves(n - 1, aux, target, source);
+            }
+        }
+
+        async function startAutoPlay() {
+            if (isAutoPlaying) return;
+
+            // To guarantee a perfect solve visually, reset game state before starting
+            stopAutoPlay();
+            initGame();
+
+            isAutoPlaying = true;
+            updateUI();
+
+            autoMoveSequence = [];
+            generateHanoiMoves(NUM_DISKS, 0, 2, 1);
+
+            // Execute moves with delay
+            for (let i = 0; i < autoMoveSequence.length; i++) {
+                if (!isAutoPlaying) break; // Allow interruption if Reset is clicked
+
+                const move = autoMoveSequence[i];
+
+                // 1. Lift the disk (Visual only)
+                selectedPeg = move.from;
+                renderDisks();
+
+                await sleep(300);
+                if (!isAutoPlaying) break;
+
+                // 2. Move the disk (Logical update)
+                moveDisk(move.from, move.to);
+                selectedPeg = move.to; // Keep it "selected" so it hovers above target
+                movesCount++;
+                updateUI();
+                renderDisks();
+
+                await sleep(350);
+                if (!isAutoPlaying) break;
+
+                // 3. Drop the disk (Deselect)
+                selectedPeg = null;
+                renderDisks();
+
+                await sleep(200);
+            }
+
+            if (isAutoPlaying) {
+                checkWin();
+                isAutoPlaying = false;
+                updateUI();
+            }
+        }
+
+        function stopAutoPlay() {
+            isAutoPlaying = false;
+            selectedPeg = null;
+            if (autoPlayTimeout) clearTimeout(autoPlayTimeout);
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => {
+                autoPlayTimeout = setTimeout(resolve, ms);
+            });
+        }
+
+        // --- Event Listeners ---
+        hitAreas.forEach(area => {
+            // Using pointerdown for instant response on mobile/touch screens
+            area.addEventListener('pointerdown', handlePegClick);
+        });
+
+        btnReset.addEventListener('click', () => {
+            stopAutoPlay();
+            initGame();
+        });
+
+        btnAuto.addEventListener('click', startAutoPlay);
+
+        // Handle window resize to recalculate calc() values smoothly
+        window.addEventListener('resize', renderDisks);
+
+        // Start game
+        initGame();
+
+    </script>
+</body>
+
+</html>

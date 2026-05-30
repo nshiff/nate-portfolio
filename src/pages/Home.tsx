@@ -138,6 +138,18 @@ export function Home() {
                 </p>
                 <span className="card-action">View Details &rarr;</span>
               </Link>
+              
+              {/* Project 12: Towers of Hanoi */}
+              <Link to="/project/12" className="card card-link">
+                <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%)' }}>
+                  <span style={{ fontSize: '3rem' }}>🗼</span>
+                </div>
+                <h3 className="card-title">Towers of Hanoi</h3>
+                <p className="card-description">
+                  An interactive playable visualization and automated solver for the classic mathematical puzzle.
+                </p>
+                <span className="card-action">View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>
