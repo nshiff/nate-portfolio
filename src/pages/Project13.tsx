@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom';
 
+function pi() {
+  return <span style={{ fontFamily: "serif" }}>π</span>;
+}
+
 export function Project13() {
   return (
     <main style={{ flex: 1, padding: '2rem 0' }}>
@@ -40,9 +44,14 @@ export function Project13() {
         </div>
 
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
-          <p><a href="https://github.com/nshiff/nate-portfolio/blob/main/public/demo/monte-carlo-pi.html" target="_blank" rel="noopener noreferrer">Source code</a></p>
-          <p>
-            A visual simulation of estimating the value of Pi using the Monte Carlo method. By randomly scattering points in a square and determining the ratio of points that fall within an inscribed circle, the simulation converges on the mathematical constant Pi.
+          <p style={{ marginBottom: '1.5rem' }}>
+            <a href="https://github.com/nshiff/nate-portfolio/blob/main/public/demo/monte-carlo-pi.html" target="_blank" rel="noopener noreferrer">Source code</a>
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            A high-performance visual simulation estimating the value of Pi using the Monte Carlo method.
+          </p>
+          <p style={{ marginBottom: '2rem' }}>
+            Because the area of a circle is <strong>{pi()}r&sup2;</strong> and the area of its bounding square is <strong>(2r)&sup2;</strong> (or <strong>4r&sup2;</strong>), the ratio of the circle's area to the square's area is exactly <strong>{pi()} / 4</strong>. If we randomly scatter dots across the square, the ratio of dots that land <em>inside</em> the circle to the total number of dots will naturally approach this <strong>{pi()} / 4</strong> ratio. By simply multiplying our observed ratio by 4, we get an easy and elegant approximation of Pi!
           </p>
           <p>
             This project was created using AI-assisted development with <a href="https://gemini.google/overview/canvas/" target="_blank" rel="noopener noreferrer">Gemini Canvas</a>.
