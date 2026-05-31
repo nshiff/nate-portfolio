@@ -162,6 +162,18 @@ export function Home() {
                 </p>
                 <span className="card-action">View Details &rarr;</span>
               </Link>
+
+              {/* Project 14: Noise Visualizer */}
+              <Link to="/project/14" className="card card-link">
+                <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #0f1520 0%, #000000 100%)' }}>
+                  <span style={{ fontSize: '3rem' }}>🌌</span>
+                </div>
+                <h3 className="card-title">Noise Visualizer</h3>
+                <p className="card-description">
+                  An interactive gallery of procedural generation noise algorithms like Perlin and Worley noise.
+                </p>
+                <span className="card-action">View Details &rarr;</span>
+              </Link>
             </div>
           </div>
         </section>

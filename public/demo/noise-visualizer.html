@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Randomness & Noise Visualizer</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            /* Prevents mobile swipe-to-refresh and scrolling */
+        }
+
+        /* We render to a small internal canvas (128x128) for performance, 
+           and scale it up using CSS. 'pixelated' ensures crisp, non-blurry blocks.
+        */
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        #ui-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(15, 15, 20, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        select:focus {
+            border-color: #4da6ff;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #4da6ff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #3399ff;
+        }
+
+        #description {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #aaa;
+            min-height: 4em;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <div id="ui-panel">
+        <h1>Noise Visualizer</h1>
+        <select id="noise-selector">
+            <option value="math">Math.random() (Uniform)</option>
+            <option value="crypto">crypto.getRandomValues()</option>
+            <option value="perlin" selected>Perlin Noise (Smooth)</option>
+            <option value="fbm">Fractal Brownian Motion</option>
+            <option value="worley">Worley Noise (Cellular)</option>
+        </select>
+        <button id="pause-btn">Pause</button>
+        <div id="description">
+            A gradient noise algorithm invented by Ken Perlin. Produces smooth, continuous randomness often used for
+            organic textures and terrain.
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        const selector = document.getElementById('noise-selector');
+        const descEl = document.getElementById('description');
+        const pauseBtn = document.getElementById('pause-btn');
+
+        // Internal resolution. Keeps CPU computations manageable on mobile devices.
+        const W = 128;
+        const H = 128;
+        canvas.width = W;
+        canvas.height = H;
+
+        // ImageData allows us to directly manipulate pixel bytes for extreme performance
+        const imgData = ctx.createImageData(W, H);
+        const data = imgData.data;
+
+        // Buffers & State
+        let time = 0;
+        let currentMode = 'perlin';
+        let isPaused = false;
+        const cryptoBuffer = new Uint8Array(W * H);
+
+        // Descriptions for the UI
+        const descriptions = {
+            math: "The default JS PRNG (Math.random). Generates pseudo-random white noise. Fast, but not cryptographically secure.",
+            crypto: "Cryptographically secure pseudo-random noise (Web Crypto API). Uses system entropy. Noticeably similar to Math.random visually, but safer for secure applications.",
+            perlin: "A gradient noise algorithm invented by Ken Perlin. Produces smooth, continuous randomness often used for organic textures and terrain.",
+            fbm: "Fractal Brownian Motion. Combines multiple layers (octaves) of Perlin noise at varying frequencies to create highly organic, cloud-like complexity.",
+            worley: "Cellular noise calculated by the distance to randomly moving feature points. Often used for simulating water, stone, or biological cells."
+        };
+
+        selector.addEventListener('change', (e) => {
+            currentMode = e.target.value;
+            descEl.innerText = descriptions[currentMode];
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            pauseBtn.innerText = isPaused ? 'Resume' : 'Pause';
+        });
+
+        /* =================================================================
+           1. PERLIN NOISE IMPLEMENTATION 
+           (Classical 3D Perlin Noise reference implementation)
+        ================================================================= */
+        const p = new Uint8Array(512);
+        // Initialize permutation table randomly
+        for (let i = 0; i < 256; i++) p[i] = Math.floor(Math.random() * 256);
+        // Shuffle
+        for (let i = 255; i > 0; i--) {
+            let n = Math.floor(Math.random() * (i + 1));
+            let t = p[i];
+            p[i] = p[n];
+            p[n] = t;
+        }
+        // Duplicate for overflow
+        for (let i = 0; i < 256; i++) p[i + 256] = p[i];
+
+        function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+        function lerp(t, a, b) { return a + t * (b - a); }
+        function grad(hash, x, y, z) {
+            let h = hash & 15;
+            let u = h < 8 ? x : y;
+            let v = h < 4 ? y : h === 12 || h === 14 ? x : z;
+            return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+        }
+
+        function perlin3D(x, y, z) {
+            let X = Math.floor(x) & 255, Y = Math.floor(y) & 255, Z = Math.floor(z) & 255;
+            x -= Math.floor(x); y -= Math.floor(y); z -= Math.floor(z);
+            let u = fade(x), v = fade(y), w = fade(z);
+
+            let A = p[X] + Y, AA = p[A] + Z, AB = p[A + 1] + Z;
+            let B = p[X + 1] + Y, BA = p[B] + Z, BB = p[B + 1] + Z;
+
+            return lerp(w, lerp(v, lerp(u, grad(p[AA], x, y, z), grad(p[BA], x - 1, y, z)),
+                lerp(u, grad(p[AB], x, y - 1, z), grad(p[BB], x - 1, y - 1, z))),
+                lerp(v, lerp(u, grad(p[AA + 1], x, y, z - 1), grad(p[BA + 1], x - 1, y, z - 1)),
+                    lerp(u, grad(p[AB + 1], x, y - 1, z - 1), grad(p[BB + 1], x - 1, y - 1, z - 1))));
+        }
+
+        /* =================================================================
+           2. FRACTAL BROWNIAN MOTION (fBm)
+        ================================================================= */
+        function fbm3D(x, y, z, octaves) {
+            let total = 0;
+            let frequency = 1;
+            let amplitude = 1;
+            let maxValue = 0;
+            for (let i = 0; i < octaves; i++) {
+                total += perlin3D(x * frequency, y * frequency, z * frequency) * amplitude;
+                maxValue += amplitude;
+                amplitude *= 0.5;
+                frequency *= 2.0;
+            }
+            return total / maxValue;
+        }
+
+        /* =================================================================
+           3. WORLEY NOISE STATE (Cellular points)
+        ================================================================= */
+        const numPoints = 15;
+        const worleyPoints = [];
+        for (let i = 0; i < numPoints; i++) {
+            worleyPoints.push({
+                x: Math.random() * W,
+                y: Math.random() * H,
+                vx: (Math.random() - 0.5) * 1.5,
+                vy: (Math.random() - 0.5) * 1.5
+            });
+        }
+
+        function updateWorleyPoints() {
+            for (let pt of worleyPoints) {
+                pt.x += pt.vx;
+                pt.y += pt.vy;
+                // Bounce off walls
+                if (pt.x <= 0 || pt.x >= W) pt.vx *= -1;
+                if (pt.y <= 0 || pt.y >= H) pt.vy *= -1;
+            }
+        }
+
+        /* =================================================================
+           MAIN RENDER LOOP
+        ================================================================= */
+        function render() {
+            if (isPaused) {
+                requestAnimationFrame(render);
+                return;
+            }
+
+            let idx = 0;
+
+            if (currentMode === 'math') {
+                // Math.random (Uniform)
+                for (let i = 0; i < W * H; i++) {
+                    let val = (Math.random() * 256) | 0; // bitwise floor
+                    data[idx++] = val; // R
+                    data[idx++] = val; // G
+                    data[idx++] = val; // B
+                    data[idx++] = 255; // Alpha
+                }
+            }
+            else if (currentMode === 'crypto') {
+                // Cryptographically Secure Noise
+                window.crypto.getRandomValues(cryptoBuffer);
+                for (let i = 0; i < W * H; i++) {
+                    let val = cryptoBuffer[i];
+                    data[idx++] = val;
+                    data[idx++] = val;
+                    data[idx++] = val;
+                    data[idx++] = 255;
+                }
+            }
+            else if (currentMode === 'perlin') {
+                // 3D Perlin Noise animated over time
+                const scale = 0.05;
+                for (let y = 0; y < H; y++) {
+                    for (let x = 0; x < W; x++) {
+                        // Perlin returns roughly -1 to 1. Map to 0-255.
+                        let raw = perlin3D(x * scale, y * scale, time);
+                        let val = ((raw + 1) * 127.5) | 0;
+                        data[idx++] = val;
+                        data[idx++] = val;
+                        data[idx++] = val;
+                        data[idx++] = 255;
+                    }
+                }
+            }
+            else if (currentMode === 'fbm') {
+                // Fractal Brownian Motion (Clouds)
+                const scale = 0.02;
+                for (let y = 0; y < H; y++) {
+                    for (let x = 0; x < W; x++) {
+                        let raw = fbm3D(x * scale, y * scale, time * 0.5, 4); // 4 octaves
+                        let val = ((raw + 1) * 127.5) | 0;
+                        data[idx++] = val;
+                        data[idx++] = val;
+                        data[idx++] = val;
+                        data[idx++] = 255;
+                    }
+                }
+            }
+            else if (currentMode === 'worley') {
+                // Cellular distance-based noise
+                updateWorleyPoints();
+                for (let y = 0; y < H; y++) {
+                    for (let x = 0; x < W; x++) {
+                        let minDistSq = Infinity;
+                        for (let pt of worleyPoints) {
+                            let dx = x - pt.x;
+                            let dy = y - pt.y;
+                            let distSq = dx * dx + dy * dy;
+                            if (distSq < minDistSq) minDistSq = distSq;
+                        }
+                        let dist = Math.sqrt(minDistSq);
+                        // Map distance to a color value (invert so edges are dark, centers are light)
+                        let val = Math.max(0, 255 - (dist * 7)) | 0;
+
+                        data[idx++] = val;
+                        data[idx++] = val;
+                        data[idx++] = val;
+                        data[idx++] = 255;
+                    }
+                }
+            }
+
+            // Push pixel data back to canvas
+            ctx.putImageData(imgData, 0, 0);
+
+            // Increment time for animations
+            time += 0.03;
+
+            requestAnimationFrame(render);
+        }
+
+        // Start animation loop
+        requestAnimationFrame(render);
+    </script>
+</body>
+
+</html>
