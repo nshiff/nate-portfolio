@@ -5,7 +5,7 @@ export function Home() {
     <main style={{ flex: 1 }}>
 
       {/* Hero Section */}
-      <section id="hero" style={{ paddingBottom: '0' }}>
+      <section id="hero" style={{ padding: '0' }}>
         <div className="container">
           <p style={{ fontSize: '1.2rem', color: '#a0aec0', fontStyle: 'italic' }}>
             Follow your curiosity and explore this collection of simulations. All demos are optimized for both mobile and desktop viewports.
@@ -14,13 +14,16 @@ export function Home() {
       </section>
 
       {/* Projects Section */}
-      <section id="projects" >
+      <section id="projects" style={{ paddingTop: '0' }}>
         <div className="container">
 
+          {/* Physics */}
+          <h2 style={{ fontSize: '2rem', marginTop: '2rem', marginBottom: '1.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>Physics</h2>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '2rem'
+            gap: '2rem',
+            marginBottom: '4rem'
           }}>
             {/* Project 1: Stable Fluids */}
             <Link to="/project/01" className="card card-link">
@@ -30,31 +33,6 @@ export function Home() {
               <h3 className="card-title">Stable Fluids</h3>
               <p className="card-description">
                 An interactive real-time fluid simulation leveraging WebGL, based on Jos Stam's Stable Fluids paper.
-              </p>
-              <span className="card-action">View Details &rarr;</span>
-            </Link>
-
-            {/* Project 2: Turing Machine Simulator */}
-            <Link to="/project/02" className="card card-link">
-              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
-                <span style={{ fontSize: '2.5rem', fontFamily: 'monospace', color: '#3C3489', fontWeight: 'bold' }}>{'[ q0 ]'}</span>
-              </div>
-              <h3 className="card-title">Turing Machine</h3>
-              <p className="card-description">
-                An interactive visualization of a Turing Machine, featuring state transitions and an animated tape execution.
-              </p>
-              <span className="card-action">View Details &rarr;</span>
-            </Link>
-
-            {/* Project 3: WebModular Synth */}
-            <Link to="/project/03" className="card card-link">
-              <div className="card-image-wrapper" style={{ background: 'linear-gradient(to right, #1f2937, #111827)' }}>
-                <div style={{ position: 'absolute', inset: 0, opacity: 0.2, backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                <span style={{ fontSize: '3rem', zIndex: 10 }}>🎛️</span>
-              </div>
-              <h3 className="card-title">WebModular Synth</h3>
-              <p className="card-description">
-                A browser-based modular synthesizer built with React and the Web Audio API, featuring dynamic routing and interactive modules.
               </p>
               <span className="card-action">View Details &rarr;</span>
             </Link>
@@ -94,15 +72,24 @@ export function Home() {
               </p>
               <span className="card-action">View Details &rarr;</span>
             </Link>
+          </div>
 
-            {/* Project 7: TI-83 Fortune Teller */}
-            <Link to="/project/07" className="card card-link">
-              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #8ba888 0%, #363a3f 100%)' }}>
-                <span style={{ fontSize: '3rem' }}>🔮</span>
+          {/* Mathematics */}
+          <h2 style={{ fontSize: '2rem', marginTop: '2rem', marginBottom: '1.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>Mathematics</h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '2rem',
+            marginBottom: '4rem'
+          }}>
+            {/* Project 2: Turing Machine Simulator */}
+            <Link to="/project/02" className="card card-link">
+              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
+                <span style={{ fontSize: '2.5rem', fontFamily: 'monospace', color: '#3C3489', fontWeight: 'bold' }}>{'[ q0 ]'}</span>
               </div>
-              <h3 className="card-title">TI-83 Fortune Teller</h3>
+              <h3 className="card-title">Turing Machine</h3>
               <p className="card-description">
-                A retro TI-83 calculator styled Magic 8-Ball program built with HTML, CSS, and jQuery.
+                An interactive visualization of a Turing Machine, featuring state transitions and an animated tape execution.
               </p>
               <span className="card-action">View Details &rarr;</span>
             </Link>
@@ -127,30 +114,6 @@ export function Home() {
               <h3 className="card-title">Galton Board Simulation</h3>
               <p className="card-description">
                 An interactive physics simulation of a Galton Board demonstrating the Central Limit Theorem.
-              </p>
-              <span className="card-action">View Details &rarr;</span>
-            </Link>
-
-            {/* Project 10: Navigator Dashboard */}
-            <Link to="/project/10" className="card card-link">
-              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #164e63 100%)' }}>
-                <span style={{ fontSize: '3rem' }}>💻</span>
-              </div>
-              <h3 className="card-title">Navigator Dashboard</h3>
-              <p className="card-description">
-                A real-time dashboard visualizing system metrics exposed by the browser's navigator APIs.
-              </p>
-              <span className="card-action">View Details &rarr;</span>
-            </Link>
-
-            {/* Project 11: Alien Caretaker */}
-            <Link to="/project/11" className="card card-link">
-              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #0d0d14 0%, #a78bfa 100%)' }}>
-                <span style={{ fontSize: '3rem' }}>👽</span>
-              </div>
-              <h3 className="card-title">Alien Caretaker</h3>
-              <p className="card-description">
-                A virtual pet simulation featuring procedurally generated SVG aliens.
               </p>
               <span className="card-action">View Details &rarr;</span>
             </Link>
@@ -191,6 +154,65 @@ export function Home() {
               <span className="card-action">View Details &rarr;</span>
             </Link>
           </div>
+
+          {/* Miscellaneous */}
+          <h2 style={{ fontSize: '2rem', marginTop: '2rem', marginBottom: '1.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>Miscellaneous</h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '2rem',
+            marginBottom: '4rem'
+          }}>
+            {/* Project 3: WebModular Synth */}
+            <Link to="/project/03" className="card card-link">
+              <div className="card-image-wrapper" style={{ background: 'linear-gradient(to right, #1f2937, #111827)' }}>
+                <div style={{ position: 'absolute', inset: 0, opacity: 0.2, backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                <span style={{ fontSize: '3rem', zIndex: 10 }}>🎛️</span>
+              </div>
+              <h3 className="card-title">WebModular Synth</h3>
+              <p className="card-description">
+                A browser-based modular synthesizer built with React and the Web Audio API, featuring dynamic routing and interactive modules.
+              </p>
+              <span className="card-action">View Details &rarr;</span>
+            </Link>
+
+            {/* Project 7: TI-83 Fortune Teller */}
+            <Link to="/project/07" className="card card-link">
+              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #8ba888 0%, #363a3f 100%)' }}>
+                <span style={{ fontSize: '3rem' }}>🔮</span>
+              </div>
+              <h3 className="card-title">TI-83 Fortune Teller</h3>
+              <p className="card-description">
+                A retro TI-83 calculator styled Magic 8-Ball program built with HTML, CSS, and jQuery.
+              </p>
+              <span className="card-action">View Details &rarr;</span>
+            </Link>
+
+            {/* Project 10: Navigator Dashboard */}
+            <Link to="/project/10" className="card card-link">
+              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #164e63 100%)' }}>
+                <span style={{ fontSize: '3rem' }}>💻</span>
+              </div>
+              <h3 className="card-title">Navigator Dashboard</h3>
+              <p className="card-description">
+                A real-time dashboard visualizing system metrics exposed by the browser's navigator APIs.
+              </p>
+              <span className="card-action">View Details &rarr;</span>
+            </Link>
+
+            {/* Project 11: Alien Caretaker */}
+            <Link to="/project/11" className="card card-link">
+              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #0d0d14 0%, #a78bfa 100%)' }}>
+                <span style={{ fontSize: '3rem' }}>👽</span>
+              </div>
+              <h3 className="card-title">Alien Caretaker</h3>
+              <p className="card-description">
+                A virtual pet simulation featuring procedurally generated SVG aliens.
+              </p>
+              <span className="card-action">View Details &rarr;</span>
+            </Link>
+          </div>
+
         </div>
       </section>
     </main>
