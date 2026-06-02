@@ -395,9 +395,9 @@ export default function NavigatorDashboard() {
                     <div>
                         <h1 className="logo-title">
                             <Activity className="logo-icon" />
-                            The "navigator" object
+                            Your System Details
                         </h1>
-                        <p className="logo-subtitle">System metrics through the lens of the browser</p>
+                        <p className="logo-subtitle">As viewed by the "navigator" object</p>
                     </div>
                 </header>
 
