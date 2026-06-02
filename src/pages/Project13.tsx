@@ -15,7 +15,7 @@ export function Project13() {
         <div className="viz-container-13" style={{
           position: 'relative',
           width: '100%',
-          minHeight: '810px',
+          minHeight: '830px',
           backgroundColor: '#121212',
           borderRadius: '12px',
           marginBottom: '3rem',
