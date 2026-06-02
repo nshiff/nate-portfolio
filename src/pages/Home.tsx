@@ -5,16 +5,16 @@ export function Home() {
     <main style={{ flex: 1 }}>
 
       {/* Hero Section */}
-      <section id="hero">
+      <section id="hero" style={{ paddingBottom: '0' }}>
         <div className="container">
-          <p style={{ fontSize: '1.2rem', color: '#a0aec0' }}>
-            Follow your curiosity and explore this collection of simulations. All demos are responsive across mobile and desktop viewports.
+          <p style={{ fontSize: '1.2rem', color: '#a0aec0', fontStyle: 'italic' }}>
+            Follow your curiosity and explore this collection of simulations. All demos are optimized for both mobile and desktop viewports.
           </p>
         </div>
       </section>
 
       {/* Projects Section */}
-      <section id="projects" style={{ background: 'rgba(255,255,255,0.02)' }}>
+      <section id="projects" >
         <div className="container">
 
           <div style={{
