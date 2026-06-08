@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Roundabout Traffic Simulation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        /* Vanilla CSS Reset and Setup */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #2a2c31;
+            /* Fallback before canvas loads */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* Enforce canvas bounds */
+        canvas {
+            display: block;
+            /* touch-action: none; Removed to allow default scrolling behavior */
+        }
+
+        /* Optional: Subtle UI overlay for title */
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin: 4px 0 0 0;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Pause Button Styles */
+        #pause-btn {
+            margin-top: 12px;
+            padding: 8px 16px;
+            background-color: #4A4D54;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #pause-btn:hover {
+            background-color: #5b5e66;
+        }
+
+        /* Slider Styles */
+        .control-group {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            width: 140px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="ui-layer">
+        <h1>Roundabout Simulation</h1>
+        <p>Fully Autonomous Traffic Flow</p>
+        <button id="pause-btn" onclick="togglePause()">Pause</button>
+        <div class="control-group">
+            <label for="density-slider">Traffic Density</label>
+            <input type="range" id="density-slider" min="0" max="100" value="60">
+        </div>
+        <div class="control-group">
+            <label for="speed-slider">Sim Speed</label>
+            <input type="range" id="speed-slider" min="0.25" max="3" step="0.25" value="1">
+        </div>
+    </div>
+
+    <script>
+        /**
+         * SIMULATION CONFIGURATION & CONSTANTS
+         */
+        const R = 70; // Path radius of the roundabout lane
+        const W = 60; // Total width of the 2-lane roads
+        const L = 15; // Offset from road center to the center of the right lane
+        const ALPHA = Math.asin(L / R); // Angular offset for entry/exit points
+        const YIELD_DIST = 68.37; // sqrt(R*R - L*L) - distance from center to intersection point
+
+        let cars = [];
+        let spawnTimer = 0;
+        let isPaused = false;
+
+        // Car Palette
+        const carColors = ['#E63946', '#457B9D', '#1D3557', '#F4A261', '#E9C46A', '#2A9D8F', '#9b5de5', '#f15bb5'];
+
+        /**
+         * UTILITY FUNCTIONS
+         */
+        function normalizeAngle(a) {
+            return ((a % TWO_PI) + TWO_PI) % TWO_PI;
+        }
+
+        // 0: South, 1: East, 2: North, 3: West
+        function getBaseAngle(dir) {
+            switch (dir) {
+                case 0: return HALF_PI;  // From South (bottom)
+                case 1: return 0;        // From East (right)
+                case 2: return -HALF_PI; // From North (top)
+                case 3: return PI;       // From West (left)
+            }
+        }
+
+        // Direction vector pointing OUTWARD from the intersection
+        function getDirVec(dir) {
+            switch (dir) {
+                case 0: return { x: 0, y: 1 };  // South
+                case 1: return { x: 1, y: 0 };  // East
+                case 2: return { x: 0, y: -1 }; // North
+                case 3: return { x: -1, y: 0 }; // West
+            }
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('pause-btn');
+            if (isPaused) {
+                btn.innerText = 'Resume';
+                noLoop();
+            } else {
+                btn.innerText = 'Pause';
+                loop();
+            }
+        }
+
+        /**
+         * CAR CLASS
+         */
+        class Car {
+            constructor(origin, dest) {
+                this.origin = origin;
+                this.dest = dest;
+                this.state = 'APPROACH';
+
+                // Spawn distance relative to screen size
+                this.dist = Math.max(width, height) / 2 + 60;
+
+                // Kinematics
+                this.maxSpeed = random(1.8, 2.8);
+                this.speed = this.maxSpeed;
+                this.targetSpeed = this.maxSpeed;
+
+                // Angular Logic (Roundabouts are counter-clockwise)
+                this.baseEntryA = getBaseAngle(this.origin);
+                this.entryAngle = normalizeAngle(this.baseEntryA - ALPHA);
+
+                let baseExitA = getBaseAngle(this.dest);
+                this.exitAngle = normalizeAngle(baseExitA + ALPHA);
+
+                this.targetTravelAngle = normalizeAngle(this.entryAngle - this.exitAngle);
+
+                this.travelledAngle = 0;
+                this.currentAngle = this.entryAngle;
+                this.committed = false; // Tracks if the car has committed to entering
+
+                // Aesthetics
+                this.color = carColors[Math.floor(random(carColors.length))];
+                this.w = 10;
+                this.l = 18;
+            }
+
+            update(speedMult = 1) {
+                this.targetSpeed = this.maxSpeed * speedMult;
+
+                // --- 1. COLLISION AVOIDANCE & YIELD LOGIC ---
+
+                // Find cars ahead
+                let minDistDiff = Infinity;
+                let minAngleDiff = Infinity;
+                let carAheadLinear = null;
+                let carAheadRoundabout = null;
+
+                for (let c of cars) {
+                    if (c === this) continue;
+
+                    // Follow logic in straight paths (Approach & Exit)
+                    if (c.state === this.state) {
+                        if (this.state === 'APPROACH' && c.origin === this.origin) {
+                            let diff = this.dist - c.dist;
+                            if (diff > 0 && diff < minDistDiff) {
+                                minDistDiff = diff;
+                                carAheadLinear = c;
+                            }
+                        } else if (this.state === 'EXIT' && c.dest === this.dest) {
+                            let diff = c.dist - this.dist;
+                            if (diff > 0 && diff < minDistDiff) {
+                                minDistDiff = diff;
+                                carAheadLinear = c;
+                            }
+                        }
+                    }
+
+                    // Follow logic inside the roundabout
+                    if (this.state === 'ROUNDABOUT' && c.state === 'ROUNDABOUT') {
+                        let diff = normalizeAngle(this.currentAngle - c.currentAngle);
+                        if (diff > 0 && diff < PI && diff < minAngleDiff) {
+                            minAngleDiff = diff;
+                            carAheadRoundabout = c;
+                        }
+                    }
+                }
+
+                // Apply straight path car following
+                if (carAheadLinear) {
+                    if (minDistDiff < 30) {
+                        this.targetSpeed = 0;
+                        // Emergency hard stop
+                        if (minDistDiff < 22) {
+                            this.speed = 0;
+                            if (this.state === 'APPROACH') this.dist = carAheadLinear.dist + 22;
+                            if (this.state === 'EXIT') this.dist = carAheadLinear.dist - 22;
+                        }
+                    } else if (minDistDiff < 60) {
+                        this.targetSpeed = Math.min(this.targetSpeed, carAheadLinear.speed);
+                    }
+                }
+
+                // Apply roundabout car following
+                if (this.state === 'ROUNDABOUT' && carAheadRoundabout) {
+                    let arcDist = minAngleDiff * R;
+                    if (arcDist < 30) {
+                        this.targetSpeed = 0;
+                    } else if (arcDist < 60) {
+                        this.targetSpeed = Math.min(this.targetSpeed, carAheadRoundabout.speed);
+                    }
+                }
+
+                // Yield logic at intersection
+                let safeToEnter = true;
+                // Added the committed check, and increased detection range from 50 to 80
+                if (this.state === 'APPROACH' && this.dist < 80 && !this.committed) {
+                    for (let c of cars) {
+                        if (c === this) continue;
+                        // Check cars currently inside the roundabout
+                        if (c.state === 'ROUNDABOUT' && c.dest !== this.origin) {
+                            let distToUs = normalizeAngle(c.currentAngle - this.entryAngle);
+                            // Dynamically scale upstream check with speedMult so they wait for larger gaps at higher speeds
+                            let safeGap = 1.1 + (speedMult - 1) * 0.3;
+                            if (distToUs < safeGap) {
+                                safeToEnter = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!safeToEnter) {
+                        this.targetSpeed = 0;
+                        // Hold at the yield line
+                        if (this.dist <= 24) {
+                            this.speed = 0;
+                            this.dist = 24;
+                        }
+                    } else if (this.dist <= 24) {
+                        // If it's safe to enter and we are crossing the line, commit to entering
+                        this.committed = true;
+                    }
+                }
+
+                // Smooth acceleration/braking
+                // Scale the lerp factor with speedMult so braking distance remains consistent at higher speeds
+                let lerpFactor = Math.min(1, 0.15 * speedMult);
+                this.speed += (this.targetSpeed - this.speed) * lerpFactor;
+                if (this.speed < 0.05 && this.targetSpeed === 0) this.speed = 0;
+
+                // --- 2. MOVEMENT & STATE TRANSITIONS ---
+
+                if (this.state === 'APPROACH') {
+                    this.dist -= this.speed;
+                    if (this.dist <= 0) {
+                        this.state = 'ROUNDABOUT';
+                        this.dist = 0;
+                        this.travelledAngle = 0;
+                    }
+                }
+                else if (this.state === 'ROUNDABOUT') {
+                    this.travelledAngle += this.speed / R;
+                    this.currentAngle = normalizeAngle(this.entryAngle - this.travelledAngle);
+
+                    if (this.travelledAngle >= this.targetTravelAngle) {
+                        this.state = 'EXIT';
+                        this.dist = 0;
+                    }
+                }
+                else if (this.state === 'EXIT') {
+                    this.dist += this.speed;
+                }
+            }
+
+            draw(cx, cy) {
+                let x, y, heading;
+
+                if (this.state === 'APPROACH') {
+                    let pinX = cx + R * Math.cos(this.entryAngle);
+                    let pinY = cy + R * Math.sin(this.entryAngle);
+                    let dVec = getDirVec(this.origin);
+                    x = pinX + dVec.x * this.dist;
+                    y = pinY + dVec.y * this.dist;
+                    heading = atan2(-dVec.y, -dVec.x);
+                }
+                else if (this.state === 'ROUNDABOUT') {
+                    x = cx + R * Math.cos(this.currentAngle);
+                    y = cy + R * Math.sin(this.currentAngle);
+                    heading = this.currentAngle - HALF_PI;
+                }
+                else if (this.state === 'EXIT') {
+                    let poutX = cx + R * Math.cos(this.exitAngle);
+                    let poutY = cy + R * Math.sin(this.exitAngle);
+                    let dVec = getDirVec(this.dest);
+                    x = poutX + dVec.x * this.dist;
+                    y = poutY + dVec.y * this.dist;
+                    heading = atan2(dVec.y, dVec.x);
+                }
+
+                push();
+                translate(x, y);
+                rotate(heading);
+
+                // Featureless rectangle representation
+                fill(this.color);
+                noStroke();
+                rectMode(CENTER);
+                rect(0, 0, this.l, this.w, 2);
+
+                pop();
+            }
+        }
+
+        /**
+         * P5.JS MAIN LIFECYCLE
+         */
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+
+        function draw() {
+            // 1. Draw Environment
+            background('#6B9E5A'); // Grass
+
+            let cx = width / 2;
+            let cy = height / 2;
+
+            // Roads (drawn outward from center)
+            fill('#4A4D54');
+            noStroke();
+            rectMode(CORNER);
+            rect(cx - 30, 0, 60, height); // North-South
+            rect(0, cy - 30, width, 60);  // East-West
+
+            // Roundabout Track (bulges over roads to form flared entry corners)
+            circle(cx, cy, 170); // 85 radius * 2
+
+            // Inner Island
+            fill('#6B9E5A');
+            stroke('#E2E8F0');
+            strokeWeight(2);
+            circle(cx, cy, 110); // 55 radius * 2
+
+            // Road Markings (Yellow centerlines)
+            stroke('#FACC15');
+            strokeWeight(2);
+            drawingContext.setLineDash([10, 15]);
+            line(cx, cy + 85, cx, height);   // South
+            line(cx, 0, cx, cy - 85);        // North
+            line(cx + 85, cy, width, cy);    // East
+            line(0, cy, cx - 85, cy);        // West
+            drawingContext.setLineDash([]);
+
+            // Yield Lines (Dashed white lines at intersections)
+            stroke('#FFFFFF');
+            strokeWeight(3);
+            drawingContext.setLineDash([5, 5]);
+
+            // Position lines exactly at the YIELD_DIST offset crossing the right lanes
+            line(cx, cy + YIELD_DIST, cx + 30, cy + YIELD_DIST); // South Lane
+            line(cx, cy - YIELD_DIST, cx - 30, cy - YIELD_DIST); // North Lane
+            line(cx + YIELD_DIST, cy, cx + YIELD_DIST, cy - 30); // East Lane
+            line(cx - YIELD_DIST, cy, cx - YIELD_DIST, cy + 30); // West Lane
+            drawingContext.setLineDash([]);
+
+            // 2. Process & Draw Cars
+            let speedMult = parseFloat(document.getElementById('speed-slider').value);
+
+            for (let i = cars.length - 1; i >= 0; i--) {
+                cars[i].update(speedMult);
+                cars[i].draw(cx, cy);
+
+                // Clean up cars that have exited the screen boundaries
+                if (cars[i].state === 'EXIT' && cars[i].dist > Math.max(width, height) / 2 + 100) {
+                    cars.splice(i, 1);
+                }
+            }
+
+            // 3. Traffic Spawner
+            let densitySlider = document.getElementById('density-slider');
+            let density = parseInt(densitySlider.value);
+
+            if (density > 0) {
+                spawnTimer += speedMult;
+
+                // Map the slider 1-100 value to spawn thresholds
+                // Higher density = lower threshold (faster spawns)
+                let spawnThreshold = map(density, 1, 100, 120, 15);
+
+                if (spawnTimer > spawnThreshold) {
+                    let o = Math.floor(random(4));
+                    let d = Math.floor(random(4));
+
+                    // Greatly reduce U-turns to keep traffic flowing naturally
+                    if (o === d && random() > 0.05) {
+                        d = (d + 1) % 4;
+                    }
+
+                    // Prevent spawning if the road is currently backed up
+                    let clear = true;
+                    let startDist = Math.max(width, height) / 2 + 60;
+                    for (let c of cars) {
+                        if (c.state === 'APPROACH' && c.origin === o) {
+                            if (c.dist > startDist - 50) {
+                                clear = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (clear) {
+                        cars.push(new Car(o, d));
+                        // Add a randomized delay to spawning to create natural clumping
+                        // Higher density = less negative delay
+                        let maxDelay = map(density, 1, 100, 40, 0);
+                        spawnTimer = Math.floor(random(-maxDelay, 5));
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

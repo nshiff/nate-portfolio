@@ -211,6 +211,18 @@ export function Home() {
               </p>
               <span className="card-action">View Details &rarr;</span>
             </Link>
+
+            {/* Project 15: Traffic Simulation */}
+            <Link to="/project/15" className="card card-link">
+              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #6B9E5A 0%, #4A4D54 100%)' }}>
+                <span style={{ fontSize: '3rem' }}>🚗</span>
+              </div>
+              <h3 className="card-title">Traffic Simulation</h3>
+              <p className="card-description">
+                An interactive roundabout traffic simulation featuring autonomous agents.
+              </p>
+              <span className="card-action">View Details &rarr;</span>
+            </Link>
           </div>
 
         </div>

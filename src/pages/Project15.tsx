@@ -1,0 +1,55 @@
+import { Link } from 'react-router-dom';
+
+export function Project15() {
+  return (
+    <main style={{ flex: 1, padding: '2rem 0' }}>
+      <div className="container">
+        <Link to="/" style={{ display: 'inline-block', marginBottom: '2rem', color: 'var(--text-secondary)' }}>
+          &larr; Back to Portfolio
+        </Link>
+
+        <div className="viz-container-15" style={{
+          position: 'relative',
+          width: '100%',
+          height: '80vh',
+          minHeight: '700px',
+          backgroundColor: '#000',
+          borderRadius: '12px',
+          marginBottom: '3rem',
+          overflow: 'hidden',
+        }}>
+          <iframe
+            src="/demo/traffic-sim.html"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              border: 'none',
+            }}
+            title="Traffic Simulation Demo"
+          />
+        </div>
+
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 700, lineHeight: 1.2 }}>Traffic Simulation</h1>
+
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>p5.js</span>
+          <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>Simulation</span>
+        </div>
+
+        <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
+          <p><a href="https://github.com/nshiff/nate-portfolio/blob/main/public/demo/traffic-sim.html" target="_blank" rel="noopener noreferrer">Source code</a></p>
+          <p>
+            An interactive roundabout traffic simulation featuring fully autonomous agents.
+            Adjust the traffic density and simulation speed to observe flow dynamics and emergent behaviors as vehicles yield and navigate the intersection.
+          </p>
+          <p>
+            This project was created using AI-assisted development with <a href="https://gemini.google/overview/canvas/" target="_blank" rel="noopener noreferrer">Gemini Canvas</a>.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
