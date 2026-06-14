@@ -223,6 +223,18 @@ export function Home() {
               </p>
               <span className="card-action">View Details &rarr;</span>
             </Link>
+
+            {/* Project 16: Chord Progression Generator */}
+            <Link to="/project/16" className="card card-link">
+              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #1a0a2e 0%, #3b1f5e 100%)' }}>
+                <span style={{ fontSize: '3rem' }}>🎵</span>
+              </div>
+              <h3 className="card-title">Chord Progression Generator</h3>
+              <p className="card-description">
+                An interactive tool for generating and exploring chord progressions.
+              </p>
+              <span className="card-action">View Details &rarr;</span>
+            </Link>
           </div>
 
         </div>

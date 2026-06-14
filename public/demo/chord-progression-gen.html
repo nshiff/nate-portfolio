@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chord Progression Generator</title>
+    <style>
+        :root {
+            --bg-color: #12121c;
+            --surface-color: #232336;
+            --surface-hover: #32324a;
+            --primary-color: #ff5e7e;
+            --text-color: #f0f0f5;
+            --text-muted: #a0a0b5;
+            --radius: 16px;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--surface-color);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 480px) {
+            .controls {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+
+        select, button {
+            padding: 14px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        select {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23a0a0b5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat, repeat;
+            background-position: right .7em top 50%, 0 0;
+            background-size: .65em auto, 100%;
+            padding-right: 2.5em;
+            flex: 1;
+        }
+
+        select:focus {
+            border-color: var(--primary-color);
+        }
+
+        select option {
+            background-color: var(--surface-color);
+            color: var(--text-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: #fff;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .key-label {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            letter-spacing: 0.5px;
+        }
+
+        .chords-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (min-width: 480px) {
+            .chords-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .chord-card {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: manipulation;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chord-card:hover {
+            background-color: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .chord-card.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            transform: scale(0.95);
+            border-color: transparent;
+            box-shadow: 0 0 15px rgba(255, 94, 126, 0.4);
+        }
+
+        .chord-card::after {
+            content: 'Tap to play';
+            position: absolute;
+            bottom: 12px;
+            font-size: 0.7rem;
+            font-weight: normal;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .chord-card:hover::after {
+            opacity: 1;
+        }
+
+        .chord-card.active::after {
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Progression Generator</h1>
+        <p class="subtitle">Select a genre to generate a programmatic 4-chord progression.</p>
+
+        <div class="controls">
+            <select id="genre-select">
+                <option value="Country" selected>Country</option>
+                <option value="Jazz">Jazz</option>
+            </select>
+            <button id="generate-btn">Generate</button>
+        </div>
+
+        <div id="key-label" class="key-label"></div>
+
+        <div class="chords-grid" id="chord-container">
+            <!-- Chord cards will be generated here -->
+        </div>
+    </div>
+
+    <script>
+        // --- Music Theory & Data ---
+        
+        // Base MIDI note numbers (arranged tightly around C4 for smooth voice leading)
+        const noteMidi = {
+            "C": 60, "C#": 61, "Db": 61, "D": 62, "D#": 63, "Eb": 63, "E": 64, "F": 65,
+            "F#": 66, "Gb": 66, "G": 55, "G#": 56, "Ab": 56, "A": 57, "A#": 58, "Bb": 58, "B": 59
+        };
+
+        // Intervals in semitones from the root
+        const intervals = {
+            "maj": [0, 4, 7],
+            "min": [0, 3, 7],
+            "dom7": [0, 4, 7, 10],
+            "maj7": [0, 4, 7, 11],
+            "min7": [0, 3, 7, 10],
+            "m7b5": [0, 3, 6, 10]
+        };
+
+        // --- Web Audio API Setup ---
+        
+        let audioCtx = null;
+        let masterGain = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Set up a master gain to prevent clipping when playing multiple chords
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.4;
+                
+                // Optional: add a slight lowpass filter to warm up the tone
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 2000;
+                
+                masterGain.connect(filter);
+                filter.connect(audioCtx.destination);
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Convert MIDI note number to Frequency
+        function midiToFreq(midi) {
+            return 440 * Math.pow(2, (midi - 69) / 12);
+        }
+
+        function playChord(chordData) {
+            initAudio();
+            
+            const rootNoteMidi = noteMidi[chordData.root];
+            const chordIntervals = intervals[chordData.type];
+            
+            // Calculate upper structure intervals based on inversion
+            const inversion = chordData.inversion || 0;
+            let upperIntervals = [...chordIntervals];
+            for (let i = 0; i < inversion; i++) {
+                // Move the lowest note of the upper structure up one octave
+                upperIntervals.push(upperIntervals.shift() + 12);
+            }
+            
+            // Build the voicing: An octave down for the bass root, then the inverted upper structure
+            const midiNotes = [rootNoteMidi - 12, ...upperIntervals.map(interval => rootNoteMidi + interval)];
+            const frequencies = midiNotes.map(midiToFreq);
+
+            const now = audioCtx.currentTime;
+            
+            // Play each note in the chord
+            frequencies.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                // Mix waveform types for a richer "electric piano / synth" sound
+                // Bass notes get a sine wave, upper structure gets triangle
+                osc.type = i === 0 ? 'sine' : 'triangle'; 
+                osc.frequency.value = freq;
+
+                // Synthesizer ADSR Envelope (Shortened for snappier playback)
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(1.0 / midiNotes.length, now + 0.05); // Attack
+                gainNode.gain.exponentialRampToValueAtTime(0.6 / midiNotes.length, now + 0.2); // Decay
+                gainNode.gain.setValueAtTime(0.6 / midiNotes.length, now + 0.4); // Sustain
+                gainNode.gain.linearRampToValueAtTime(0.001, now + 0.8); // Release
+
+                osc.connect(gainNode);
+                gainNode.connect(masterGain);
+
+                osc.start(now);
+                osc.stop(now + 0.8); // Allow release tail to finish
+            });
+        }
+
+
+        // --- UI Logic ---
+        
+        let currentProgression = [];
+
+        function generateProgression() {
+            const genre = document.getElementById('genre-select').value;
+            const scaleIntervals = [0, 2, 4, 5, 7, 9, 11]; // Major scale diatonic intervals
+            
+            const flatNames = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+            const sharpNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+            
+            let keyIndex = Math.floor(Math.random() * 12);
+            
+            // Determine if the key traditionally uses sharps or flats
+            // Sharp keys: C, D, E, F#, G, A, B (Indices: 0, 2, 4, 6, 7, 9, 11)
+            // Flat keys: Db, F, Ab, Bb (Indices: 1, 5, 8, 10)
+            // (Note: Eb (3) uses flats, so we leave it out of the useSharps array)
+            const useSharps = [0, 2, 4, 6, 7, 9, 11].includes(keyIndex);
+            const noteNames = useSharps ? sharpNames : flatNames;
+            
+            // Update the UI with the selected key
+            const keyName = noteNames[keyIndex];
+            document.getElementById('key-label').textContent = `Key: ${keyName} Major`;
+            
+            let prog = [];
+
+            if (genre === 'Jazz') {
+                const scaleQualities = ["maj7", "min7", "min7", "maj7", "dom7", "min7", "m7b5"];
+                
+                // Pick a diatonic starting point that gives a good jazz sequence
+                // Indices: 2 (iii), 5 (vi), 1 (ii), 0 (I)
+                const startOptions = [2, 5, 1, 0];
+                let currentIndex = startOptions[Math.floor(Math.random() * startOptions.length)];
+                
+                for (let i = 0; i < 4; i++) {
+                    let semitone = scaleIntervals[currentIndex];
+                    let rootIndex = (keyIndex + semitone) % 12;
+                    let type = scaleQualities[currentIndex];
+                    
+                    // Programmatic Jazz Alterations
+                    
+                    // 1. Secondary Dominants: Turn a min7 into a dom7 randomly
+                    if (type === "min7" && Math.random() > 0.6) {
+                        type = "dom7";
+                    }
+                    
+                    // 2. Tritone Substitution: Sub a dominant 7th chord 40% of the time
+                    if (type === "dom7" && Math.random() > 0.4) {
+                        rootIndex = (rootIndex + 6) % 12;
+                    }
+
+                    let rootNote = noteNames[rootIndex];
+                    
+                    // Format name nicely
+                    let name = rootNote;
+                    if (type === "maj7") name += "maj7";
+                    else if (type === "min7") name += "m7";
+                    else if (type === "dom7") name += "7";
+                    else if (type === "m7b5") name += "m7b5";
+                    
+                    // Randomly select an inversion (0 = root pos, 1 = 1st inv, 2 = 2nd inv, 3 = 3rd inv)
+                    let inversion = Math.floor(Math.random() * 4);
+                    
+                    prog.push({ name, root: rootNote, type, inversion });
+                    
+                    // Move up a fourth (down a fifth) diatonically to get the next chord
+                    currentIndex = (currentIndex + 3) % 7;
+                }
+            } else if (genre === 'Country') {
+                const scaleQualities = ["maj", "min", "min", "maj", "maj", "min", "m7b5"];
+                
+                // Classic country progression paths using Nashville numbers (0=I, 3=IV, 4=V, 5=vi)
+                const countryPaths = [
+                    [0, 3, 4, 0], // I - IV - V - I
+                    [0, 4, 5, 3], // I - V - vi - IV
+                    [0, 5, 3, 4], // I - vi - IV - V
+                    [3, 0, 4, 0], // IV - I - V - I
+                    [0, 3, 0, 4], // I - IV - I - V
+                    [0, 4, 0, 4], // I - V - I - V
+                    [5, 3, 0, 4]  // vi - IV - I - V
+                ];
+                
+                // Pick a random predefined country path logic
+                const path = countryPaths[Math.floor(Math.random() * countryPaths.length)];
+                
+                for (let i = 0; i < 4; i++) {
+                    let currentIndex = path[i];
+                    let semitone = scaleIntervals[currentIndex];
+                    let rootIndex = (keyIndex + semitone) % 12;
+                    let type = scaleQualities[currentIndex];
+                    
+                    // Country Alteration: Sometimes make the V chord a dominant 7th
+                    if (currentIndex === 4 && Math.random() > 0.5) {
+                        type = "dom7";
+                    }
+
+                    let rootNote = noteNames[rootIndex];
+                    
+                    // Format name nicely
+                    let name = rootNote;
+                    if (type === "min") name += "m";
+                    else if (type === "dom7") name += "7";
+                    // Major triads just use the root letter
+                    
+                    // Keep inversions constrained for country to feel grounded (mostly root, occasionally 1st/2nd)
+                    let inversionOptions = [0, 0, 0, 1, 2];
+                    let inversion = inversionOptions[Math.floor(Math.random() * inversionOptions.length)];
+                    if (type === "dom7") inversion = Math.floor(Math.random() * 4);
+                    
+                    prog.push({ name, root: rootNote, type, inversion });
+                }
+            }
+            
+            currentProgression = prog;
+            renderChords();
+        }
+
+        function renderChords() {
+            const container = document.getElementById('chord-container');
+            container.innerHTML = ''; // Clear current
+            
+            currentProgression.forEach((chordData) => {
+                const card = document.createElement('div');
+                card.className = 'chord-card';
+                card.textContent = chordData.name;
+                
+                // Universal pointer events for mobile and desktop support
+                card.addEventListener('pointerdown', (e) => {
+                    e.preventDefault(); // Prevent default touch behaviors
+                    card.classList.add('active');
+                    playChord(chordData);
+                });
+
+                card.addEventListener('pointerup', () => card.classList.remove('active'));
+                card.addEventListener('pointerleave', () => card.classList.remove('active'));
+
+                container.appendChild(card);
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('generate-btn').addEventListener('click', generateProgression);
+        document.getElementById('genre-select').addEventListener('change', generateProgression);
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', generateProgression);
+
+    </script>
+</body>
+</html>
