@@ -5,13 +5,13 @@ export function Home() {
     <main style={{ flex: 1 }}>
 
       {/* Hero Section */}
-      <section id="hero" style={{ paddingBottom: '1rem' }}>
+      {/* <section id="hero" style={{ paddingBottom: '1rem' }}>
         <div className="container">
           <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
             Follow your curiosity and enjoy this collection of simulations. All demos are optimized for both mobile and desktop viewports.
           </p>
         </div>
-      </section>
+      </section> */}
 
       {/* Projects Section */}
       <section id="projects" style={{ paddingTop: '0' }}>
