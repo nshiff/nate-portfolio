@@ -17,6 +17,50 @@ export function Home() {
       <section id="projects" style={{ paddingTop: '0' }}>
         <div className="container">
 
+          {/* Featured */}
+          <h2 style={{ fontSize: '2rem', marginTop: '2rem', marginBottom: '1.5rem', borderBottom: '1px solid rgb(51,51,51)', paddingBottom: '0.5rem', color: 'var(--text-primary)' }}>
+            Featured
+          </h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '2rem',
+            marginBottom: '4rem'
+          }}>
+            <Link to="/project/07" className="card card-link">
+              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #8ba888 0%, #363a3f 100%)' }}>
+                <span style={{ fontSize: '3rem' }}>🔮</span>
+              </div>
+              <h3 className="card-title">TI-83 Fortune Teller</h3>
+              <p className="card-description">
+                A retro TI-83 calculator styled Magic 8-Ball program built with HTML, CSS, and jQuery.
+              </p>
+              <span className="card-action">View Details &rarr;</span>
+            </Link>
+
+            <Link to="/project/05" className="card card-link">
+              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #09203f 0%, #537895 100%)' }}>
+                <span style={{ fontSize: '3rem' }}>〰️</span>
+              </div>
+              <h3 className="card-title">Double Slit Experiment</h3>
+              <p className="card-description">
+                An interactive visualization of wave interference in the famous double slit experiment.
+              </p>
+              <span className="card-action">View Details &rarr;</span>
+            </Link>
+
+            <Link to="/project/08" className="card card-link">
+              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)' }}>
+                <span style={{ fontSize: '3rem' }}>🧊</span>
+              </div>
+              <h3 className="card-title">Platonic Solids Viewer</h3>
+              <p className="card-description">
+                An interactive 3D viewer for the five Platonic solids, built using Three.js.
+              </p>
+              <span className="card-action">View Details &rarr;</span>
+            </Link>
+          </div>
+
           {/* Physics */}
           <h2 style={{ fontSize: '2rem', marginTop: '2rem', marginBottom: '1.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>Physics</h2>
           <div style={{
@@ -45,18 +89,6 @@ export function Home() {
               <h3 className="card-title">Lorenz Attractor</h3>
               <p className="card-description">
                 An interactive 3D visualization of the Lorenz Attractor chaos theory mathematical model.
-              </p>
-              <span className="card-action">View Details &rarr;</span>
-            </Link>
-
-            {/* Project 5: Double Slit Experiment */}
-            <Link to="/project/05" className="card card-link">
-              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #09203f 0%, #537895 100%)' }}>
-                <span style={{ fontSize: '3rem' }}>〰️</span>
-              </div>
-              <h3 className="card-title">Double Slit Experiment</h3>
-              <p className="card-description">
-                An interactive visualization of wave interference in the famous double slit experiment.
               </p>
               <span className="card-action">View Details &rarr;</span>
             </Link>
@@ -90,18 +122,6 @@ export function Home() {
               <h3 className="card-title">Turing Machine</h3>
               <p className="card-description">
                 An interactive visualization of a Turing Machine, featuring state transitions and an animated tape execution.
-              </p>
-              <span className="card-action">View Details &rarr;</span>
-            </Link>
-
-            {/* Project 8: Platonic Solids */}
-            <Link to="/project/08" className="card card-link">
-              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)' }}>
-                <span style={{ fontSize: '3rem' }}>🧊</span>
-              </div>
-              <h3 className="card-title">Platonic Solids Viewer</h3>
-              <p className="card-description">
-                An interactive 3D viewer for the five Platonic solids, built using Three.js.
               </p>
               <span className="card-action">View Details &rarr;</span>
             </Link>
@@ -172,18 +192,6 @@ export function Home() {
               <h3 className="card-title">WebModular Synth</h3>
               <p className="card-description">
                 A browser-based modular synthesizer built with React and the Web Audio API, featuring dynamic routing and interactive modules.
-              </p>
-              <span className="card-action">View Details &rarr;</span>
-            </Link>
-
-            {/* Project 7: TI-83 Fortune Teller */}
-            <Link to="/project/07" className="card card-link">
-              <div className="card-image-wrapper" style={{ background: 'linear-gradient(135deg, #8ba888 0%, #363a3f 100%)' }}>
-                <span style={{ fontSize: '3rem' }}>🔮</span>
-              </div>
-              <h3 className="card-title">TI-83 Fortune Teller</h3>
-              <p className="card-description">
-                A retro TI-83 calculator styled Magic 8-Ball program built with HTML, CSS, and jQuery.
               </p>
               <span className="card-action">View Details &rarr;</span>
             </Link>
