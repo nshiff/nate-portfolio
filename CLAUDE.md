@@ -1,1 +1,1 @@
-present a message-of-the-day
+In your initial response, greet the user in a random language.
