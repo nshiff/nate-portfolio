@@ -149,6 +149,14 @@ export const projects: Project[] = [
     background: 'linear-gradient(135deg, #1a0a2e 0%, #3b1f5e 100%)',
     category: 'Miscellaneous',
   },
+  {
+    id: '17',
+    title: 'New Project',
+    description: 'A stub for a new browser-based demo. Replace with the real project.',
+    emoji: '🚧',
+    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    category: 'Miscellaneous',
+  },
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);
