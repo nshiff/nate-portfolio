@@ -149,6 +149,15 @@ export const projects: Project[] = [
     background: 'linear-gradient(135deg, #1a0a2e 0%, #3b1f5e 100%)',
     category: 'Miscellaneous',
   },
+  {
+    id: '17',
+    title: 'Claude Pick',
+    description: 'Enter any set of options and let an AI deliberate, reason, and deliver a confident verdict.',
+    emoji: '✦',
+    emojiStyle: { color: '#cc785c', fontWeight: 'bold' },
+    background: 'linear-gradient(135deg, #0d0d14 0%, #2a1a12 100%)',
+    category: 'Miscellaneous',
+  },
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);
