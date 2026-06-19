@@ -43,8 +43,15 @@ export function Project17() {
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
           <p>
             An interactive 3D cloth simulation where a fabric mesh drapes and collides with a sphere.
-            Built with raw WebGL using a mass-spring system — each vertex is connected to its neighbors
-            by structural, shear, and bend springs. Drag to rotate the scene and watch the cloth respond to gravity in real time.
+            Built with Three.js using a mass-spring system — each vertex is connected to its neighbors
+            by structural, shear, and bend springs.
+          </p>
+          <p style={{ marginTop: '1rem' }}>
+            One finger touch to move the cloth, two-finger pinch to zoom. Associated controls on desktop
+            (left-click to interact with cloth, right-click hold to pan, scroll wheel to zoom).
+          </p>
+          <p>
+            This project was created using AI-assisted development with <a href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Claude</a>.
           </p>
         </div>
       </div>
