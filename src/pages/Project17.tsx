@@ -43,8 +43,7 @@ export function Project17() {
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
           <p>
             An interactive 3D cloth simulation where a fabric mesh drapes and collides with a sphere.
-            Built with Three.js using a mass-spring system — each vertex is connected to its neighbors
-            by structural, shear, and bend springs.
+            Built with Three.js using a Verlet cloth simulation.
           </p>
           <p style={{ marginTop: '1rem' }}>
             One finger touch to move the cloth, two-finger pinch to zoom. Associated controls on desktop
