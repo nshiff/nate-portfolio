@@ -70,60 +70,6 @@
       color: var(--thread);
     }
 
-    .ctrl {
-      margin-bottom: 13px;
-    }
-
-    .ctrl label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .ctrl label .val {
-      color: var(--thread);
-    }
-
-    input[type=range] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 2px;
-      background: var(--line);
-      border-radius: 2px;
-      outline: none;
-      cursor: pointer;
-    }
-
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--thread);
-      border: 2px solid var(--ground);
-      transition: background 0.15s;
-    }
-
-    input[type=range]::-webkit-slider-thumb:hover {
-      background: var(--warm);
-    }
-
-    input[type=range]::-moz-range-thumb {
-      width: 12px;
-      height: 12px;
-      border: 2px solid var(--ground);
-      border-radius: 50%;
-      background: var(--thread);
-      cursor: pointer;
-    }
-
     .row {
       display: flex;
       gap: 6px;
@@ -233,22 +179,6 @@
 
   <div class="panel">
     <h2><span>controls</span><span class="fps" id="fps">— fps</span></h2>
-    <div class="ctrl">
-      <label>gravity <span class="val" id="v-grav">9.0</span></label>
-      <input type="range" id="s-grav" min="0" max="20" step="0.1" value="9" />
-    </div>
-    <div class="ctrl">
-      <label>wind <span class="val" id="v-wind">0.0</span></label>
-      <input type="range" id="s-wind" min="0" max="14" step="0.1" value="0" />
-    </div>
-    <div class="ctrl">
-      <label>stiffness <span class="val" id="v-stiff">5</span></label>
-      <input type="range" id="s-stiff" min="1" max="8" step="1" value="5" />
-    </div>
-    <div class="ctrl">
-      <label>grip <span class="val" id="v-fric">0.78</span></label>
-      <input type="range" id="s-fric" min="0" max="0.95" step="0.01" value="0.78" />
-    </div>
     <div class="row">
       <button class="ghost-btn on" id="t-tension">tension hue</button>
       <button class="ghost-btn drop" id="b-drop">drop again</button>
@@ -656,17 +586,8 @@
     canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
     /* ---------- Controls wiring ---------- */
-    function bindSlider(id, valId, fmt, apply) {
-      const s = document.getElementById(id);
-      const v = document.getElementById(valId);
-      const update = () => { const val = parseFloat(s.value); v.textContent = fmt(val); apply(val); };
-      s.addEventListener("input", () => { update(); wake(); });
-      update();
-    }
-    bindSlider("s-grav", "v-grav", x => x.toFixed(1), x => cloth.gravity = x);
-    bindSlider("s-wind", "v-wind", x => x.toFixed(1), x => cloth.wind = x);
-    bindSlider("s-stiff", "v-stiff", x => String(x | 0), x => cloth.iterations = x | 0);
-    bindSlider("s-fric", "v-fric", x => x.toFixed(2), x => cloth.friction = x);
+    // Slider controls were removed; the cloth uses the defaults set in its
+    // constructor (gravity 9, wind 0, stiffness 5, grip 0.78).
 
     const tensionBtn = document.getElementById("t-tension");
     tensionBtn.addEventListener("click", () => {

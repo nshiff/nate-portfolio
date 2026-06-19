@@ -11,7 +11,7 @@ export function Project17() {
         <div style={{
           position: 'relative',
           width: '100%',
-          height: '60vh',
+          height: '80vh',
           minHeight: '400px',
           background: 'rgba(255,255,255,0.05)',
           borderRadius: '12px',
