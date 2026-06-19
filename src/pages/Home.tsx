@@ -42,7 +42,7 @@ export function Home() {
             projects={featuredProjects}
             headingStyle={{ borderBottomColor: 'rgb(51,51,51)', color: 'var(--text-primary)' }}
           />
-          <ProjectSection title="Physics" projects={projectsByCategory('Physics')} />
+          <ProjectSection title="Science" projects={projectsByCategory('Science')} />
           <ProjectSection title="Mathematics" projects={projectsByCategory('Mathematics')} />
           <ProjectSection title="Miscellaneous" projects={projectsByCategory('Miscellaneous')} />
         </div>

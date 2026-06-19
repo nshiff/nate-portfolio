@@ -5,7 +5,7 @@ export interface Project {
   emoji: string;
   emojiSize?: string;
   background: string;
-  category: 'Physics' | 'Mathematics' | 'Miscellaneous';
+  category: 'Science' | 'Mathematics' | 'Miscellaneous';
   featured?: boolean;
   overlayGrid?: boolean;
   emojiStyle?: React.CSSProperties;
@@ -21,7 +21,7 @@ export const projects: Project[] = [
     emoji: '🌊',
     emojiSize: '2rem',
     background: 'linear-gradient(45deg, #050505, #1a1a2e)',
-    category: 'Physics',
+    category: 'Science',
   },
   {
     id: '04',
@@ -29,7 +29,7 @@ export const projects: Project[] = [
     description: 'An interactive 3D visualization of the Lorenz Attractor chaos theory mathematical model.',
     emoji: '🦋',
     background: 'linear-gradient(135deg, #080a10 0%, #1e2330 100%)',
-    category: 'Physics',
+    category: 'Science',
   },
   {
     id: '05',
@@ -37,7 +37,7 @@ export const projects: Project[] = [
     description: 'An interactive visualization of wave interference in the famous double slit experiment.',
     emoji: '〰️',
     background: 'linear-gradient(135deg, #09203f 0%, #537895 100%)',
-    category: 'Physics',
+    category: 'Science',
     featured: true,
   },
   {
@@ -46,7 +46,7 @@ export const projects: Project[] = [
     description: 'An interactive simulation exploring entropy and the second law of thermodynamics.',
     emoji: '👹',
     background: 'linear-gradient(135deg, #cc2b5e 0%, #753a88 100%)',
-    category: 'Physics',
+    category: 'Science',
   },
   {
     id: '02',
@@ -155,7 +155,7 @@ export const projects: Project[] = [
     description: 'An interactive 3D cloth simulation where fabric drapes and collides with a sphere, built with Three.js.',
     emoji: '🧵',
     background: 'radial-gradient(ellipse at 50% 38%, #181310, #0d0b0a 70%)',
-    category: 'Physics',
+    category: 'Science',
   },
 ];
 
