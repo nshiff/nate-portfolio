@@ -19,7 +19,7 @@ export function Project17() {
           overflow: 'hidden',
         }}>
           <iframe
-            src="/demo/new-project.html"
+            src="/demo/cloth-sim.html"
             style={{
               position: 'absolute',
               top: 0,
@@ -28,21 +28,23 @@ export function Project17() {
               height: '100%',
               border: 'none',
             }}
-            title="New Project Demo"
+            title="Cloth Simulation Demo"
           />
         </div>
 
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 700, lineHeight: 1.2 }}>New Project</h1>
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 700, lineHeight: 1.2 }}>Cloth Simulation</h1>
 
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-          <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>HTML</span>
+          <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>Three.js</span>
+          <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>Physics</span>
           <span style={{ padding: '0.25rem 0.75rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent-color)', borderRadius: '999px', fontSize: '0.875rem' }}>JavaScript</span>
         </div>
 
         <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
           <p>
-            This is a stub for a new project. Replace this description with details about
-            what the demo does and how to interact with it.
+            An interactive 3D cloth simulation where a fabric mesh drapes and collides with a sphere.
+            Built with raw WebGL using a mass-spring system — each vertex is connected to its neighbors
+            by structural, shear, and bend springs. Drag to rotate the scene and watch the cloth respond to gravity in real time.
           </p>
         </div>
       </div>

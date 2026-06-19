@@ -151,11 +151,11 @@ export const projects: Project[] = [
   },
   {
     id: '17',
-    title: 'New Project',
-    description: 'A stub for a new browser-based demo. Replace with the real project.',
-    emoji: '🚧',
-    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-    category: 'Miscellaneous',
+    title: 'Cloth Simulation',
+    description: 'An interactive 3D cloth simulation where fabric drapes and collides with a sphere, built with Three.js.',
+    emoji: '🧵',
+    background: 'radial-gradient(ellipse at 50% 38%, #181310, #0d0b0a 70%)',
+    category: 'Physics',
   },
 ];
 

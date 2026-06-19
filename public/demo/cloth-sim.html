@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Drape — cloth meets sphere in three dimensions</title>
+  <style>
+    :root {
+      --ground: #0d0b0a;
+      --ground2: #181310;
+      --thread: #d8c3a5;
+      --warm: #e2683f;
+      --cool: #4a7e8c;
+      --paper: #efe7d6;
+      --muted: #8a7d6b;
+      --line: rgba(216, 195, 165, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: radial-gradient(ellipse at 50% 38%, var(--ground2), var(--ground) 70%);
+      color: var(--paper);
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      display: block;
+      touch-action: none;
+    }
+
+    .panel {
+      position: fixed;
+      left: 26px;
+      bottom: 26px;
+      z-index: 5;
+      background: rgba(13, 11, 10, 0.74);
+      backdrop-filter: blur(9px) saturate(120%);
+      -webkit-backdrop-filter: blur(9px) saturate(120%);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: 16px 18px 18px;
+      width: 262px;
+      font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    .panel h2 {
+      font-size: 12px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .panel h2 .fps {
+      color: var(--thread);
+    }
+
+    .ctrl {
+      margin-bottom: 13px;
+    }
+
+    .ctrl label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .ctrl label .val {
+      color: var(--thread);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 2px;
+      background: var(--line);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--thread);
+      border: 2px solid var(--ground);
+      transition: background 0.15s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      background: var(--warm);
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--ground);
+      border-radius: 50%;
+      background: var(--thread);
+      cursor: pointer;
+    }
+
+    .row {
+      display: flex;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .ghost-btn {
+      flex: 1;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      padding: 9px 6px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .ghost-btn:hover {
+      color: var(--paper);
+      border-color: rgba(216, 195, 165, 0.4);
+    }
+
+    .ghost-btn.on {
+      color: var(--ground);
+      background: var(--cool);
+      border-color: var(--cool);
+    }
+
+    .ghost-btn.drop {
+      color: var(--ground);
+      background: var(--warm);
+      border-color: var(--warm);
+    }
+
+    .ghost-btn.drop:hover {
+      filter: brightness(1.08);
+      color: var(--ground);
+    }
+
+    .hint {
+      position: fixed;
+      right: 26px;
+      bottom: 28px;
+      z-index: 5;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: right;
+      line-height: 2;
+      pointer-events: none;
+      max-width: 240px;
+    }
+
+    .hint b {
+      color: var(--thread);
+      font-weight: 700;
+    }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--ground);
+      color: var(--muted);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      transition: opacity 0.6s ease;
+    }
+
+    @media (max-width: 640px) {
+      .hint {
+        display: none;
+      }
+
+      .panel {
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+        width: auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .loading {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="stage"></canvas>
+  <div class="loading" id="loading">weaving…</div>
+
+  <div class="panel">
+    <h2><span>controls</span><span class="fps" id="fps">— fps</span></h2>
+    <div class="ctrl">
+      <label>gravity <span class="val" id="v-grav">9.0</span></label>
+      <input type="range" id="s-grav" min="0" max="20" step="0.1" value="9" />
+    </div>
+    <div class="ctrl">
+      <label>wind <span class="val" id="v-wind">0.0</span></label>
+      <input type="range" id="s-wind" min="0" max="14" step="0.1" value="0" />
+    </div>
+    <div class="ctrl">
+      <label>stiffness <span class="val" id="v-stiff">5</span></label>
+      <input type="range" id="s-stiff" min="1" max="8" step="1" value="5" />
+    </div>
+    <div class="ctrl">
+      <label>grip <span class="val" id="v-fric">0.78</span></label>
+      <input type="range" id="s-fric" min="0" max="0.95" step="0.01" value="0.78" />
+    </div>
+    <div class="row">
+      <button class="ghost-btn on" id="t-tension">tension hue</button>
+      <button class="ghost-btn drop" id="b-drop">drop again</button>
+    </div>
+  </div>
+
+  <div class="hint">
+    <b>drag</b> the cloth to lift it<br />
+    <b>orbit</b> — right-drag or two fingers<br />
+    <b>scroll</b> to zoom
+  </div>
+
+  <script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+  <script type="module">
+    import * as THREE from "three";
+    import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+    /* ============================================================
+       DRAPE — 3D Verlet cloth dropping onto a sphere.
+       Physics is plain JS (Cloth3D); Three.js renders a mesh whose
+       vertices are rewritten from the sim each frame.
+       ============================================================ */
+
+    /* ---------- Physics core ---------- */
+    class Cloth3D {
+      constructor(opts) {
+        this.cols = opts.cols;
+        this.rows = opts.rows;
+        this.spacing = opts.spacing;
+        this.gravity = 9.0;
+        this.damping = 0.98;
+        this.iterations = 5;
+        this.stressCeiling = 1.5;
+        this.windDir = new THREE.Vector3(1, 0, 0.3).normalize();
+        this.wind = 0;
+        this.windPhase = 0;
+        this.friction = 0.78;
+        this.dropHeight = opts.dropHeight ?? 2.6;
+        this.sphere = { x: 0, y: opts.sphereY ?? -2.2, z: 0, r: opts.sphereR ?? 1.8 };
+        this.points = [];
+        this.constraints = [];
+        this.build();
+      }
+
+      build() {
+        this.points.length = 0;
+        this.constraints.length = 0;
+        const w = (this.cols - 1) * this.spacing;
+        const d = (this.rows - 1) * this.spacing;
+        const y0 = this.dropHeight;
+        for (let r = 0; r < this.rows; r++) {
+          for (let c = 0; c < this.cols; c++) {
+            const x = c * this.spacing - w / 2;
+            const z = r * this.spacing - d / 2;
+            this.points.push({ x, y: y0, z, px: x, py: y0, pz: z, pinned: false });
+          }
+        }
+        const idx = (c, r) => r * this.cols + c;
+        const link = (a, b) => {
+          const A = this.points[a], B = this.points[b];
+          const rest = Math.hypot(A.x - B.x, A.y - B.y, A.z - B.z);
+          this.constraints.push({ p1: a, p2: b, rest, active: true, stress: 1 });
+        };
+        for (let r = 0; r < this.rows; r++) {
+          for (let c = 0; c < this.cols; c++) {
+            if (c < this.cols - 1) link(idx(c, r), idx(c + 1, r));
+            if (r < this.rows - 1) link(idx(c, r), idx(c, r + 1));
+            if (c < this.cols - 1 && r < this.rows - 1) {
+              link(idx(c, r), idx(c + 1, r + 1));
+              link(idx(c + 1, r), idx(c, r + 1));
+            }
+          }
+        }
+      }
+
+      reset() {
+        const w = (this.cols - 1) * this.spacing;
+        const d = (this.rows - 1) * this.spacing;
+        const y0 = this.dropHeight;
+        let i = 0;
+        for (let r = 0; r < this.rows; r++) {
+          for (let c = 0; c < this.cols; c++) {
+            const x = c * this.spacing - w / 2;
+            const z = r * this.spacing - d / 2;
+            const p = this.points[i++];
+            // small random jitter so the drape folds differently each drop
+            const j = this.spacing * 0.12;
+            p.x = x + (Math.random() - 0.5) * j;
+            p.z = z + (Math.random() - 0.5) * j;
+            p.y = y0;
+            p.px = p.x; p.py = p.y; p.pz = p.z;
+            p.pinned = false;
+          }
+        }
+        for (const cn of this.constraints) cn.active = true;
+      }
+
+      integrate(dt) {
+        this.windPhase += 0.03;
+        const g = this.gravity * dt * dt;
+        const gust = this.wind * (0.5 + 0.5 * Math.sin(this.windPhase)) * dt * dt;
+        const d = this.damping;
+        for (const p of this.points) {
+          if (p.pinned) continue;
+          const vx = (p.x - p.px) * d;
+          const vy = (p.y - p.py) * d;
+          const vz = (p.z - p.pz) * d;
+          p.px = p.x; p.py = p.y; p.pz = p.z;
+          p.x += vx + this.windDir.x * gust;
+          p.y += vy - g;
+          p.z += vz + this.windDir.z * gust;
+        }
+      }
+
+      satisfy() {
+        const pts = this.points;
+        for (let i = 0; i < this.iterations; i++) {
+          for (const cn of this.constraints) {
+            if (!cn.active) continue;
+            const a = pts[cn.p1], b = pts[cn.p2];
+            const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+            const dist = Math.hypot(dx, dy, dz) || 1e-6;
+            const diff = (cn.rest - dist) / dist;
+            cn.stress = dist / cn.rest;
+            const ox = dx * 0.5 * diff, oy = dy * 0.5 * diff, oz = dz * 0.5 * diff;
+            if (!a.pinned) { a.x -= ox; a.y -= oy; a.z -= oz; }
+            if (!b.pinned) { b.x += ox; b.y += oy; b.z += oz; }
+          }
+          this.collideSphere();
+        }
+      }
+
+      collideSphere() {
+        const s = this.sphere;
+        const r = s.r + 0.02;
+        for (const p of this.points) {
+          if (p.pinned) continue;
+          const dx = p.x - s.x, dy = p.y - s.y, dz = p.z - s.z;
+          const dist = Math.hypot(dx, dy, dz);
+          if (dist < r) {
+            const inv = 1 / (dist || 1e-6);
+            p.x = s.x + dx * inv * r;
+            p.y = s.y + dy * inv * r;
+            p.z = s.z + dz * inv * r;
+            p.px += (p.x - p.px) * this.friction;
+            p.py += (p.y - p.py) * this.friction;
+            p.pz += (p.z - p.pz) * this.friction;
+          }
+        }
+      }
+
+      step(dt) {
+        this.integrate(dt);
+        this.satisfy();
+        // largest squared per-point displacement this step — lets the
+        // render loop tell when the cloth has come to rest and can sleep
+        let m = 0;
+        for (const p of this.points) {
+          const a = p.x - p.px, b = p.y - p.py, c = p.z - p.pz;
+          const d = a * a + b * b + c * c;
+          if (d > m) m = d;
+        }
+        return m;
+      }
+    }
+
+    /* ---------- Scene setup ---------- */
+    const canvas = document.getElementById("stage");
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0d0b0a, 0.055);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(3.4, 1.6, 5.2);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 2.5;
+    controls.maxDistance = 14;
+    controls.target.set(0, -1.4, 0);
+    controls.mouseButtons = { LEFT: null, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
+    controls.touches = { ONE: null, TWO: THREE.TOUCH.DOLLY_ROTATE };
+
+    /* ---------- Lights ---------- */
+    const key = new THREE.DirectionalLight(0xfff0e0, 2.4);
+    key.position.set(4, 7, 4);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 1;
+    key.shadow.camera.far = 24;
+    key.shadow.camera.left = -6; key.shadow.camera.right = 6;
+    key.shadow.camera.top = 6; key.shadow.camera.bottom = -6;
+    key.shadow.bias = -0.0005;
+    scene.add(key);
+
+    const rim = new THREE.DirectionalLight(0x4a7e8c, 0.9);
+    rim.position.set(-5, 2, -4);
+    scene.add(rim);
+    scene.add(new THREE.AmbientLight(0x404048, 1.1));
+    scene.add(new THREE.HemisphereLight(0xd8c3a5, 0x1a1410, 0.5));
+
+    /* ---------- Sphere ---------- */
+    const SPHERE_R = 1.8, SPHERE_Y = -2.2;
+    const sphereMat = new THREE.MeshStandardMaterial({
+      color: 0x1c1916, roughness: 0.85, metalness: 0.1,
+    });
+    const sphereMesh = new THREE.Mesh(new THREE.SphereGeometry(SPHERE_R, 48, 48), sphereMat);
+    sphereMesh.position.y = SPHERE_Y;
+    sphereMesh.castShadow = true;
+    sphereMesh.receiveShadow = true;
+    scene.add(sphereMesh);
+
+    /* ---------- Floor ---------- */
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x0f0c0a, roughness: 1 });
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(20, 64), floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = SPHERE_Y - SPHERE_R - 0.001;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    /* ---------- Cloth mesh ---------- */
+    const COLS = 56, ROWS = 56, SPACING = 0.1;
+    const cloth = new Cloth3D({ cols: COLS, rows: ROWS, spacing: SPACING, sphereR: SPHERE_R, sphereY: SPHERE_Y, dropHeight: 2.6 });
+
+    const clothGeo = new THREE.BufferGeometry();
+    const vertCount = COLS * ROWS;
+    const positions = new Float32Array(vertCount * 3);
+    const colors = new Float32Array(vertCount * 3);
+
+    const indices = [];
+    const vid = (c, r) => r * COLS + c;
+    for (let r = 0; r < ROWS - 1; r++) {
+      for (let c = 0; c < COLS - 1; c++) {
+        const a = vid(c, r), b = vid(c + 1, r), d = vid(c, r + 1), e = vid(c + 1, r + 1);
+        indices.push(a, d, b, b, d, e);
+      }
+    }
+    clothGeo.setIndex(indices);
+    clothGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    clothGeo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+
+    const clothMat = new THREE.MeshStandardMaterial({
+      vertexColors: true,
+      roughness: 0.72, metalness: 0.0,
+      side: THREE.DoubleSide,
+      flatShading: false,
+    });
+    const clothMesh = new THREE.Mesh(clothGeo, clothMat);
+    clothMesh.castShadow = true;
+    clothMesh.receiveShadow = true;
+    clothMesh.frustumCulled = false; // bounds aren't refreshed each frame; never cull
+    scene.add(clothMesh);
+
+    // per-vertex accumulated stress (averaged from incident constraints)
+    const vertStress = new Float32Array(vertCount);
+    const vertStressCount = new Float32Array(vertCount);
+
+    const COOL = new THREE.Color(0x4a7e8c);
+    const LINEN = new THREE.Color(0xd8c3a5);
+    const WARM = new THREE.Color(0xe2683f);
+    const tmpColor = new THREE.Color();
+    let showTension = true;
+
+    function updateClothMesh() {
+      const pts = cloth.points;
+      // positions
+      for (let i = 0; i < vertCount; i++) {
+        const p = pts[i];
+        positions[i * 3] = p.x;
+        positions[i * 3 + 1] = p.y;
+        positions[i * 3 + 2] = p.z;
+      }
+      // gather per-vertex stress
+      if (showTension) {
+        vertStress.fill(0); vertStressCount.fill(0);
+        for (const cn of cloth.constraints) {
+          if (!cn.active) continue;
+          vertStress[cn.p1] += cn.stress; vertStressCount[cn.p1]++;
+          vertStress[cn.p2] += cn.stress; vertStressCount[cn.p2]++;
+        }
+        const ceil = cloth.stressCeiling;
+        for (let i = 0; i < vertCount; i++) {
+          const s = vertStressCount[i] ? vertStress[i] / vertStressCount[i] : 1;
+          const t = Math.max(0, Math.min(1, (s - 1) / (ceil - 1)));
+          if (t < 0.5) tmpColor.copy(COOL).lerp(LINEN, t / 0.5);
+          else tmpColor.copy(LINEN).lerp(WARM, (t - 0.5) / 0.5);
+          colors[i * 3] = tmpColor.r; colors[i * 3 + 1] = tmpColor.g; colors[i * 3 + 2] = tmpColor.b;
+        }
+        clothGeo.attributes.color.needsUpdate = true;
+      } else {
+        for (let i = 0; i < vertCount; i++) {
+          colors[i * 3] = LINEN.r; colors[i * 3 + 1] = LINEN.g; colors[i * 3 + 2] = LINEN.b;
+        }
+        clothGeo.attributes.color.needsUpdate = true;
+      }
+      clothGeo.attributes.position.needsUpdate = true;
+      clothGeo.computeVertexNormals();
+      // bounding sphere is only needed for ray hit-tests during a grab; we refresh
+      // it in onPointerDown instead of every frame. Disable culling so a stale
+      // bound never hides the cloth.
+    }
+
+    /* ---------- Drag via raycasting ---------- */
+    const raycaster = new THREE.Raycaster();
+    const pointerNDC = new THREE.Vector2();
+    let dragPlane = new THREE.Plane();
+    const dragPoint = new THREE.Vector3();
+    let isDragging = false;
+
+    // A grab captures a small patch of points, not one. Each grabbed point
+    // stores its index, an offset from the grab centre (so the patch keeps its
+    // shape), and a falloff weight (1 at centre, 0 at the edge of the radius).
+    let grabbed = [];          // [{ i, ox, oy, oz, w }]
+    const GRAB_RADIUS = 0.55;  // world units; a pinch-sized patch (~5 cells across)
+
+    function setPointer(e) {
+      const t = e.touches ? e.touches[0] : e;
+      pointerNDC.x = (t.clientX / window.innerWidth) * 2 - 1;
+      pointerNDC.y = -(t.clientY / window.innerHeight) * 2 + 1;
+    }
+
+    function onPointerDown(e) {
+      if (e.button === 2) return; // right button is orbit
+      setPointer(e);
+      raycaster.setFromCamera(pointerNDC, camera);
+      // ray hit-test relies on an up-to-date bound; refresh it just for this grab
+      clothGeo.computeBoundingSphere();
+      const hit = raycaster.intersectObject(clothMesh);
+      if (hit.length) {
+        const hp = hit[0].point;
+        const pts = cloth.points;
+        const r2 = GRAB_RADIUS * GRAB_RADIUS;
+        grabbed = [];
+        for (let i = 0; i < pts.length; i++) {
+          const ox = pts[i].x - hp.x, oy = pts[i].y - hp.y, oz = pts[i].z - hp.z;
+          const d2 = ox * ox + oy * oy + oz * oz;
+          if (d2 <= r2) {
+            const d = Math.sqrt(d2);
+            // smoothstep falloff: firm in the middle, soft at the rim
+            const t = 1 - d / GRAB_RADIUS;
+            const w = t * t * (3 - 2 * t);
+            grabbed.push({ i, ox, oy, oz, w });
+          }
+        }
+        if (grabbed.length === 0) return;
+        isDragging = true;
+        wake();
+        controls.enabled = false;
+        const n = new THREE.Vector3();
+        camera.getWorldDirection(n);
+        dragPlane.setFromNormalAndCoplanarPoint(n, hp);
+        e.preventDefault();
+      }
+    }
+
+    function onPointerMove(e) {
+      if (!isDragging || grabbed.length === 0) return;
+      setPointer(e);
+      raycaster.setFromCamera(pointerNDC, camera);
+      if (raycaster.ray.intersectPlane(dragPlane, dragPoint)) {
+        for (const g of grabbed) {
+          const p = cloth.points[g.i];
+          // target keeps each point's original offset from the grab centre,
+          // so the whole patch translates rather than collapsing to a spike
+          const tx = dragPoint.x + g.ox, ty = dragPoint.y + g.oy, tz = dragPoint.z + g.oz;
+          // blend toward target by weight: centre follows fully, rim eases in
+          p.x += (tx - p.x) * g.w;
+          p.y += (ty - p.y) * g.w;
+          p.z += (tz - p.z) * g.w;
+          p.px = p.x; p.py = p.y; p.pz = p.z; // damp velocity so it tracks cleanly
+          // only the firmly-held core is pinned; soft rim stays free to relax
+          p.pinned = g.w > 0.85;
+        }
+      }
+      e.preventDefault();
+    }
+
+    function onPointerUp() {
+      for (const g of grabbed) cloth.points[g.i].pinned = false;
+      grabbed = [];
+      isDragging = false;
+      controls.enabled = true;
+    }
+
+    canvas.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("mousemove", onPointerMove);
+    window.addEventListener("mouseup", onPointerUp);
+    canvas.addEventListener("touchstart", onPointerDown, { passive: false });
+    window.addEventListener("touchmove", onPointerMove, { passive: false });
+    window.addEventListener("touchend", onPointerUp);
+    canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    /* ---------- Controls wiring ---------- */
+    function bindSlider(id, valId, fmt, apply) {
+      const s = document.getElementById(id);
+      const v = document.getElementById(valId);
+      const update = () => { const val = parseFloat(s.value); v.textContent = fmt(val); apply(val); };
+      s.addEventListener("input", () => { update(); wake(); });
+      update();
+    }
+    bindSlider("s-grav", "v-grav", x => x.toFixed(1), x => cloth.gravity = x);
+    bindSlider("s-wind", "v-wind", x => x.toFixed(1), x => cloth.wind = x);
+    bindSlider("s-stiff", "v-stiff", x => String(x | 0), x => cloth.iterations = x | 0);
+    bindSlider("s-fric", "v-fric", x => x.toFixed(2), x => cloth.friction = x);
+
+    const tensionBtn = document.getElementById("t-tension");
+    tensionBtn.addEventListener("click", () => {
+      showTension = !showTension;
+      tensionBtn.classList.toggle("on", showTension);
+      wake();
+    });
+    document.getElementById("b-drop").addEventListener("click", () => { cloth.reset(); wake(); });
+
+    /* ---------- Resize ---------- */
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      wake();
+    });
+
+    /* ---------- Loop ---------- */
+    const fpsEl = document.getElementById("fps");
+    let lastFps = performance.now(), frames = 0;
+    const FIXED_DT = 1 / 60;
+
+    // Sleep-when-settled: once the cloth stops moving we stop simulating and
+    // re-rendering, dropping CPU to near-idle. Any interaction wakes it back up.
+    const SLEEP_MOTION = 1e-4;   // squared units/frame; below this is visually still
+    const SLEEP_AFTER = 45;      // consecutive quiet frames before sleeping (~0.75s)
+    let quietFrames = 0;
+    let asleep = false;
+
+    function wake() {
+      quietFrames = 0;
+      if (asleep) {
+        asleep = false;
+        fpsEl.textContent = "— fps";
+      }
+    }
+
+    // camera orbit/zoom should also wake rendering (the scene needs to redraw)
+    controls.addEventListener("change", wake);
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (asleep) {
+        // idle: the rAF tick is cheap, but we skip physics, mesh rebuild, and draw.
+        // OrbitControls damping still needs to settle, so let it finish quietly.
+        if (controls.enableDamping) controls.update();
+        return;
+      }
+
+      const motion = cloth.step(FIXED_DT);
+      updateClothMesh();
+      controls.update();
+      renderer.render(scene, camera);
+
+      // wind keeps the cloth in perpetual motion by design, so never sleep then
+      const stirring = cloth.wind > 0.05 || isDragging;
+      if (!stirring && motion < SLEEP_MOTION) {
+        if (++quietFrames >= SLEEP_AFTER) { asleep = true; fpsEl.textContent = "rest"; }
+      } else {
+        quietFrames = 0;
+      }
+
+      frames++;
+      const now = performance.now();
+      if (now - lastFps >= 500) {
+        fpsEl.textContent = Math.round((frames * 1000) / (now - lastFps)) + " fps";
+        frames = 0; lastFps = now;
+      }
+    }
+
+    /* ---------- Boot ---------- */
+    cloth.reset();
+    updateClothMesh();
+    animate();
+
+    const loading = document.getElementById("loading");
+    loading.style.opacity = "0";
+    setTimeout(() => loading.remove(), 700);
+  </script>
+</body>
+
+</html>
