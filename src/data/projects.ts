@@ -157,6 +157,14 @@ export const projects: Project[] = [
     background: 'radial-gradient(ellipse at 50% 38%, #181310, #0d0b0a 70%)',
     category: 'Science',
   },
+  {
+    id: '18',
+    title: 'Space-Filling Curves',
+    description: 'An interactive visualization of Hilbert, Peano, and Moore space-filling curves across multiple iterations.',
+    emoji: '〽️',
+    background: 'linear-gradient(135deg, #0F1115 0%, #1a1f2e 100%)',
+    category: 'Mathematics',
+  },
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Space-Filling Curves</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
+
+        :root {
+            --bg: #0F1115;
+            --panel: #15181E;
+            --ink: #EDEAE2;
+            --ink-dim: #8E909A;
+            --chrome: #3A3F4A;
+            --hilbert: #7FB8A8;
+            --peano: #D9A35F;
+            --moore: #C77B8C;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            padding: 32px 20px 48px;
+        }
+
+        .wrap {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 14px;
+            background: var(--panel);
+            border: 1px solid var(--chrome);
+            border-radius: 6px;
+            padding: 4px;
+        }
+
+        .tab {
+            flex: 1 1 auto;
+            min-width: 88px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: var(--ink-dim);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            padding: 10px 6px;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .tab:hover {
+            color: var(--ink);
+        }
+
+        .tab[aria-selected="true"][data-curve="hilbert"] {
+            background: var(--chrome);
+            color: var(--hilbert);
+        }
+
+        .tab[aria-selected="true"][data-curve="peano"] {
+            background: var(--chrome);
+            color: var(--peano);
+        }
+
+        .tab[aria-selected="true"][data-curve="moore"] {
+            background: var(--chrome);
+            color: var(--moore);
+        }
+
+        .stage {
+            background: var(--panel);
+            border: 1px solid var(--chrome);
+            border-radius: 6px;
+            padding: 14px;
+        }
+
+        .stage-head {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .stage-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--ink-dim);
+        }
+
+        canvas {
+            width: 100%;
+            aspect-ratio: 1;
+            display: block;
+            background: #0A0B0E;
+            border-radius: 4px;
+        }
+
+        .controls {
+            background: var(--panel);
+            border: 1px solid var(--chrome);
+            border-radius: 6px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+        }
+
+        .control-row label {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--ink-dim);
+            margin-bottom: 8px;
+        }
+
+        .control-row label span.val {
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 3px;
+            background: var(--chrome);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--ink);
+            cursor: pointer;
+            border: 2px solid var(--bg);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--ink);
+            cursor: pointer;
+            border: 2px solid var(--bg);
+        }
+
+        .footnote {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--ink-dim);
+            margin-bottom: 18px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="tabs" role="tablist" aria-label="Select curve type">
+            <button class="tab" data-curve="hilbert" role="tab" aria-selected="true">HILBERT</button>
+            <button class="tab" data-curve="moore" role="tab" aria-selected="false">MOORE</button>
+            <button class="tab" data-curve="peano" role="tab" aria-selected="false">PEANO</button>
+        </div>
+
+        <div class="controls">
+            <div class="control-row">
+                <label for="depth">ITERATION DEPTH <span class="val" id="depth-val">3</span></label>
+                <input type="range" id="depth" min="1" max="5" step="1" value="3">
+            </div>
+        </div>
+
+        <div class="footnote" id="footnote"></div>
+
+        <div class="stage">
+            <div class="stage-head">
+                <span class="stage-meta" id="curve-meta"></span>
+            </div>
+            <canvas id="curve-canvas" width="700" height="700"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // ---- Curve generators ----
+        // Each returns { strokes, n }: `n` is the grid side length (the curve tiles
+        // an n x n square exactly), and `strokes` holds the ordered points of the
+        // path. It's an array (rather than a flat list) so the rendering layer can
+        // support multiple disconnected paths if a future curve needs that — every
+        // curve here traces a single continuous path, so it's always one element.
+
+        function hilbertPoints(order) {
+            const n = 1 << order;
+            const pts = [];
+            function d2xy(d, order) {
+                let rx, ry, x = 0, y = 0;
+                for (let s = 1; s < (1 << order); s <<= 1) {
+                    rx = 1 & (d >> 1);
+                    ry = 1 & (d ^ rx);
+                    // rotate
+                    if (ry === 0) {
+                        if (rx === 1) {
+                            x = s - 1 - x;
+                            y = s - 1 - y;
+                        }
+                        [x, y] = [y, x];
+                    }
+                    x += s * rx;
+                    y += s * ry;
+                    d >>= 2;
+                }
+                return [x, y];
+            }
+            const total = n * n;
+            for (let d = 0; d < total; d++) {
+                pts.push(d2xy(d, order));
+            }
+            return { strokes: [pts], n };
+        }
+
+        function applyD4(pts, size, id) {
+            // Dihedral group D4: 8 symmetries of a square, used to orient each
+            // Hilbert quadrant so its entry/exit corners chain into the next one.
+            return pts.map(([x, y]) => {
+                let nx = x, ny = y;
+                switch (id) {
+                    case 0: break;
+                    case 1: nx = size - 1 - x; break;
+                    case 2: ny = size - 1 - y; break;
+                    case 3: nx = size - 1 - x; ny = size - 1 - y; break;
+                    case 4: [nx, ny] = [y, x]; break;
+                    case 5: [nx, ny] = [size - 1 - y, x]; break;
+                    case 6: [nx, ny] = [y, size - 1 - x]; break;
+                    case 7: [nx, ny] = [size - 1 - y, size - 1 - x]; break;
+                }
+                return [nx, ny];
+            });
+        }
+
+        function moorePoints(order) {
+            // Moore curve: 4 Hilbert(order-1) quadrants, each given a D4 orientation,
+            // such that the path is BOTH continuous (each quadrant's exit corner is
+            // grid-adjacent to the next quadrant's entry corner) AND closed (the
+            // final point loops back adjacent to the first) -- this closed-loop
+            // property is what actually distinguishes a Moore curve from a plain
+            // Hilbert curve concatenation. An earlier version of this function only
+            // enforced continuity and produced an open path, not a true Moore curve;
+            // these four orientations were found by exhaustive search requiring both
+            // properties, and verified closed at every order from 1 through 6.
+            if (order < 1) order = 1;
+            const sub = order - 1;
+            const { strokes: hStrokes, n: hn } = hilbertPoints(Math.max(sub, 0));
+            const h = hStrokes[0];
+            const half = hn;
+            const n = half * 2;
+            const offsets = [[0, 0], [half, 0], [half, half], [0, half]];
+            const transforms = [[2, false], [2, false], [0, true], [0, true]]; // [D4 id, reverse]
+
+            const quads = transforms.map(([t, rev], idx) => {
+                let q = applyD4(h, half, t);
+                if (rev) q = q.slice().reverse();
+                return q.map(([x, y]) => [x + offsets[idx][0], y + offsets[idx][1]]);
+            });
+            const pts = [].concat(...quads);
+
+            return { strokes: [pts], n };
+        }
+
+        function peanoPoints(order) {
+            // Classic Peano curve: recursive 3x3 meander. Each level's 9 sub-blocks
+            // are arranged in the meander pattern, and each sub-block is independently
+            // reflected (one of 4 states A/B/C/D, the Klein four-group of horizontal/
+            // vertical flips) so its local entry corner lands adjacent to the previous
+            // block's exit corner. The state seen by each child is the parent's state
+            // composed (XOR) with a fixed base pattern, derived once by exhaustive
+            // corner-matching and confirmed to hold at every recursion depth.
+            const baseMeander = [[0, 0], [0, 1], [0, 2], [1, 2], [1, 1], [1, 0], [2, 0], [2, 1], [2, 2]];
+            const code = { A: [0, 0], B: [0, 1], C: [1, 0], D: [1, 1] };
+            const decode = {};
+            for (const k in code) decode[code[k].join(',')] = k;
+            function compose(s1, s2) {
+                const a = code[s1], b = code[s2];
+                return decode[[a[0] ^ b[0], a[1] ^ b[1]].join(',')];
+            }
+            function transformMeander(state) {
+                const [fx, fy] = code[state];
+                return baseMeander.map(([x, y]) => [fx ? 2 - x : x, fy ? 2 - y : y]);
+            }
+            const baseChain = ['A', 'C', 'A', 'B', 'D', 'B', 'A', 'C', 'A'];
+            function chainFor(state) {
+                return baseChain.map(s => compose(state, s));
+            }
+
+            const pts = [];
+            function recurse(level, x0, y0, size, state) {
+                if (level === 0) { pts.push([x0, y0]); return; }
+                const sub = size / 3;
+                const positions = transformMeander(state);
+                const chain = chainFor(state);
+                for (let i = 0; i < 9; i++) {
+                    const [bx, by] = positions[i];
+                    recurse(level - 1, x0 + bx * sub, y0 + by * sub, sub, chain[i]);
+                }
+            }
+
+            const n = Math.pow(3, order);
+            recurse(order, 0, 0, n, 'A');
+            return { strokes: [pts], n };
+        }
+
+        // ---- Rendering ----
+
+        const generators = {
+            hilbert: hilbertPoints,
+            peano: peanoPoints,
+            moore: moorePoints,
+        };
+        const colors = {
+            hilbert: '#7FB8A8',
+            peano: '#D9A35F',
+            moore: '#C77B8C',
+        };
+        const footnotes = {
+            hilbert: 'Self-avoiding and locality-preserving — nearby points on the curve stay nearby in the grid. Grid grows by 2ⁿ per side.',
+            peano: "The original space-filling curve, recursive on a 3×3 meander. Grid grows by 3ⁿ per side, so it covers far more cells at the same depth — order 5 alone visits 59,049 points.",
+            moore: "A variant of the Hilbert curve, built from four Hilbert quadrants joined into a single loop. Unlike Hilbert, its path closes — start and end land one cell apart.",
+        };
+
+        const canvas = document.getElementById('curve-canvas');
+        const ctx = canvas.getContext('2d');
+        const metaEl = document.getElementById('curve-meta');
+        const footnoteEl = document.getElementById('footnote');
+        const tabs = document.querySelectorAll('.tab');
+
+        let activeCurve = 'hilbert';
+        let animFrame = null;
+
+        // Flatten strokes into a single ordered instruction list so the animation
+        // counter works the same way whether a curve is one continuous path or
+        // many disconnected ones (pen lifts between strokes become 'move' ops).
+        function flattenStrokes(strokes) {
+            const ops = [];
+            for (const stroke of strokes) {
+                ops.push({ type: 'move', pt: stroke[0] });
+                for (let i = 1; i < stroke.length; i++) {
+                    ops.push({ type: 'line', pt: stroke[i] });
+                }
+            }
+            return ops;
+        }
+
+        function computeFit(n, W, H, pad) {
+            // All three curves here exactly tile an n x n grid, so a single
+            // grid-to-pixel mapping covers every case.
+            const cell = (W - pad * 2) / n;
+            return ([gx, gy]) => [pad + gx * cell + cell / 2, pad + gy * cell + cell / 2];
+        }
+
+        const LINE_WIDTH = 2;
+
+        function drawCurve(key, depth) {
+            const { strokes, n } = generators[key](depth);
+            const totalPts = strokes.reduce((sum, s) => sum + s.length, 0);
+            metaEl.textContent = `${n}×${n} · ${totalPts} pts`;
+            footnoteEl.textContent = footnotes[key];
+
+            const W = canvas.width, H = canvas.height;
+            const pad = 24;
+            const toXY = computeFit(n, W, H, pad);
+            const ops = flattenStrokes(strokes);
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = colors[key];
+            ctx.lineWidth = LINE_WIDTH;
+
+            if (animFrame) {
+                cancelAnimationFrame(animFrame);
+                animFrame = null;
+            }
+
+            if (reduceMotion) {
+                ctx.beginPath();
+                for (const op of ops) {
+                    const [x, y] = toXY(op.pt);
+                    if (op.type === 'move') ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                return;
+            }
+
+            // animate: draw stroke-by-stroke (move ops lift the pen without drawing)
+            let i = 0;
+            const stepsPerFrame = Math.max(1, Math.ceil(ops.length / 90));
+
+            ctx.beginPath();
+
+            function step() {
+                const end = Math.min(i + stepsPerFrame, ops.length);
+                for (; i < end; i++) {
+                    const op = ops[i];
+                    const [x, y] = toXY(op.pt);
+                    if (op.type === 'move') ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                if (i < ops.length) {
+                    animFrame = requestAnimationFrame(step);
+                } else {
+                    animFrame = null;
+                }
+            }
+            animFrame = requestAnimationFrame(step);
+        }
+
+        function render() {
+            const depth = parseInt(depthSlider.value, 10);
+            drawCurve(activeCurve, depth);
+        }
+
+        const depthSlider = document.getElementById('depth');
+        const depthVal = document.getElementById('depth-val');
+
+        depthSlider.addEventListener('input', () => {
+            depthVal.textContent = depthSlider.value;
+            render();
+        });
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                if (tab.dataset.curve === activeCurve) return;
+                tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
+                tab.setAttribute('aria-selected', 'true');
+                activeCurve = tab.dataset.curve;
+                render();
+            });
+        });
+
+        render();
+    </script>
+</body>
+
+</html>
