@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 function pi() {
   return <span style={{ fontFamily: "serif" }}>π</span>;

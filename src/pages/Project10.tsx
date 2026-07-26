@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import NavigatorDashboard from '../components/NavigatorDashboard';
 
 export function Project10() {

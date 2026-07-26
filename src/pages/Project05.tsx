@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import DoubleSlitVisualization from '../components/DoubleSlitVisualization';
 
 export function Project05() {
