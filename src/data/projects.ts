@@ -150,14 +150,6 @@ export const projects: Project[] = [
     category: 'Miscellaneous',
   },
   {
-    id: '17',
-    title: 'Cloth Simulation',
-    description: 'An interactive 3D cloth simulation where fabric drapes and collides with a sphere, built with Three.js.',
-    emoji: '🧵',
-    background: 'radial-gradient(ellipse at 50% 38%, #181310, #0d0b0a 70%)',
-    category: 'Science',
-  },
-  {
     id: '18',
     title: 'Space-Filling Curves',
     description: 'An interactive visualization of Hilbert, Peano, and Moore space-filling curves across multiple iterations.',
