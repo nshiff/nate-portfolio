@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Wave Function Collapse</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
+
+        :root {
+            --bg: #0F1115;
+            --panel: #15181E;
+            --ink: #EDEAE2;
+            --ink-dim: #8E909A;
+            --chrome: #3A3F4A;
+            --accent: #7FB8A8;
+            --warn: #C77B8C;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            padding: 32px 20px 48px;
+        }
+
+        .wrap {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .controls {
+            background: var(--panel);
+            border: 1px solid var(--chrome);
+            border-radius: 6px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .control-group {
+            flex: 1 1 200px;
+        }
+
+        .control-row label {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--ink-dim);
+            margin-bottom: 8px;
+        }
+
+        .control-row label span.val {
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 3px;
+            background: var(--chrome);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--ink);
+            cursor: pointer;
+            border: 2px solid var(--bg);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--ink);
+            cursor: pointer;
+            border: 2px solid var(--bg);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 8px;
+            flex: 0 0 auto;
+        }
+
+        button.action {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            color: var(--ink);
+            background: var(--chrome);
+            border: 1px solid var(--chrome);
+            border-radius: 4px;
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        button.action:hover {
+            border-color: var(--accent);
+        }
+
+        button.action:active {
+            background: #2c303a;
+        }
+
+        .stage {
+            background: var(--panel);
+            border: 1px solid var(--chrome);
+            border-radius: 6px;
+            padding: 14px;
+        }
+
+        .stage-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+
+        .stage-meta {
+            color: var(--ink-dim);
+        }
+
+        .stage-status {
+            font-weight: 500;
+        }
+
+        .stage-status[data-status="running"] {
+            color: var(--accent);
+        }
+
+        .stage-status[data-status="done"] {
+            color: var(--accent);
+        }
+
+        .stage-status[data-status="contradiction"] {
+            color: var(--warn);
+        }
+
+        canvas {
+            width: 100%;
+            aspect-ratio: 1;
+            display: block;
+            background: #0A0B0E;
+            border-radius: 4px;
+            image-rendering: pixelated;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--ink-dim);
+        }
+
+        .legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            border: 1px solid var(--chrome);
+        }
+
+        .footnote {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--ink-dim);
+            margin-top: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="controls">
+            <div class="control-group">
+                <div class="control-row">
+                    <label for="grid-size">GRID SIZE <span class="val" id="grid-size-val">24</span>&times;<span
+                            class="val" id="grid-size-val-2">24</span></label>
+                    <input type="range" id="grid-size" min="6" max="48" step="1" value="24">
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control-row">
+                    <label for="speed">SPEED <span class="val" id="speed-val">4</span> steps/frame</label>
+                    <input type="range" id="speed" min="1" max="8" step="1" value="4">
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="action" id="btn-pause">PAUSE</button>
+                <button class="action" id="btn-restart">RESTART</button>
+            </div>
+        </div>
+
+        <div class="stage">
+            <div class="stage-head">
+                <span class="stage-meta" id="stage-meta"></span>
+                <span class="stage-status" id="stage-status" data-status="running">RUNNING</span>
+            </div>
+            <canvas id="wfc-canvas" width="720" height="720"></canvas>
+            <div class="legend" id="legend"></div>
+        </div>
+
+        <div class="footnote">
+            Each cell starts able to become any of 9 tiles. Every step, the least-uncertain cell "collapses" to one
+            tile (weighted by its rarity), then that constraint ripples outward via breadth-first search, eliminating
+            incompatible neighbors. Translucent cells are still undecided — the strip along the bottom previews their
+            remaining candidates. A contradiction (a cell left with zero options) restarts the grid automatically.
+        </div>
+    </div>
+
+    <script>
+        // ---- Tile set ----
+        // 9 tiles, each with 4 edge sockets (N/E/S/W) labeled a-e, and a weight.
+        // Two tiles are compatible across a direction only if the touching edge
+        // labels match exactly (A's east label === B's west label, etc).
+        // Each tile's 4 edges carry a label from the ordered chain a-sea, b-sand,
+        // c-grass, d-forest, e-peak. A "solid" tile repeats one label on all 4
+        // edges, so it only ever borders itself or a transition tile that also
+        // carries that label. A "transition" tile pairs two adjacent labels on
+        // opposite edges (N/S get one label, E/W get the other), so it can only
+        // sit between its two neighboring tiers, in either screen orientation.
+        // Because compatibility only ever matches identical labels, terrain is
+        // forced to grade through the chain in order instead of jumping tiers.
+        const TILES = [
+            { name: 'sea', edges: { N: 'a', E: 'a', S: 'a', W: 'a' }, weight: 3, color: '#1f4e5f' },
+            { name: 'coast', edges: { N: 'a', E: 'b', S: 'a', W: 'b' }, weight: 3, color: '#3a7d6a' },
+            { name: 'sand', edges: { N: 'b', E: 'b', S: 'b', W: 'b' }, weight: 2, color: '#d9c07a' },
+            { name: 'grassland', edges: { N: 'b', E: 'c', S: 'b', W: 'c' }, weight: 3, color: '#5a9e4a' },
+            { name: 'grass', edges: { N: 'c', E: 'c', S: 'c', W: 'c' }, weight: 4, color: '#4c8a3f' },
+            { name: 'forest-edge', edges: { N: 'c', E: 'd', S: 'c', W: 'd' }, weight: 2, color: '#3d6b2f' },
+            { name: 'forest', edges: { N: 'd', E: 'd', S: 'd', W: 'd' }, weight: 2, color: '#22461c' },
+            { name: 'foothill', edges: { N: 'd', E: 'e', S: 'd', W: 'e' }, weight: 1, color: '#8a7355' },
+            { name: 'peak', edges: { N: 'e', E: 'e', S: 'e', W: 'e' }, weight: 1, color: '#c9c2b8' },
+        ];
+        const NUM_TILES = TILES.length;
+        const OPPOSITE = { N: 'S', S: 'N', E: 'W', W: 'E' };
+        const DIRS = [
+            { key: 'N', dx: 0, dy: -1 },
+            { key: 'E', dx: 1, dy: 0 },
+            { key: 'S', dx: 0, dy: 1 },
+            { key: 'W', dx: -1, dy: 0 },
+        ];
+
+        // compatible(a, b, dir): is tile b allowed in direction `dir` from tile a?
+        function compatible(aIdx, bIdx, dir) {
+            const a = TILES[aIdx], b = TILES[bIdx];
+            return a.edges[dir] === b.edges[OPPOSITE[dir]];
+        }
+
+        // Precompute a compatibility table: compatTable[dir][aIdx] = Set of bIdx allowed in that direction.
+        const compatTable = {};
+        for (const { key } of DIRS) {
+            compatTable[key] = [];
+            for (let a = 0; a < NUM_TILES; a++) {
+                const set = new Set();
+                for (let b = 0; b < NUM_TILES; b++) {
+                    if (compatible(a, b, key)) set.add(b);
+                }
+                compatTable[key].push(set);
+            }
+        }
+
+        // ---- Grid state ----
+        let W = 24, H = 24;
+        let cells = []; // { options: Set<number>, collapsed: bool, tile: number|null }
+
+        function makeGrid(w, h) {
+            const grid = new Array(w * h);
+            for (let i = 0; i < grid.length; i++) {
+                grid[i] = { options: new Set(Array.from({ length: NUM_TILES }, (_, i) => i)), collapsed: false, tile: null };
+            }
+            return grid;
+        }
+
+        function idx(x, y) { return y * W + x; }
+        function inBounds(x, y) { return x >= 0 && x < W && y >= 0 && y < H; }
+
+        // ---- Entropy selection ----
+        // Returns { status: 'done' } | { status: 'contradiction' } | { status: 'ok', x, y }
+        function selectLowestEntropy() {
+            let best = null, bestVal = Infinity;
+            let anyUncollapsed = false;
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const c = cells[idx(x, y)];
+                    if (c.collapsed) continue;
+                    anyUncollapsed = true;
+                    if (c.options.size === 0) {
+                        return { status: 'contradiction' };
+                    }
+                    const jitter = Math.random() * 1e-6;
+                    const entropy = c.options.size + jitter;
+                    if (entropy < bestVal) {
+                        bestVal = entropy;
+                        best = { x, y };
+                    }
+                }
+            }
+            if (!anyUncollapsed) return { status: 'done' };
+            return { status: 'ok', x: best.x, y: best.y };
+        }
+
+        // ---- Weighted collapse ----
+        function collapseCell(x, y) {
+            const c = cells[idx(x, y)];
+            const options = Array.from(c.options);
+            let totalWeight = 0;
+            for (const o of options) totalWeight += TILES[o].weight;
+            let r = Math.random() * totalWeight;
+            let chosen = options[options.length - 1];
+            for (const o of options) {
+                r -= TILES[o].weight;
+                if (r <= 0) { chosen = o; break; }
+            }
+            c.options = new Set([chosen]);
+            c.collapsed = true;
+            c.tile = chosen;
+            return chosen;
+        }
+
+        // ---- Propagation (BFS) ----
+        function propagate(startX, startY) {
+            const queue = [[startX, startY]];
+            let head = 0;
+            while (head < queue.length) {
+                const [cx, cy] = queue[head++];
+                const current = cells[idx(cx, cy)];
+                for (const { key, dx, dy } of DIRS) {
+                    const nx = cx + dx, ny = cy + dy;
+                    if (!inBounds(nx, ny)) continue;
+                    const neighbor = cells[idx(nx, ny)];
+                    if (neighbor.collapsed) continue;
+
+                    const before = neighbor.options.size;
+                    if (before === 0) continue;
+
+                    const allowed = compatTable[key];
+                    const next = new Set();
+                    for (const nOpt of neighbor.options) {
+                        let ok = false;
+                        for (const cOpt of current.options) {
+                            if (allowed[cOpt].has(nOpt)) { ok = true; break; }
+                        }
+                        if (ok) next.add(nOpt);
+                    }
+                    neighbor.options = next;
+
+                    if (next.size < before) {
+                        queue.push([nx, ny]);
+                    }
+                }
+            }
+        }
+
+        // ---- One collapse-and-propagate step ----
+        function step() {
+            const sel = selectLowestEntropy();
+            if (sel.status !== 'ok') return sel.status;
+            collapseCell(sel.x, sel.y);
+            propagate(sel.x, sel.y);
+            return 'ok';
+        }
+
+        // ---- Rendering ----
+        const canvas = document.getElementById('wfc-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function render() {
+            const cw = canvas.width / W;
+            const ch = canvas.height / H;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const c = cells[idx(x, y)];
+                    const px = x * cw, py = y * ch;
+
+                    if (c.collapsed) {
+                        ctx.fillStyle = TILES[c.tile].color;
+                        ctx.fillRect(px, py, cw, ch);
+                    } else {
+                        const n = Math.max(c.options.size, 0);
+                        const opacity = n === 0 ? 0 : 1 - (n - 1) / (NUM_TILES - 1);
+                        ctx.fillStyle = `rgba(127, 184, 168, ${0.08 + opacity * 0.5})`;
+                        ctx.fillRect(px, py, cw, ch);
+
+                        if (n > 0 && n <= 3) {
+                            const opts = Array.from(c.options);
+                            const stripH = Math.max(ch * 0.18, 2);
+                            const segW = cw / opts.length;
+                            for (let i = 0; i < opts.length; i++) {
+                                ctx.fillStyle = TILES[opts[i]].color;
+                                ctx.fillRect(px + i * segW, py + ch - stripH, segW, stripH);
+                            }
+                        }
+
+                        if (n === 0) {
+                            ctx.fillStyle = 'rgba(199, 123, 140, 0.85)';
+                            ctx.fillRect(px, py, cw, ch);
+                        }
+                    }
+                }
+            }
+        }
+
+        // ---- Legend ----
+        const legendEl = document.getElementById('legend');
+        function buildLegend() {
+            legendEl.innerHTML = '';
+            for (const t of TILES) {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                const swatch = document.createElement('span');
+                swatch.className = 'legend-swatch';
+                swatch.style.background = t.color;
+                item.appendChild(swatch);
+                item.appendChild(document.createTextNode(t.name));
+                legendEl.appendChild(item);
+            }
+        }
+        buildLegend();
+
+        // ---- Loop / status ----
+        const statusEl = document.getElementById('stage-status');
+        const metaEl = document.getElementById('stage-meta');
+        let status = 'running'; // 'running' | 'done' | 'contradiction' | 'paused'
+        let userPaused = false;
+        let speed = 4;
+        let stepCount = 0;
+        let rafId = null;
+
+        function setStatus(s) {
+            status = s;
+            const label = userPaused && s === 'running' ? 'PAUSED' : s.toUpperCase();
+            statusEl.textContent = label;
+            statusEl.dataset.status = userPaused && s === 'running' ? 'paused' : s;
+        }
+
+        function updateMeta() {
+            metaEl.textContent = `${W}×${H} · ${stepCount} steps`;
+        }
+
+        function resetGrid() {
+            cells = makeGrid(W, H);
+            stepCount = 0;
+            userPaused = false;
+            document.getElementById('btn-pause').textContent = 'PAUSE';
+            setStatus('running');
+            updateMeta();
+            render();
+        }
+
+        function loop() {
+            if (status === 'running' && !userPaused) {
+                for (let i = 0; i < speed; i++) {
+                    const result = step();
+                    stepCount++;
+                    if (result === 'contradiction') {
+                        setStatus('contradiction');
+                        render();
+                        updateMeta();
+                        setTimeout(resetGrid, 900);
+                        rafId = requestAnimationFrame(loop);
+                        return;
+                    }
+                    if (result === 'done') {
+                        setStatus('done');
+                        break;
+                    }
+                }
+                render();
+                updateMeta();
+            }
+            rafId = requestAnimationFrame(loop);
+        }
+
+        // ---- Controls ----
+        const gridSizeInput = document.getElementById('grid-size');
+        const gridSizeVal = document.getElementById('grid-size-val');
+        const gridSizeVal2 = document.getElementById('grid-size-val-2');
+        gridSizeInput.addEventListener('input', () => {
+            const v = parseInt(gridSizeInput.value, 10);
+            gridSizeVal.textContent = v;
+            gridSizeVal2.textContent = v;
+            W = v; H = v;
+            resetGrid();
+        });
+
+        const speedInput = document.getElementById('speed');
+        const speedVal = document.getElementById('speed-val');
+        speedInput.addEventListener('input', () => {
+            speed = parseInt(speedInput.value, 10);
+            speedVal.textContent = speed;
+        });
+
+        const btnPause = document.getElementById('btn-pause');
+        btnPause.addEventListener('click', () => {
+            userPaused = !userPaused;
+            btnPause.textContent = userPaused ? 'RESUME' : 'PAUSE';
+            setStatus(status === 'contradiction' ? 'contradiction' : (status === 'done' ? 'done' : 'running'));
+        });
+
+        document.getElementById('btn-restart').addEventListener('click', resetGrid);
+
+        // ---- Init ----
+        resetGrid();
+        loop();
+    </script>
+</body>
+
+</html>

@@ -157,6 +157,14 @@ export const projects: Project[] = [
     background: 'linear-gradient(135deg, #0F1115 0%, #1a1f2e 100%)',
     category: 'Mathematics',
   },
+  {
+    id: '19',
+    title: 'Wave Function Collapse',
+    description: 'An interactive procedural generation demo using the Wave Function Collapse algorithm to tile a grid from a constrained tile set.',
+    emoji: '🧩',
+    background: 'linear-gradient(135deg, #0F1115 0%, #1e2a24 100%)',
+    category: 'Mathematics',
+  },
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);
