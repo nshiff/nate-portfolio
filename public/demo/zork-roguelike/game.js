@@ -24,7 +24,8 @@
     },
     help: {
       help: "help — list available commands",
-      run: () => Object.values(COMMANDS).map((c) => c.help).join("\n"),
+      run: () => Object.values(COMMANDS).map((c) => c.help).join("\n")
+        + "\n\nTip: click a color swatch in the top-right corner to change the terminal's text color (green/amber/white).",
     },
     exit: {
       help: "exit — end the simulation",
