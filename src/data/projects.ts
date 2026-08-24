@@ -165,6 +165,14 @@ export const projects: Project[] = [
     background: 'linear-gradient(135deg, #0F1115 0%, #1e2a24 100%)',
     category: 'Mathematics',
   },
+  {
+    id: '20',
+    title: 'Search Party',
+    description: 'A Zork-like text adventure, currently in early development.',
+    emoji: '🖥️',
+    background: 'linear-gradient(135deg, #05080a 0%, #0d1f16 100%)',
+    category: 'Miscellaneous',
+  },
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);

@@ -24,6 +24,7 @@ import { Project15 } from './pages/Project15';
 import { Project16 } from './pages/Project16';
 import { Project18 } from './pages/Project18';
 import { Project19 } from './pages/Project19';
+import { Project20 } from './pages/Project20';
 import { ThemeProvider } from './components/theme-provider';
 import { ThemeToggle } from './components/ThemeToggle';
 
@@ -155,6 +156,10 @@ const router = createBrowserRouter([
       {
         path: "/project/19",
         element: <Project19 />,
+      },
+      {
+        path: "/project/20",
+        element: <Project20 />,
       },
     ],
   },
