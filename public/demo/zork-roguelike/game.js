@@ -47,22 +47,18 @@
 
   const COMMANDS = {
     whoami: {
-      help: "whoami",
       run: () => "player",
     },
     map: {
-      help: "map",
       run: () => Object.keys(ROOMS)
         .filter((id) => visited.has(id))
         .map((id) => `${id}${id === currentRoom ? " (you are here)" : ""}`)
         .join("\n"),
     },
     sleep: {
-      help: "sleep",
       run: () => `You awake feeling ${pick(SLEEP_FEELINGS)}.`,
     },
     walk: {
-      help: "walk",
       run: (arg) => {
         const target = (arg || "").trim().toUpperCase().replace(/\s+/g, "_");
         if (!target) return "Walk where? Try \"walk <room name>\".";
@@ -74,7 +70,6 @@
       },
     },
     color: {
-      help: "color",
       run: (arg) => {
         const name = (arg || "").trim().toLowerCase();
         if (!name) return "Color what? Try \"color green\", \"color amber\", \"color white\", or \"color default\".";
@@ -84,15 +79,11 @@
       },
     },
     help: {
-      help: "help",
-      run: () => Object
-        .values(COMMANDS)
-        .map((c) => c.help)
+      run: () => Object.keys(COMMANDS)
         .sort((a, b) => a < b ? -1 : 1)
         .join("\t"),
     },
     exit: {
-      help: "exit",
       run: () => {
         input.disabled = true;
         return "Simulation ended.";
