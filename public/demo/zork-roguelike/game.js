@@ -23,10 +23,12 @@
     BEDROOM: {
       description: "You look around a tidy BEDROOM.",
       adjacent: ["LIVING_ROOM"],
+      allowSleep: true,
     },
     LIVING_ROOM: {
       description: "A gorgeous rug with geometric patterns adorns the LIVING_ROOM.",
       adjacent: ["BEDROOM", "FRONT_LAWN"],
+      allowSleep: true,
     },
     FRONT_LAWN: {
       description: "The grass on the FRONT_LAWN could use a trim.",
@@ -60,7 +62,10 @@
         .join("\n"),
     },
     sleep: {
-      run: () => `You awake feeling ${pick(SLEEP_FEELINGS)}.`,
+      run: () => {
+        if (!ROOMS[currentRoom].allowSleep) return "You can't sleep here.";
+        return `You awake feeling ${pick(SLEEP_FEELINGS)}.`;
+      },
     },
     walk: {
       run: (arg) => {
