@@ -67,7 +67,7 @@
     },
     walk: {
       run: (arg) => {
-        const target = (arg || "").trim().toUpperCase().replace(/\s+/g, "_");
+        const target = (arg || "").trim().toUpperCase();
         if (!target) return "Walk where? Try \"walk ROOMNAME\" to an adjacent room.";
         const destination = ROOMS[currentRoom].adjacent.find((id) => id === target);
         if (!destination) return `You can't walk to "${arg.trim()}" from here.`;
