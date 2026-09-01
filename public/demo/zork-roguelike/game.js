@@ -19,11 +19,11 @@
 
   const COMMANDS = {
     whoami: {
-      help: "whoami — print the current player name",
+      help: "whoami",
       run: () => "player",
     },
     color: {
-      help: "color <green|amber|white|default> — set the terminal's text color",
+      help: "color",
       run: (arg) => {
         const name = (arg || "").trim().toLowerCase();
         if (!name) return "Color what? Try \"color green\", \"color amber\", \"color white\", or \"color default\".";
@@ -33,11 +33,15 @@
       },
     },
     help: {
-      help: "help — list available commands",
-      run: () => Object.values(COMMANDS).map((c) => c.help).join("\n"),
+      help: "help",
+      run: () => Object
+        .values(COMMANDS)
+        .map((c) => c.help)
+        .sort((a, b) => a < b ? -1 : 1)
+        .join("\t"),
     },
     exit: {
-      help: "exit — end the simulation",
+      help: "exit",
       run: () => {
         input.disabled = true;
         return "Simulation ended.";
