@@ -17,21 +17,20 @@
     default: "#33ff66",
   };
 
-  // Room keys double as display names (e.g. LIVING_ROOM is shown as-is).
   const ROOMS = {
     BEDROOM: {
-      description: "You look around a tidy BEDROOM.",
-      adjacent: ["LIVING_ROOM"],
+      description: "You stand in a small BEDROOM.",
+      adjacent: ["LIVINGROOM"],
       allowSleep: true,
     },
-    LIVING_ROOM: {
-      description: "A gorgeous rug with geometric patterns adorns the LIVING_ROOM.",
-      adjacent: ["BEDROOM", "FRONT_LAWN"],
+    LIVINGROOM: {
+      description: "A gorgeous rug with geometric patterns adorns the LIVINGROOM.",
+      adjacent: ["BEDROOM", "FRONTLAWN"],
       allowSleep: true,
     },
-    FRONT_LAWN: {
-      description: "The grass on the FRONT_LAWN could use a trim.",
-      adjacent: ["LIVING_ROOM"],
+    FRONTLAWN: {
+      description: "The grass on the FRONTLAWN could use a trim.",
+      adjacent: ["LIVINGROOM"],
     },
   };
 
@@ -69,7 +68,7 @@
     walk: {
       run: (arg) => {
         const target = (arg || "").trim().toUpperCase().replace(/\s+/g, "_");
-        if (!target) return "Walk where? Try \"walk <room name>\".";
+        if (!target) return "Walk where? Try \"walk ROOMNAME\" to an adjacent room.";
         const destination = ROOMS[currentRoom].adjacent.find((id) => id === target);
         if (!destination) return `You can't walk to "${arg.trim()}" from here.`;
         currentRoom = destination;
