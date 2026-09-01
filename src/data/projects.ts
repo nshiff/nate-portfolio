@@ -168,7 +168,7 @@ export const projects: Project[] = [
   {
     id: '20',
     title: 'Search Party',
-    description: 'A Zork-like text adventure, currently in early development.',
+    description: 'A Zork-like text adventure.',
     emoji: '🖥️',
     background: 'linear-gradient(135deg, #05080a 0%, #0d1f16 100%)',
     category: 'Miscellaneous',

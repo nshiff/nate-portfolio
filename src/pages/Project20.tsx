@@ -42,7 +42,7 @@ export function Project20() {
 
                 <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
                     <p>
-                        A Zork-like text adventure, currently in early development.
+                        A Zork-like text adventure.
                     </p>
                 </div>
             </div>
