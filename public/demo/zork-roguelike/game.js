@@ -9,12 +9,12 @@
   const output = document.getElementById("output");
   const input = document.getElementById("cmd");
   const root = document.documentElement;
-  const swatches = document.querySelectorAll(".swatch");
 
   const COLORS = {
     green: "#33ff66",
     amber: "#ffb02e",
     white: "#e8e8e8",
+    default: "#33ff66",
   };
 
   const COMMANDS = {
@@ -22,10 +22,19 @@
       help: "whoami — print the current player name",
       run: () => "player",
     },
+    color: {
+      help: "color <green|amber|white|default> — set the terminal's text color",
+      run: (arg) => {
+        const name = (arg || "").trim().toLowerCase();
+        if (!name) return "Color what? Try \"color green\", \"color amber\", \"color white\", or \"color default\".";
+        if (!COLORS[name]) return `Unknown color: "${name}". Try green, amber, white, or default.`;
+        setColor(name);
+        return `Color set to ${name}.`;
+      },
+    },
     help: {
       help: "help — list available commands",
-      run: () => Object.values(COMMANDS).map((c) => c.help).join("\n")
-        + "\n\nTip: click a color swatch in the top-right corner to change the terminal's text color (green/amber/white).",
+      run: () => Object.values(COMMANDS).map((c) => c.help).join("\n"),
     },
     exit: {
       help: "exit — end the simulation",
@@ -39,17 +48,12 @@
   function setColor(name) {
     if (!COLORS[name]) return;
     root.style.setProperty("--fg", COLORS[name]);
-    swatches.forEach((s) => s.classList.toggle("active", s.dataset.color === name));
     try {
       localStorage.setItem("searchparty-color", name);
     } catch {
       // storage unavailable — ignore, defaults to green next load
     }
   }
-
-  swatches.forEach((s) => {
-    s.addEventListener("click", () => setColor(s.dataset.color));
-  });
 
   let savedColor = "green";
   try {

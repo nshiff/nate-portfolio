@@ -48,36 +48,6 @@
       letter-spacing: 0.05em;
     }
 
-    #colorpicker {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .swatch {
-      width: 1.25rem;
-      height: 1.25rem;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      cursor: pointer;
-      padding: 0;
-    }
-
-    .swatch[data-color="green"] {
-      background: #33ff66;
-    }
-
-    .swatch[data-color="amber"] {
-      background: #ffb02e;
-    }
-
-    .swatch[data-color="white"] {
-      background: #e8e8e8;
-    }
-
-    .swatch.active {
-      border-color: var(--fg);
-    }
-
     #output {
       flex: 1;
       overflow-y: auto;
@@ -125,11 +95,6 @@
 <body>
   <div id="titlebar">
     <span class="title">SEARCH PARTY</span>
-    <div id="colorpicker">
-      <button class="swatch" data-color="green" title="Green" aria-label="Green"></button>
-      <button class="swatch" data-color="amber" title="Amber" aria-label="Amber"></button>
-      <button class="swatch" data-color="white" title="White" aria-label="White"></button>
-    </div>
   </div>
 
   <div id="output"></div>
