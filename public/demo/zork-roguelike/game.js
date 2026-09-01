@@ -17,7 +17,6 @@
     default: "#33ff66",
   };
 
-  // The story begins in a bedroom. More rooms will join this map later.
   // Room keys double as display names (e.g. LIVING_ROOM is shown as-is).
   const ROOMS = {
     BEDROOM: {
