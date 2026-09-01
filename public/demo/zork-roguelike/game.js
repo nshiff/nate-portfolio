@@ -17,10 +17,38 @@
     default: "#33ff66",
   };
 
+  // The story begins in a bedroom. More rooms will join this map later.
+  const ROOMS = {
+    bedroom: {
+      name: "Bedroom",
+    },
+  };
+
+  const START_ROOM = "bedroom";
+  let currentRoom = START_ROOM;
+  const visited = new Set([START_ROOM]);
+
+  const SLEEP_FEELINGS = ["refreshed", "alright", "terrible", "groggy", "oddly energized", "like you dreamed in a language you don't speak"];
+
+  function pick(list) {
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
   const COMMANDS = {
     whoami: {
       help: "whoami",
       run: () => "player",
+    },
+    map: {
+      help: "map",
+      run: () => Object.keys(ROOMS)
+        .filter((id) => visited.has(id))
+        .map((id) => `${ROOMS[id].name}${id === currentRoom ? " (you are here)" : ""}`)
+        .join("\n"),
+    },
+    sleep: {
+      help: "sleep",
+      run: () => `You awake feeling ${pick(SLEEP_FEELINGS)}.`,
     },
     color: {
       help: "color",
