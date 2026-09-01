@@ -25,8 +25,12 @@
       adjacent: ["LIVING_ROOM"],
     },
     LIVING_ROOM: {
-      description: "It doesn't look like anyone uses the couch much in this LIVING_ROOM.",
-      adjacent: ["BEDROOM"],
+      description: "A gorgeous rug with geometric patterns adorns the LIVING_ROOM.",
+      adjacent: ["BEDROOM", "FRONT_LAWN"],
+    },
+    FRONT_LAWN: {
+      description: "The grass on the FRONT_LAWN could use a trim.",
+      adjacent: ["LIVING_ROOM"],
     },
   };
 
@@ -127,6 +131,7 @@
   function handle(raw) {
     const trimmed = raw.trim();
     if (!trimmed) return;
+    print("\n");
     printEcho(trimmed);
 
     const [name, ...rest] = trimmed.toLowerCase().split(/\s+/);
