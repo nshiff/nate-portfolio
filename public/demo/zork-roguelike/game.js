@@ -46,7 +46,7 @@
 
   function describeRoom(id) {
     const room = ROOMS[id];
-    return `${room.description}\nadjacent: ${room.adjacent.join(", ")}`;
+    return `${room.description}\n\nYou are adjacent to:\n${room.adjacent.join(", ")}`;
   }
 
   const COMMANDS = {
