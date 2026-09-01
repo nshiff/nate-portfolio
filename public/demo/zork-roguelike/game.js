@@ -56,6 +56,7 @@
     map: {
       run: () => Object.keys(ROOMS)
         .filter((id) => visited.has(id))
+        .sort()
         .map((id) => `${id}${id === currentRoom ? " (you are here)" : ""}`)
         .join("\n"),
     },
