@@ -18,13 +18,19 @@
   };
 
   // The story begins in a bedroom. More rooms will join this map later.
+  // Room keys double as display names (e.g. LIVING_ROOM is shown as-is).
   const ROOMS = {
-    bedroom: {
-      name: "Bedroom",
+    BEDROOM: {
+      description: "You look around a small BEDROOM. Pretty tidy, all things considered.",
+      adjacent: ["LIVING_ROOM"],
+    },
+    LIVING_ROOM: {
+      description: "It doesn't look like anyone uses the couch much in this LIVING_ROOM.",
+      adjacent: ["BEDROOM"],
     },
   };
 
-  const START_ROOM = "bedroom";
+  const START_ROOM = "BEDROOM";
   let currentRoom = START_ROOM;
   const visited = new Set([START_ROOM]);
 
@@ -32,6 +38,11 @@
 
   function pick(list) {
     return list[Math.floor(Math.random() * list.length)];
+  }
+
+  function describeRoom(id) {
+    const room = ROOMS[id];
+    return `${room.description}\nadjacent: ${room.adjacent.join(", ")}`;
   }
 
   const COMMANDS = {
@@ -43,12 +54,24 @@
       help: "map",
       run: () => Object.keys(ROOMS)
         .filter((id) => visited.has(id))
-        .map((id) => `${ROOMS[id].name}${id === currentRoom ? " (you are here)" : ""}`)
+        .map((id) => `${id}${id === currentRoom ? " (you are here)" : ""}`)
         .join("\n"),
     },
     sleep: {
       help: "sleep",
       run: () => `You awake feeling ${pick(SLEEP_FEELINGS)}.`,
+    },
+    walk: {
+      help: "walk",
+      run: (arg) => {
+        const target = (arg || "").trim().toUpperCase().replace(/\s+/g, "_");
+        if (!target) return "Walk where? Try \"walk <room name>\".";
+        const destination = ROOMS[currentRoom].adjacent.find((id) => id === target);
+        if (!destination) return `You can't walk to "${arg.trim()}" from here.`;
+        currentRoom = destination;
+        visited.add(destination);
+        return describeRoom(destination);
+      },
     },
     color: {
       help: "color",
@@ -131,7 +154,7 @@
     handle(value);
   });
 
-  print("Search Party.");
-  print('Type "help" to see available commands.');
+  print('Type "help" to see available commands.\n\n');
+  print(describeRoom(START_ROOM));
   input.focus();
 })();
