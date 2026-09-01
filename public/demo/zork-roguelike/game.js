@@ -33,16 +33,54 @@
       adjacent: ["LIVINGROOM", "DOWNTOWN", "CITYPARK", "FOREST"],
     },
     DOWNTOWN: {
-      description: "The hustle and bustle of DOWNTOWN",
-      adjacent: ["FRONTLAWN"],
+      description: "The hustle and bustle of DOWNTOWN.",
+      adjacent: ["FRONTLAWN", "CAFE", "STREETFAIR", "TAVERN"],
     },
     CITYPARK: {
       description: "The CITYPARK boasts a playground and great sporting facilities.",
-      adjacent: ["FRONTLAWN"],
+      adjacent: ["FRONTLAWN", "BIGTREE", "FOUNTAIN", "OUTLOOK"],
     },
     FOREST: {
       description: "Some peace and quiet in the FOREST.",
-      adjacent: ["FRONTLAWN"],
+      adjacent: ["FRONTLAWN", "STREAM", "TREEHOUSE", "VERYBIGTREE"],
+    },
+    CAFE: {
+      description: "Espresso hisses and cups clatter inside the CAFE.",
+      adjacent: ["DOWNTOWN"],
+    },
+    STREETFAIR: {
+      description: "Stalls and fried-dough smoke crowd the STREETFAIR.",
+      adjacent: ["DOWNTOWN"],
+    },
+    TAVERN: {
+      description: "You can smell the booze and smoke in the TAVERN.",
+      adjacent: ["DOWNTOWN"],
+    },
+    BIGTREE: {
+      description: "One massive oak, the BIGTREE, throws shade over half the lawn.",
+      adjacent: ["CITYPARK"],
+      allowSleep: true,
+    },
+    FOUNTAIN: {
+      description: "Pedestrians crowd the edge of the FOUNTAIN.",
+      adjacent: ["CITYPARK"],
+    },
+    OUTLOOK: {
+      description: "From the OUTLOOK, you can see a neighborhood, DOWNTOWN, and the FOREST.",
+      adjacent: ["CITYPARK"],
+    },
+    STREAM: {
+      description: "Cold water runs clear over the stones of the STREAM.",
+      adjacent: ["FOREST"],
+    },
+    TREEHOUSE: {
+      description: "A rope ladder leads up to a rickety TREEHOUSE.",
+      adjacent: ["FOREST"],
+      allowSleep: true,
+    },
+    VERYBIGTREE: {
+      description: "You stand in awe of a VERYBIGTREE.",
+      adjacent: ["FOREST"],
     },
   };
 
@@ -58,7 +96,8 @@
 
   function describeRoom(id) {
     const room = ROOMS[id];
-    return `${room.description}\n\nYou are adjacent to:\n${room.adjacent.join(", ")}`;
+    const adjacent = [...room.adjacent].sort();
+    return `${room.description}\n\nYou are adjacent to:\n${adjacent.join(", ")}`;
   }
 
   const COMMANDS = {
