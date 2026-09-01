@@ -33,15 +33,15 @@
       adjacent: ["LIVINGROOM", "DOWNTOWN", "CITYPARK", "FOREST"],
     },
     DOWNTOWN: {
-      description: "Storefronts and traffic lights stretch down DOWNTOWN.",
+      description: "The hustle and bustle of DOWNTOWN",
       adjacent: ["FRONTLAWN"],
     },
     CITYPARK: {
-      description: "Joggers loop the pond at the center of the CITYPARK.",
+      description: "The CITYPARK boasts a playground and great sporting facilities.",
       adjacent: ["FRONTLAWN"],
     },
     FOREST: {
-      description: "The trees close in and the light goes green in the FOREST.",
+      description: "Some peace and quiet in the FOREST.",
       adjacent: ["FRONTLAWN"],
     },
   };
