@@ -66,7 +66,7 @@
       adjacent: ["CITYPARK"],
     },
     OUTLOOK: {
-      description: "From the OUTLOOK, you can see a neighborhood, DOWNTOWN, and the FOREST.",
+      description: "From the OUTLOOK, you can see DOWNTOWN, a neighborhood, and the FOREST.",
       adjacent: ["CITYPARK"],
     },
     STREAM: {
