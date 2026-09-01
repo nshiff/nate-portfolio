@@ -21,7 +21,7 @@
   // Room keys double as display names (e.g. LIVING_ROOM is shown as-is).
   const ROOMS = {
     BEDROOM: {
-      description: "You look around a small BEDROOM. Pretty tidy, all things considered.",
+      description: "You look around a tidy BEDROOM.",
       adjacent: ["LIVING_ROOM"],
     },
     LIVING_ROOM: {
