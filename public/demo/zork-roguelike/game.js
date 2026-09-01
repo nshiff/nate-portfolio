@@ -30,7 +30,19 @@
     },
     FRONTLAWN: {
       description: "The grass on the FRONTLAWN could use a trim.",
-      adjacent: ["LIVINGROOM"],
+      adjacent: ["LIVINGROOM", "DOWNTOWN", "CITYPARK", "FOREST"],
+    },
+    DOWNTOWN: {
+      description: "Storefronts and traffic lights stretch down DOWNTOWN.",
+      adjacent: ["FRONTLAWN"],
+    },
+    CITYPARK: {
+      description: "Joggers loop the pond at the center of the CITYPARK.",
+      adjacent: ["FRONTLAWN"],
+    },
+    FOREST: {
+      description: "The trees close in and the light goes green in the FOREST.",
+      adjacent: ["FRONTLAWN"],
     },
   };
 
