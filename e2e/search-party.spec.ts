@@ -16,9 +16,9 @@ function driver(page: import('@playwright/test').Page) {
   };
 }
 
-/* Six rooms: a spine (BEDROOM ↔ LIVINGROOM ↔ FRONTLAWN) with a
-   three-way fork at the end (DOWNTOWN / CITYPARK / FOREST).
-   No case, no clock — just navigation and the scanner. */
+/* Six rooms: a spine (BEDROOM <-> LIVINGROOM <-> FRONTLAWN) with a
+   three-way fork at the end (DOWNTOWN / CITYPARK / FOREST, each a
+   dead end). No case, no clock, no scanner -- just navigation. */
 
 const ROOMS = ['BEDROOM', 'LIVINGROOM', 'FRONTLAWN', 'DOWNTOWN', 'CITYPARK', 'FOREST'];
 
@@ -34,8 +34,9 @@ test('the session intro shows the help tip then the BEDROOM', async ({ page }) =
   const { text } = driver(page);
   const intro = await text();
   expect(intro).toContain('Type "help" to see available commands.');
-  expect(intro).toContain('Your BEDROOM.');
-  expect(intro).toContain('Exits: LIVINGROOM');
+  expect(intro).toContain('A small BEDROOM.');
+  expect(intro).toContain('Adjacent:');
+  expect(intro).toContain('LIVINGROOM');
 });
 
 test('help lists exactly the surviving verbs', async ({ page }) => {
@@ -43,11 +44,11 @@ test('help lists exactly the surviving verbs', async ({ page }) => {
   const { run, text } = driver(page);
   await run('help');
   const listed = await text();
-  for (const cmd of ['whoami', 'map', 'sleep', 'walk', 'look', 'scan', 'color', 'help', 'exit']) {
+  for (const cmd of ['whoami', 'map', 'sleep', 'walk', 'look', 'color', 'help', 'exit']) {
     expect(listed, `help should list "${cmd}"`).toContain(cmd);
   }
-  // the case / item / NPC machinery is gone
-  for (const gone of ['accuse', 'suspects', 'case', 'take', 'drop', 'inventory', 'talk', 'notes', 'window']) {
+  // the case / item / NPC / scanner machinery is all gone
+  for (const gone of ['scan', 'accuse', 'suspects', 'case', 'take', 'drop', 'inventory', 'talk', 'notes', 'window']) {
     expect(listed, `help should NOT list "${gone}"`).not.toContain(gone);
   }
 });
@@ -59,7 +60,8 @@ test('walk the spine out to each fork leaf and back', async ({ page }) => {
   await run('walk LIVINGROOM');
   await run('walk FRONTLAWN');
   await expect(output).toContainText('FRONTLAWN');
-  await expect(output).toContainText('Exits: CITYPARK, DOWNTOWN, FOREST, LIVINGROOM');
+  // the fork's neighbours, sorted A-Z on the Adjacent line
+  await expect(output).toContainText('CITYPARK, DOWNTOWN, FOREST, LIVINGROOM');
 
   for (const leaf of ['DOWNTOWN', 'CITYPARK', 'FOREST']) {
     await run(`walk ${leaf}`);
@@ -80,7 +82,8 @@ test('map lists only visited rooms, marking the current one', async ({ page }) =
   const { run, text } = driver(page);
   await run('walk LIVINGROOM');
   await run('map');
-  // read just the map block (everything after the last "> map" echo)
+  // read just the map block (everything after the last "> map" echo);
+  // FRONTLAWN otherwise appears in an earlier Adjacent line
   const full = await text();
   const mapBlock = full.slice(full.lastIndexOf('> map') + '> map'.length);
   expect(mapBlock).toContain('BEDROOM');
@@ -103,28 +106,6 @@ test('sleep works where allowed and is refused on the FRONTLAWN', async ({ page 
   await run('walk FOREST');
   await run('sleep'); // FOREST allows it
   expect(await text()).toContain('You awake feeling');
-});
-
-test('scan reads the room anomaly and every room has one', async ({ page }) => {
-  await page.goto(GAME);
-  const { run, text } = driver(page);
-
-  await run('scan');
-  expect(await text()).toContain('AMBIENT WEIRDNESS'); // BEDROOM
-
-  await run('walk LIVINGROOM');
-  await run('scan');
-  expect(await text()).toContain('navigation plot');
-
-  // walk the fork and confirm each leaf scans to something
-  await run('walk FRONTLAWN');
-  for (const leaf of ['DOWNTOWN', 'CITYPARK', 'FOREST']) {
-    await run(`walk ${leaf}`);
-    await run('scan');
-    const t = await text();
-    expect(t, `${leaf} scan produced a readout`).not.toContain('finds nothing unusual');
-    await run('walk FRONTLAWN');
-  }
 });
 
 test('look re-describes the current room without moving', async ({ page }) => {

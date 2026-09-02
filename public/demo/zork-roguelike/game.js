@@ -1,9 +1,8 @@
 /* ============================================================
    Search Party
    A small text world: six rooms, a short spine with a fork at
-   the end. Walk it slowly. Look at things. Scan the ones that
-   seem off. No case, no clock — just the town at night and a
-   scanner that keeps finding stuff it can't explain.
+   the end. Walk it slowly, look around. No case, no clock —
+   just the town.
    ============================================================ */
 
 (() => {
@@ -26,11 +25,8 @@
 
   /* ----------------------------------------------------------
      World. Six rooms. The key IS the display name — uppercase,
-     single-token. `description` shows on entry (short, mobile-
-     first, spells the room name in caps as flavour). `anomaly`
-     is the opt-in scanner readout — detail lives here, since
-     you only see it on demand. Deadpan / Calvin-and-Hobbes
-     register: cosmic thing, domestic framing.
+     single-token. `description` shows on entry (kept short,
+     mobile-first, spells the room name in caps as flavour).
      ---------------------------------------------------------- */
 
   const ROOMS = {
@@ -38,34 +34,28 @@
       description: "A small BEDROOM.\n\nSeveral rare playing cards sit unsleeved on the desk.",
       adjacent: ["LIVINGROOM"],
       allowSleep: true,
-      anomaly: "",
     },
     LIVINGROOM: {
       description: "A cozy LIVINGROOM.\n\nA beautiful geometric rug adorns the LIVINGROOM.",
       adjacent: ["BEDROOM", "FRONTLAWN"],
       allowSleep: true,
-      anomaly: "",
     },
     FRONTLAWN: {
       description: "The FRONTLAWN gives you a good look at the neighborhood.\n\nThe grass could use a trim.",
       adjacent: ["LIVINGROOM", "DOWNTOWN", "CITYPARK", "FOREST"],
-      anomaly: "",
     },
     DOWNTOWN: {
       description: "Feel the hustle and bustle of DOWNTOWN.\n\nIs there a street fair going on today?",
       adjacent: ["FRONTLAWN"],
-      anomaly: "",
     },
     CITYPARK: {
       description: "A CITYPARK with a nice fountain.\n\nThe water in the fountain is so clear!",
       adjacent: ["FRONTLAWN"],
-      anomaly: "",
     },
     FOREST: {
       description: "A tranquil FOREST.\n\nThat is one big tree.",
       adjacent: ["FRONTLAWN"],
       allowSleep: true,
-      anomaly: "",
     },
   };
 
@@ -116,9 +106,6 @@
     },
     look: {
       run: () => describeRoom(currentRoom),
-    },
-    scan: {
-      run: () => ROOMS[currentRoom].anomaly || "Scanner finds nothing unusual. It sounds disappointed.",
     },
     color: {
       run: (arg) => {
