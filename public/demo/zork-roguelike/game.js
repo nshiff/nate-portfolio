@@ -87,7 +87,23 @@
     ruledOut: new Set(),
     heat: 100,
     solved: false,
+    // --- the garage window: soft time pressure ---
+    turn: 0,           // spent by walk/scan/talk/take
+    window: 38,        // turns until the window slams
+    trailStep: 0,      // how far along CULPRIT_TRAIL the culprit is
+    caughtInPerson: false,
   };
+
+  // The culprit walks this ahead of you, one hop every TRAIL_EVERY turns,
+  // finishing (stepping off-world) after the last room. Scanning a room they
+  // are in — or just left — gives a live, present-tense clue. Timed so a
+  // thorough investigation (all tells + the slip, ~24 turns) arrives at the
+  // RESERVOIR just as the culprit does; a content-skipping beeline gets there
+  // early to an empty hangar and has to come back.
+  const CULPRIT_TRAIL = ["FUNHOUSE", "BACKLOT", "UNDERPASS", "PUMPROOM", "RESERVOIR"];
+  const TRAIL_EVERY = 5;   // turns per hop
+  const TRAIL_HEADSTART = 4;
+  // culprit at RESERVOIR from turn 4 + 4*5 = 24; window slams at 38.
 
   function rollCase() {
     CASE.culprit = pick(SUSPECTS);
@@ -121,9 +137,13 @@
     CASE.ruledOut = new Set();
     CASE.heat = 100;
     CASE.solved = false;
+    CASE.turn = 0;
+    CASE.window = 38;
+    CASE.trailStep = 0;
+    CASE.caughtInPerson = false;
   }
 
-  // Heat tiers gate the ending and one NPC.
+  // Heat tiers gate one NPC and (as a fallback) the ending.
   function heatTier() {
     if (CASE.heat >= 80) return "hot";
     if (CASE.heat >= 45) return "warm";
@@ -131,6 +151,59 @@
   }
   function coolTrail(amount) {
     CASE.heat = Math.max(0, CASE.heat - amount);
+  }
+
+  // How far the culprit has physically got. Frozen once the window slams
+  // or the case is solved.
+  function culpritStepNow() {
+    if (CASE.solved) return CASE.trailStep;
+    if (CASE.turn >= CASE.window) return CULPRIT_TRAIL.length; // gone
+    const stepped = Math.floor((CASE.turn - TRAIL_HEADSTART) / TRAIL_EVERY) + 1;
+    return Math.max(0, Math.min(CULPRIT_TRAIL.length, stepped));
+  }
+  function culpritRoomNow() {
+    const s = culpritStepNow();
+    return s >= 1 && s <= CULPRIT_TRAIL.length ? CULPRIT_TRAIL[s - 1] : null;
+  }
+  function culpritRoomPrev() {
+    const s = culpritStepNow();
+    return s >= 2 ? CULPRIT_TRAIL[s - 2] : null;
+  }
+  // Present-tense sighting for `scan`, or null if the culprit isn't near here.
+  function sightingHere() {
+    if (CASE.caughtInPerson) {
+      return currentRoom === CULPRIT_TRAIL[CULPRIT_TRAIL.length - 1]
+        ? `You've got them by the collar. They are not going anywhere. Name them.`
+        : null;
+    }
+    const c = CASE.culprit;
+    const lastStop = CULPRIT_TRAIL[CULPRIT_TRAIL.length - 1];
+    if (culpritRoomNow() === currentRoom) {
+      return currentRoom === lastStop
+        ? `MOVEMENT. Someone in ${c.garment} is here right now, one foot on the rail. Walk in — this is your chance to take them in person.`
+        : `MOVEMENT. Someone in ${c.garment} is here right now, working fast and not looking up. Still ahead of you, but not by much.`;
+    }
+    if (culpritRoomPrev() === currentRoom) {
+      const nextRoom = CULPRIT_TRAIL[culpritStepNow() - 1] || "onward";
+      return `Still warm: a chair, a paper cup, a snagged thread. They were here a moment ago and went ${nextRoom}.`;
+    }
+    return null;
+  }
+  function windowVibe() {
+    const left = CASE.window - CASE.turn;
+    if (left > 24) return "The garage window is wide open. Plenty of time.";
+    if (left > 12) return "The garage window is closing. Keep moving.";
+    if (left > 4) return "The garage window is about to slam. Move.";
+    if (left > 0) return "The garage window is a crack. Now or postcard.";
+    return "The garage window has slammed shut. Whatever's out there is out there for good.";
+  }
+
+  // Commands that cost a turn (i.e. advance the culprit / the window).
+  const TIMED_COMMANDS = new Set(["walk", "scan", "talk", "take"]);
+  function spendTurn() {
+    if (CASE.solved) return;
+    CASE.turn += 1;
+    CASE.trailStep = culpritStepNow();
   }
 
   /* ----------------------------------------------------------
@@ -442,9 +515,21 @@
           return `${destination} is blocked. ${gate.hint}`;
         }
         const clunk = gate && has(gate.needs);
+        const culpritHere = !CASE.solved && culpritRoomNow() === destination;
+        const lastStop = CULPRIT_TRAIL[CULPRIT_TRAIL.length - 1];
         currentRoom = destination;
         visited.add(destination);
-        return (clunk ? `The ${gate.needs} fits the slot. CLUNK.\n\n` : "") + describeRoom(destination);
+        let out = (clunk ? `The ${gate.needs} fits the slot. CLUNK.\n\n` : "") + describeRoom(destination);
+
+        if (culpritHere && destination === lastStop) {
+          // The real intercept: catch them at the hangar before they step off.
+          CASE.caughtInPerson = true;
+          out += `\n\nAnd there they are, ${CASE.culprit.garment} and all, one foot on the rail. You get a hand on their collar. Now put a name to it and call it in — fast.`;
+        } else if (culpritHere) {
+          // Spotted earlier on the trail: they bolt for the next room.
+          out += `\n\nYou catch a glimpse of ${CASE.culprit.garment} rounding the far side — then they're gone, deeper in. You're close.`;
+        }
+        return out;
       },
     },
     look: {
@@ -465,8 +550,13 @@
           noteClue(CASE.clues.dest);
           out += `\n\n${CASE.clues.dest}\nWritten down. Now: accuse <NAME> to ${CASE.dest.name}.`;
         }
+        const sighting = sightingHere();
+        if (sighting) out += `\n\n${sighting}`;
         return out;
       },
+    },
+    window: {
+      run: () => windowVibe(),
     },
     take: {
       run: (arg) => {
@@ -520,8 +610,9 @@
     },
     notes: {
       run: () => {
-        if (!notebook.length) return "Notebook empty. Scan rooms, talk to people, pick up anything too warm.";
-        return "CASE NOTES:\n" + notebook.map((c, i) => `${i + 1}. ${c}`).join("\n");
+        const clockLine = CASE.solved ? "" : `\n\n${windowVibe()}`;
+        if (!notebook.length) return "Notebook empty. Scan rooms, talk to people, pick up anything too warm." + clockLine;
+        return "CASE NOTES:\n" + notebook.map((c, i) => `${i + 1}. ${c}`).join("\n") + clockLine;
       },
     },
     accuse: {
@@ -556,12 +647,18 @@
         if (nameRight && placeRight) {
           CASE.solved = true;
           input.disabled = true;
-          const tier = heatTier();
-          const close = tier === "hot"
-            ? `Clean. ${CASE.culprit.name} picked up at the gate, ${CASE.loot.name} still crated and barely cold. The wheel resumes turning on its own.`
-            : tier === "warm"
-              ? `Messy but done. ${CASE.culprit.name} is halfway to ${CASE.dest.name} before the tug catches them; ${CASE.loot.name} comes back with a scratch and a customs form.`
-              : `Eventually. ${CASE.loot.name} is recovered from ${CASE.dest.name} eight months later. ${CASE.culprit.name} sends a postcard. It's a nice postcard.`;
+          // Catching the culprit in person beats any amount of cooled trail.
+          const windowGone = CASE.turn >= CASE.window;
+          const tier = CASE.caughtInPerson ? "caught"
+            : windowGone ? "cold"
+              : heatTier();
+          const close = tier === "caught"
+            ? `You had a hand on their collar before you finished the sentence. ${CASE.culprit.name} in a holding cell, ${CASE.loot.name} still on the dolly. The Ferris wheel starts turning like nothing happened.`
+            : tier === "hot"
+              ? `Clean. ${CASE.culprit.name} picked up at the gate, ${CASE.loot.name} still crated and barely cold.`
+              : tier === "warm"
+                ? `Messy but done. ${CASE.culprit.name} is halfway to ${CASE.dest.name} before the tug catches them; ${CASE.loot.name} comes back with a scratch and a customs form.`
+                : `Eventually. ${CASE.loot.name} is recovered from ${CASE.dest.name} eight months later. ${CASE.culprit.name} sends a postcard. It's a nice postcard.`;
           return `Called in: ${CASE.culprit.name}, ${CASE.loot.name}, ${CASE.dest.name}.\n${close}\n\nCASE CLOSED. Type "exit", or refresh for a new case.`;
         }
 
@@ -648,7 +745,15 @@
       print(`Unknown command: "${trimmed}". Type "help" for a list of commands.`);
       return;
     }
+
+    const vibeBefore = windowVibe();
     print(command.run(rest.join(" ")));
+
+    if (TIMED_COMMANDS.has(name) && !CASE.solved) {
+      spendTurn();
+      const vibeAfter = windowVibe();
+      if (vibeAfter !== vibeBefore) print(vibeAfter);
+    }
   }
 
   input.addEventListener("keydown", (e) => {
@@ -659,7 +764,7 @@
   });
 
   rollCase();
-  print('Type "help" for commands. "case" for the brief.\n\n');
+  print('Type "help" for commands. "case" for the brief. The garage window is open — but not forever.\n\n');
   print(describeRoom(START_ROOM));
   input.focus();
 })();

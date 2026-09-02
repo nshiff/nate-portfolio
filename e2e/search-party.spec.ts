@@ -220,3 +220,55 @@ test('wrong accusations cool the trail; a cold case is still winnable', async ({
   await run(`accuse ${live[0]} to ${dest}`);
   expect(await text()).toContain('CASE CLOSED');
 });
+
+/* ---------- the garage window (soft time pressure) ---------- */
+
+test('the garage window narrows as turns are spent, and the window verb reports it', async ({ page }) => {
+  await page.goto(GAME);
+  const { run, text } = driver(page);
+
+  await run('window');
+  expect(await text()).toContain('wide open');
+
+  // burn turns (walk is a timed action; pacing back and forth is fine)
+  for (let i = 0; i < 12; i++) {
+    await run('walk LIVINGROOM');
+    await run('walk BEDROOM');
+  }
+  await run('window');
+  expect(await text()).toMatch(/closing|about to slam|a crack|slammed shut/);
+});
+
+test('a thorough, timely investigation catches the culprit in person', async ({ page }) => {
+  await page.goto(GAME);
+  const { run, text } = driver(page);
+
+  // the proper route arrives at the RESERVOIR about when the culprit does
+  const route = [
+    'walk LIVINGROOM', 'walk FRONTLAWN', 'walk DOWNTOWN',
+    'walk CAFE', 'talk', 'walk DOWNTOWN', 'walk STREETFAIR', 'talk',
+    'walk FUNHOUSE', 'scan', 'walk STREETFAIR',
+    'walk BACKLOT', 'scan', 'walk STREETFAIR',
+    'walk DOWNTOWN', 'walk FRONTLAWN', 'walk FOREST',
+    'walk TREEHOUSE', 'talk', 'walk FOREST',
+    'walk FRONTLAWN', 'walk CITYPARK', 'scan',
+    'walk FOUNTAIN', 'take grey coin', 'walk UNDERPASS', 'scan',
+    'walk PUMPROOM', 'scan', 'walk RESERVOIR',
+  ];
+  for (const s of route) await run(s);
+
+  const arrival = await text();
+  expect(arrival, 'culprit intercepted at the hangar').toContain('one foot on the rail');
+
+  await run('scan'); // read the slip
+  await run('notes');
+  const dest = (await text()).match(/destination ([A-Z0-9'. -]+?) —/)![1].trim();
+  await run('suspects');
+  const board = await text();
+  const name = board.match(/Only one suspect fits: (.+)/)![1].replace(/\.\s*$/, '').trim();
+
+  await run(`accuse ${name} to ${dest}`);
+  const end = await text();
+  expect(end).toContain('CASE CLOSED');
+  expect(end, 'the in-person catch gets its own ending').toContain('hand on their collar');
+});
