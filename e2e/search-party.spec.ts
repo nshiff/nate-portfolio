@@ -33,7 +33,7 @@ test('the session intro shows the help tip then the BEDROOM', async ({ page }) =
   await page.goto(GAME);
   const { text } = driver(page);
   const intro = await text();
-  expect(intro).toContain('Type "help" to see available commands.');
+  expect(intro).toContain('Type HELP to see available commands.');
   expect(intro).toContain('A small BEDROOM.');
   expect(intro).toContain('Adjacent:');
   expect(intro).toContain('LIVINGROOM');
@@ -44,7 +44,7 @@ test('help lists exactly the surviving verbs', async ({ page }) => {
   const { run, text } = driver(page);
   await run('help');
   const listed = await text();
-  for (const cmd of ['whoami', 'look', 'map', 'sleep', 'walk', 'color', 'help', 'exit']) {
+  for (const cmd of ['WHOAMI', 'LOOK', 'MAP', 'SLEEP', 'WALK', 'COLOR', 'HELP', 'EXIT']) {
     expect(listed, `help should list "${cmd}"`).toContain(cmd);
   }
 });
@@ -55,7 +55,7 @@ test('look re-prints the current room description and adjacent list', async ({ p
   await run('walk LIVINGROOM');
   await run('look');
   const full = await text();
-  const lookBlock = full.slice(full.lastIndexOf('> look') + '> look'.length);
+  const lookBlock = full.slice(full.lastIndexOf('> LOOK') + '> LOOK'.length);
   expect(lookBlock).toContain('A cozy LIVINGROOM.');
   expect(lookBlock).toContain('Adjacent:');
   expect(lookBlock).toContain('BEDROOM, FRONTLAWN');
@@ -93,7 +93,7 @@ test('map lists only visited rooms, marking the current one', async ({ page }) =
   // read just the map block (everything after the last "> map" echo);
   // FRONTLAWN otherwise appears in an earlier Adjacent line
   const full = await text();
-  const mapBlock = full.slice(full.lastIndexOf('> map') + '> map'.length);
+  const mapBlock = full.slice(full.lastIndexOf('> MAP') + '> MAP'.length);
   expect(mapBlock).toContain('BEDROOM');
   expect(mapBlock).toContain('LIVINGROOM (you are here)');
   expect(mapBlock, 'unvisited rooms are hidden').not.toContain('FRONTLAWN');
@@ -140,7 +140,7 @@ test('an unknown command is reported, not silently eaten', async ({ page }) => {
   await page.goto(GAME);
   const { run, text } = driver(page);
   await run('teleport FRONTLAWN');
-  expect(await text()).toContain('Unknown command: "teleport FRONTLAWN"');
+  expect(await text()).toContain('Unknown command: "TELEPORT FRONTLAWN"');
 });
 
 test('every room key is a single uppercase token and the graph is symmetric', async ({ page }) => {

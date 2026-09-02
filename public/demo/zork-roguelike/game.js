@@ -76,51 +76,51 @@
   }
 
   const COMMANDS = {
-    whoami: {
+    WHOAMI: {
       run: () => "player",
     },
-    look: {
+    LOOK: {
       run: () => describeRoom(currentRoom),
     },
-    map: {
+    MAP: {
       run: () => Object.keys(ROOMS)
         .filter((id) => visited.has(id))
         .sort()
         .map((id) => `${id}${id === currentRoom ? " (you are here)" : ""}`)
         .join("\n"),
     },
-    sleep: {
+    SLEEP: {
       run: () => {
         if (!ROOMS[currentRoom].allowSleep) return "You can't sleep here.";
         return `You awake feeling ${pick(SLEEP_FEELINGS)}.`;
       },
     },
-    walk: {
+    WALK: {
       run: (arg) => {
         const target = (arg || "").trim().toUpperCase();
-        if (!target) return "Walk where?\nTry: walk ROOMNAME";
+        if (!target) return "Walk where?\nTry: WALK ROOMNAME";
         const destination = ROOMS[currentRoom].adjacent.find((id) => id === target);
-        if (!destination) return `Can't walk to "${arg.trim()}" from here.`;
+        if (!destination) return `Can't walk to "${target}" from here.`;
         currentRoom = destination;
         visited.add(destination);
         return describeRoom(destination);
       },
     },
-    color: {
+    COLOR: {
       run: (arg) => {
         const name = (arg || "").trim().toLowerCase();
-        if (!name) return "Color what? Try \"color green\", \"color amber\", \"color white\", or \"color default\".";
+        if (!name) return "Color what? Try \"COLOR GREEN\", \"COLOR AMBER\", \"COLOR WHITE\", or \"COLOR DEFAULT\".";
         if (!COLORS[name]) return `Unknown color: "${name}". Try green, amber, white, or default.`;
         setColor(name);
         return `Color set to ${name}.`;
       },
     },
-    help: {
+    HELP: {
       run: () => Object.keys(COMMANDS)
         .sort((a, b) => a < b ? -1 : 1)
         .join("\t"),
     },
-    exit: {
+    EXIT: {
       run: () => {
         input.disabled = true;
         return "Simulation ended.";
@@ -155,7 +155,7 @@
 
   function printEcho(text) {
     const line = document.createElement("div");
-    line.textContent = "> " + text;
+    line.textContent = "> " + text.toUpperCase();
     line.style.opacity = "0.7";
     output.appendChild(line);
     output.scrollTop = output.scrollHeight;
@@ -167,10 +167,10 @@
     print("\n");
     printEcho(trimmed);
 
-    const [name, ...rest] = trimmed.toLowerCase().split(/\s+/);
-    const command = COMMANDS[name];
+    const [name, ...rest] = trimmed.split(/\s+/);
+    const command = COMMANDS[name.toUpperCase()];
     if (!command) {
-      print(`Unknown command: "${trimmed}". Type "help" for a list of commands.`);
+      print(`Unknown command: "${trimmed.toUpperCase()}". Type HELP for a list of commands.`);
       return;
     }
     print(command.run(rest.join(" ")));
@@ -183,7 +183,7 @@
     handle(value);
   });
 
-  print('Type "help" to see available commands.\n\n');
+  print('Type HELP to see available commands.\n\n');
   print(describeRoom(START_ROOM));
   input.focus();
 })();
