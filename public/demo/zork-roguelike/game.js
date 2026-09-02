@@ -79,6 +79,9 @@
     whoami: {
       run: () => "player",
     },
+    look: {
+      run: () => describeRoom(currentRoom),
+    },
     map: {
       run: () => Object.keys(ROOMS)
         .filter((id) => visited.has(id))
@@ -95,7 +98,7 @@
     walk: {
       run: (arg) => {
         const target = (arg || "").trim().toUpperCase();
-        if (!target) return "Walk where? (walk ROOMNAME)";
+        if (!target) return "Walk where?\nTry: walk ROOMNAME";
         const destination = ROOMS[currentRoom].adjacent.find((id) => id === target);
         if (!destination) return `Can't walk to "${arg.trim()}" from here.`;
         currentRoom = destination;

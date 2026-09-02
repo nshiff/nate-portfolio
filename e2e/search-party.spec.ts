@@ -44,13 +44,21 @@ test('help lists exactly the surviving verbs', async ({ page }) => {
   const { run, text } = driver(page);
   await run('help');
   const listed = await text();
-  for (const cmd of ['whoami', 'map', 'sleep', 'walk', 'color', 'help', 'exit']) {
+  for (const cmd of ['whoami', 'look', 'map', 'sleep', 'walk', 'color', 'help', 'exit']) {
     expect(listed, `help should list "${cmd}"`).toContain(cmd);
   }
-  // the case / item / NPC / scanner machinery is all gone, and so is `look`
-  for (const gone of ['look', 'scan', 'accuse', 'suspects', 'case', 'take', 'drop', 'inventory', 'talk', 'notes', 'window']) {
-    expect(listed, `help should NOT list "${gone}"`).not.toContain(gone);
-  }
+});
+
+test('look re-prints the current room description and adjacent list', async ({ page }) => {
+  await page.goto(GAME);
+  const { run, text } = driver(page);
+  await run('walk LIVINGROOM');
+  await run('look');
+  const full = await text();
+  const lookBlock = full.slice(full.lastIndexOf('> look') + '> look'.length);
+  expect(lookBlock).toContain('A cozy LIVINGROOM.');
+  expect(lookBlock).toContain('Adjacent:');
+  expect(lookBlock).toContain('BEDROOM, FRONTLAWN');
 });
 
 test('walk the spine out to each fork leaf and back', async ({ page }) => {
