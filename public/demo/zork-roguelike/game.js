@@ -35,37 +35,37 @@
 
   const ROOMS = {
     BEDROOM: {
-      description: "Your BEDROOM. The bed is made, which is suspicious. A cold mug of tea on the sill has a skin on it.",
+      description: "A small BEDROOM.\n\nSeveral rare playing cards sit unsleeved on the desk.",
       adjacent: ["LIVINGROOM"],
       allowSleep: true,
-      anomaly: "Scanner boots with a chirp. HOME. AMBIENT WEIRDNESS: 2%, all of it the sock pile. The tea, it notes, is exactly room temperature and has been for hours.",
+      anomaly: "",
     },
     LIVINGROOM: {
-      description: "A gorgeous rug with geometric patterns adorns the LIVINGROOM. The patterns are, on reflection, a star chart.",
+      description: "A cozy LIVINGROOM.\n\nA beautiful geometric rug adorns the LIVINGROOM.",
       adjacent: ["BEDROOM", "FRONTLAWN"],
       allowSleep: true,
-      anomaly: "The rug resolves to a navigation plot. There's a destination marker on it, sitting well off the edge of anything municipal. Someone has vacuumed over the important part.",
+      anomaly: "",
     },
     FRONTLAWN: {
-      description: "The grass on the FRONTLAWN could use a trim. One rectangular patch is pressed flat, as if something large parked here briefly and politely.",
+      description: "The FRONTLAWN gives you a good look at the neighborhood.\n\nThe grass could use a trim.",
       adjacent: ["LIVINGROOM", "DOWNTOWN", "CITYPARK", "FOREST"],
-      anomaly: "Flattened patch: four contact points, a lot of kilograms, departed straight up. The grass under it is warm and smells of ozone and, oddly, funnel cake.",
+      anomaly: "",
     },
     DOWNTOWN: {
-      description: "The hustle and bustle of DOWNTOWN. Every third pedestrian is holding a purple octopus plush and pretending they always have.",
+      description: "Feel the hustle and bustle of DOWNTOWN.\n\nIs there a street fair going on today?",
       adjacent: ["FRONTLAWN"],
-      anomaly: "Plush density: abnormal. Each octopus pings the same channel on a slow, patient interval. They are, technically, a network. Nobody will make eye contact about it.",
+      anomaly: "",
     },
     CITYPARK: {
-      description: "The CITYPARK has a playground, sporting facilities, and a commemorative plaque for something that isn't there anymore.",
+      description: "A CITYPARK with a nice fountain.\n\nThe water in the fountain is so clear!",
       adjacent: ["FRONTLAWN"],
-      anomaly: "The plaque's mounting bolts are sheared clean and there are fresh drag marks leading away toward the fountain. Scanner estimates the missing mass in the tens of tonnes and then, politely, stops.",
+      anomaly: "",
     },
     FOREST: {
-      description: "Some peace and quiet in the FOREST. Then you notice the birdsong loops every eleven seconds.",
+      description: "A tranquil FOREST.\n\nThat is one big tree.",
       adjacent: ["FRONTLAWN"],
       allowSleep: true,
-      anomaly: "The birdsong is a four-bar sample on repeat. Under it, a low carrier tone. Something out here is politely holding a channel open and waiting for someone to pick up.",
+      anomaly: "",
     },
   };
 
@@ -77,15 +77,13 @@
     "refreshed",
     "great, actually",
     "terrible",
-    "groggy and vaguely accused of something",
-    "like you dreamed in a language you don't speak",
-    "like the octopus plush was in it",
-    "ready to solve a mystery, or at least start one",
+    "groggy",
+    "suspiciously good",
   ];
 
   function describeRoom(id) {
     const room = ROOMS[id];
-    return `${room.description}\n\nExits: ${[...room.adjacent].sort().join(", ")}`;
+    return `Location:\n${room.description}\n\nAdjacent:\n${[...room.adjacent].sort().join(", ")}`;
   }
 
   const COMMANDS = {
