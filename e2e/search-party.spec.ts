@@ -21,7 +21,7 @@ test('walk from BEDROOM all the way to OUTLOOK', async ({ page }) => {
   }
 
   // last room's description confirms arrival
-  await expect(output).toContainText('From the OUTLOOK, you can see');
+  await expect(output).toContainText('From the OUTLOOK you can see');
   // and it was never reported as unreachable along the way
   await expect(output).not.toContainText("You can't walk to");
 });
