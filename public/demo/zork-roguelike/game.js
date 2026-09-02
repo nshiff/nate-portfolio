@@ -170,7 +170,7 @@
     const [name, ...rest] = trimmed.split(/\s+/);
     const command = COMMANDS[name.toUpperCase()];
     if (!command) {
-      print(`Unknown command: "${trimmed.toUpperCase()}". Type HELP for a list of commands.`);
+      print(`Unknown command: "${trimmed.toUpperCase()}". Type help or HELP for a list of commands.`);
       return;
     }
     print(command.run(rest.join(" ")));
@@ -183,7 +183,7 @@
     handle(value);
   });
 
-  print('Type HELP to see available commands.\n\n');
+  print('Type help or HELP to see available commands.\n\n');
   print(describeRoom(START_ROOM));
   input.focus();
 })();
