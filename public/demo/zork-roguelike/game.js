@@ -122,20 +122,7 @@
   function setColor(name) {
     if (!COLORS[name]) return;
     root.style.setProperty("--fg", COLORS[name]);
-    try {
-      localStorage.setItem("searchparty-color", name);
-    } catch {
-      // storage unavailable — ignore, defaults to green next load
-    }
   }
-
-  let savedColor = "green";
-  try {
-    savedColor = localStorage.getItem("searchparty-color") || "green";
-  } catch {
-    // storage unavailable — fall back to default
-  }
-  setColor(COLORS[savedColor] ? savedColor : "green");
 
   function print(text) {
     const line = document.createElement("div");

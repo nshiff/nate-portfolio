@@ -109,7 +109,7 @@ test('sleep works where allowed and is refused on the FRONTLAWN', async ({ page 
   expect(await text()).toContain('You awake feeling');
 });
 
-test('color sets --fg and persists across a reload', async ({ page }) => {
+test('color sets --fg for the session and resets to green on reload', async ({ page }) => {
   await page.goto(GAME);
   const { run } = driver(page);
 
@@ -124,9 +124,7 @@ test('color sets --fg and persists across a reload', async ({ page }) => {
   const fgAfter = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--fg').trim(),
   );
-  expect(fgAfter.toLowerCase()).toBe('#ffb02e');
-
-  await run('color default'); // reset for the next test in this context
+  expect(fgAfter.toLowerCase()).toBe('#33ff66');
 });
 
 test('an unknown command is reported, not silently eaten', async ({ page }) => {
