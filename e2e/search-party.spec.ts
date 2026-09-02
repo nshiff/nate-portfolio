@@ -37,7 +37,7 @@ test('help lists exactly the surviving verbs', async ({ page }) => {
   const { run, text } = driver(page);
   await run('help');
   const listed = await text();
-  for (const cmd of ['LOOK', 'MAP', 'SLEEP', 'WALK', 'COLOR', 'HELP', 'EXIT']) {
+  for (const cmd of ['LOOK', 'MAP', 'SLEEP', 'WALK', 'COLOR', 'HELP']) {
     expect(listed, `help should list "${cmd}"`).toContain(cmd);
   }
 });

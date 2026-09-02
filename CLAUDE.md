@@ -31,7 +31,7 @@ Client-only **React 19 + TypeScript SPA** (Vite, react-router v8 data router), n
 
 ## Project 20 — Search Party (`public/demo/zork-roguelike/`)
 
-It's a **small text-adventure world**: two files, `index.html` (dark terminal UI) and `game.js` (the whole game — a short IIFE). Currently deliberately minimal: around six rooms (`BEDROOM ↔ LIVINGROOM ↔ FRONTLAWN`, then `FRONTLAWN` forks to dead-end leaves `DOWNTOWN` / `CITYPARK` / `FOREST`), around seven verbs (`look`, `map`, `sleep`, `walk`, `color`, `help`, `exit`), no case/clock/NPCs/items. It has been torn down and rebuilt more than once — **treat the code as current truth.**
+It's a **small text-adventure world**: two files, `index.html` (dark terminal UI) and `game.js` (the whole game — a short IIFE). Currently deliberately minimal: around six rooms (`BEDROOM ↔ LIVINGROOM ↔ FRONTLAWN`, then `FRONTLAWN` forks to dead-end leaves `DOWNTOWN` / `CITYPARK` / `FOREST`), around six verbs (`look`, `map`, `sleep`, `walk`, `color`, `help`), no case/clock/NPCs/items. It has been torn down and rebuilt more than once — **treat the code as current truth.**
 
 - **Command model:** one `COMMANDS` object, `{ name: { run: (arg) => "output string" } }`. Adding a command is a one-entry change. There is **no descriptive help text** — `help` lists `Object.keys(COMMANDS)`, so the command's key *is* its help. Don't restore verbose help without asking.
 - **Rooms:** `ROOMS` keyed by id, and **the key IS the display name** — uppercase, single-token, no `name` field. Per-room: `description` (shown on entry, two short sentences, spells the room name in caps as flavour), `adjacent` (neighbour ids, symmetric — list both sides), optional `allowSleep`.

@@ -117,12 +117,6 @@
         .sort((a, b) => a < b ? -1 : 1)
         .join("\t"),
     },
-    EXIT: {
-      run: () => {
-        input.disabled = true;
-        return "Simulation ended.";
-      },
-    },
   };
 
   function setColor(name) {
