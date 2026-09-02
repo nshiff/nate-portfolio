@@ -44,7 +44,7 @@
       adjacent: ["LIVINGROOM", "DOWNTOWN", "CITYPARK", "FOREST"],
     },
     DOWNTOWN: {
-      description: "Feel the hustle and bustle of DOWNTOWN.\n\nA nearby CAFE catches your eye.",
+      description: "Feel the hustle and bustle of DOWNTOWN.\n\nAnyone who's anyone is downtown!.",
       adjacent: ["FRONTLAWN"],
     },
     CITYPARK: {
@@ -106,7 +106,7 @@
     COLOR: {
       run: (arg) => {
         const name = (arg || "").trim().toLowerCase();
-        if (!name) return "Color what? Try \"COLOR GREEN\", \"COLOR AMBER\", \"COLOR WHITE\", or \"COLOR DEFAULT\".";
+        if (!name) return "Try COLOR GREEN, COLOR AMBER, COLOR WHITE, or COLOR DEFAULT.";
         if (!COLORS[name]) return `Unknown color: "${name}". Try green, amber, white, or default.`;
         setColor(name);
         return `Color set to ${name}.`;
