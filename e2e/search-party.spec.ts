@@ -44,11 +44,11 @@ test('help lists exactly the surviving verbs', async ({ page }) => {
   const { run, text } = driver(page);
   await run('help');
   const listed = await text();
-  for (const cmd of ['whoami', 'map', 'sleep', 'walk', 'look', 'color', 'help', 'exit']) {
+  for (const cmd of ['whoami', 'map', 'sleep', 'walk', 'color', 'help', 'exit']) {
     expect(listed, `help should list "${cmd}"`).toContain(cmd);
   }
-  // the case / item / NPC / scanner machinery is all gone
-  for (const gone of ['scan', 'accuse', 'suspects', 'case', 'take', 'drop', 'inventory', 'talk', 'notes', 'window']) {
+  // the case / item / NPC / scanner machinery is all gone, and so is `look`
+  for (const gone of ['look', 'scan', 'accuse', 'suspects', 'case', 'take', 'drop', 'inventory', 'talk', 'notes', 'window']) {
     expect(listed, `help should NOT list "${gone}"`).not.toContain(gone);
   }
 });
@@ -106,17 +106,6 @@ test('sleep works where allowed and is refused on the FRONTLAWN', async ({ page 
   await run('walk FOREST');
   await run('sleep'); // FOREST allows it
   expect(await text()).toContain('You awake feeling');
-});
-
-test('look re-describes the current room without moving', async ({ page }) => {
-  await page.goto(GAME);
-  const { run, text } = driver(page);
-  await run('walk LIVINGROOM');
-  await run('look');
-  const t = await text();
-  expect(t).toContain('LIVINGROOM');
-  await run('map');
-  expect(await text()).toContain('LIVINGROOM (you are here)');
 });
 
 test('color sets --fg and persists across a reload', async ({ page }) => {

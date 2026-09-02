@@ -1,8 +1,7 @@
 /* ============================================================
    Search Party
    A small text world: six rooms, a short spine with a fork at
-   the end. Walk it slowly, look around. No case, no clock —
-   just the town.
+   the end. Walk it slowly. No case, no clock — just the town.
    ============================================================ */
 
 (() => {
@@ -103,9 +102,6 @@
         visited.add(destination);
         return describeRoom(destination);
       },
-    },
-    look: {
-      run: () => describeRoom(currentRoom),
     },
     color: {
       run: (arg) => {
