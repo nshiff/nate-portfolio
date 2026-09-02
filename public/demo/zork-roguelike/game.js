@@ -44,11 +44,11 @@
       adjacent: ["LIVINGROOM", "DOWNTOWN", "CITYPARK", "FOREST"],
     },
     DOWNTOWN: {
-      description: "Feel the hustle and bustle of DOWNTOWN.\n\nIs there a street fair going on today?",
+      description: "Feel the hustle and bustle of DOWNTOWN.\n\nA nearby CAFE catches your eye.",
       adjacent: ["FRONTLAWN"],
     },
     CITYPARK: {
-      description: "A CITYPARK with a nice fountain.\n\nThe water in the fountain is so clear!",
+      description: "A CITYPARK with a nice fountain.\n\nThe water is so clear!",
       adjacent: ["FRONTLAWN"],
     },
     FOREST: {
