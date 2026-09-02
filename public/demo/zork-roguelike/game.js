@@ -76,9 +76,6 @@
   }
 
   const COMMANDS = {
-    WHOAMI: {
-      run: () => "player",
-    },
     LOOK: {
       run: () => describeRoom(currentRoom),
     },

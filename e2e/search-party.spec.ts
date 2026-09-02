@@ -22,18 +22,11 @@ function driver(page: import('@playwright/test').Page) {
 
 const ROOMS = ['BEDROOM', 'LIVINGROOM', 'FRONTLAWN', 'DOWNTOWN', 'CITYPARK', 'FOREST'];
 
-test('whoami returns "player"', async ({ page }) => {
-  await page.goto(GAME);
-  const { run, output } = driver(page);
-  await run('whoami');
-  await expect(output).toContainText('player');
-});
-
 test('the session intro shows the help tip then the BEDROOM', async ({ page }) => {
   await page.goto(GAME);
   const { text } = driver(page);
   const intro = await text();
-  expect(intro).toContain('Type HELP to see available commands.');
+  expect(intro).toContain('Type help or HELP to see available commands.');
   expect(intro).toContain('A small BEDROOM.');
   expect(intro).toContain('Adjacent:');
   expect(intro).toContain('LIVINGROOM');
@@ -44,7 +37,7 @@ test('help lists exactly the surviving verbs', async ({ page }) => {
   const { run, text } = driver(page);
   await run('help');
   const listed = await text();
-  for (const cmd of ['WHOAMI', 'LOOK', 'MAP', 'SLEEP', 'WALK', 'COLOR', 'HELP', 'EXIT']) {
+  for (const cmd of ['LOOK', 'MAP', 'SLEEP', 'WALK', 'COLOR', 'HELP', 'EXIT']) {
     expect(listed, `help should list "${cmd}"`).toContain(cmd);
   }
 });
