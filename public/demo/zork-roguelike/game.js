@@ -61,6 +61,33 @@
   let currentRoom = START_ROOM;
   const visited = new Set([START_ROOM]);
 
+  /* ----------------------------------------------------------
+     Findable items. Same shape as ROOMS — the key IS the
+     display name (uppercase, single-token), `description` is
+     one short line. One of these gets hidden in a random room.
+     ---------------------------------------------------------- */
+
+  const SEEKITEMS = {
+    GOLDBARS: {
+      description: "A tidy stack of gold bars. Heavier than they look.",
+    },
+    FANCYSUIT: {
+      description: "A three-piece suit in your exact size. Suspicious.",
+    },
+    BURRITO: {
+      description: "A warm burrito wrapped in foil. Someone's loss.",
+    },
+    RUBBERDUCK: {
+      description: "A small rubber duck. It has seen things.",
+    },
+    SUNGLASSES: {
+      description: "Sunglasses that make everything look cooler.",
+    },
+    SECRETRECIPE: {
+      description: "A folded index card marked \"DO NOT LOSE.\"",
+    },
+  };
+
   const SLEEP_FEELINGS = [
     "refreshed",
     "great, actually",
@@ -115,6 +142,9 @@
       run: () => Object.keys(COMMANDS)
         .sort((a, b) => a < b ? -1 : 1)
         .join("\t"),
+    },
+    SEEK: {
+      run: () => "Your search turned up nothing.",
     },
   };
 
