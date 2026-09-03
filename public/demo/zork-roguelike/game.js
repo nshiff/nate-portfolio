@@ -106,7 +106,7 @@
       run: (arg) => {
         const name = (arg || "").trim().toLowerCase();
         if (!name) return "Try: COLOR COLORNAME\nAvailable colors: GREEN, AMBER, WHITE";
-        if (!COLORS[name]) return `Unknown color: "${name}". Try green, amber, or white.`;
+        if (!COLORS[name]) return `Unknown color: ${name}. Try green, amber, or white.`;
         setColor(name);
         return `Color set to ${name}.`;
       },
