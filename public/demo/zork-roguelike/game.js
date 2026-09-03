@@ -68,23 +68,23 @@
   const visited = new Set([START_ROOM]);
 
   const SEEKITEMS = {
-    GOLDBARS: {
-      description: "a small stack of solid GOLDBARS.",
+    PLAYINGCARDS: {
+      description: "a well-loved deck of PLAYINGCARDS.",
     },
     FANCYSUIT: {
       description: "a FANCYSUIT, and it's your size!",
     },
-    BURRITO: {
-      description: "a chunky BURRITO.",
+    SILVERCOIN: {
+      description: "a shiny SILVERCOIN.",
     },
     RUBBERDUCK: {
-      description: "a RUBBERDUCK. How quaint.",
+      description: "a yellow RUBBERDUCK. How quaint.",
     },
     SUNGLASSES: {
-      description: "a pair of dark SUNGLASSES.",
+      description: "a pair of reflective SUNGLASSES.",
     },
     SECRETRECIPE: {
-      description: "an index card containing a SECRETRECIPE.",
+      description: "a worn index card containing a SECRETRECIPE.",
     },
   };
 
@@ -95,7 +95,7 @@
     SEEK_PLACEMENTS[roomId] = seekItems[i];
   });
 
-  const SEEK_PRAISE = ["Congratulations!", "Way to go!", "Nice sleuthing!"];
+  const SEEK_PRAISES = ["Nice sleuthing!", "Nice find!", "Good pick-up!"];
 
   const SLEEP_FEELINGS = [
     "refreshed",
@@ -172,7 +172,7 @@
         if (!item) {
           return "Your search turned up nothing.";
         }
-        return `You found ${SEEKITEMS[item].description}\n\n${pick(SEEK_PRAISE)}`;
+        return `You found ${SEEKITEMS[item].description}\n\n${pick(SEEK_PRAISES)}`;
       },
     },
   };
