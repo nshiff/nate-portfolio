@@ -43,7 +43,7 @@
       adjacent: ["LIVINGROOM", "DOWNTOWN", "CITYPARK", "FOREST"],
     },
     DOWNTOWN: {
-      description: "Feel the hustle and bustle of DOWNTOWN.\n\nAnyone who's anyone is downtown!.",
+      description: "Feel the hustle and bustle of DOWNTOWN.\n\nAnyone who's anyone is downtown!",
       adjacent: ["FRONTLAWN"],
     },
     CITYPARK: {
