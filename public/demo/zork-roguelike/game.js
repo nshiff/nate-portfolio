@@ -15,7 +15,6 @@
     green: "#33ff66",
     amber: "#ffb02e",
     white: "#e8e8e8",
-    default: "#33ff66",
   };
 
   function pick(list) {
@@ -95,9 +94,9 @@
     WALK: {
       run: (arg) => {
         const target = (arg || "").trim().toUpperCase();
-        if (!target) return "Walk where?\nTry: WALK ROOMNAME";
+        if (!target) return "Try: WALK ROOMNAME";
         const destination = ROOMS[currentRoom].adjacent.find((id) => id === target);
-        if (!destination) return `Can't walk to "${target}" from here.`;
+        if (!destination) return `Cannot reach ${target} from here.`;
         currentRoom = destination;
         visited.add(destination);
         return describeRoom(destination);
@@ -106,8 +105,8 @@
     COLOR: {
       run: (arg) => {
         const name = (arg || "").trim().toLowerCase();
-        if (!name) return "Try COLOR GREEN, COLOR AMBER, COLOR WHITE, or COLOR DEFAULT.";
-        if (!COLORS[name]) return `Unknown color: "${name}". Try green, amber, white, or default.`;
+        if (!name) return "Try: COLOR COLORNAME\nAvailable colors: GREEN, AMBER, WHITE";
+        if (!COLORS[name]) return `Unknown color: "${name}". Try green, amber, or white.`;
         setColor(name);
         return `Color set to ${name}.`;
       },
@@ -148,7 +147,7 @@
     const [name, ...rest] = trimmed.split(/\s+/);
     const command = COMMANDS[name.toUpperCase()];
     if (!command) {
-      print(`Unknown command: "${trimmed.toUpperCase()}". Type help or HELP for a list of commands.`);
+      print(`Unknown command: ${trimmed.toUpperCase()}.\nRun HELP to list available commands.`);
       return;
     }
     print(command.run(rest.join(" ")));
@@ -161,7 +160,7 @@
     handle(value);
   });
 
-  print('Type help or HELP to see available commands.\n\n');
+  print('Run help or HELP to list available commands.\n\n');
   print(describeRoom(START_ROOM));
   input.focus();
 })();

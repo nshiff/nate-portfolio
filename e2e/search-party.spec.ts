@@ -26,7 +26,7 @@ test('the session intro shows the help tip then the BEDROOM', async ({ page }) =
   await page.goto(GAME);
   const { text } = driver(page);
   const intro = await text();
-  expect(intro).toContain('Type help or HELP to see available commands.');
+  expect(intro).toContain('Run help or HELP to list available commands.');
   expect(intro).toContain('A small BEDROOM.');
   expect(intro).toContain('Adjacent:');
   expect(intro).toContain('LIVINGROOM');
@@ -58,14 +58,14 @@ test('walk the spine out to each fork leaf and back', async ({ page }) => {
     await run(`walk ${leaf}`);
     await run('walk FRONTLAWN');
   }
-  expect(await text(), 'no move was rejected').not.toContain("Can't walk to");
+  expect(await text(), 'no move was rejected').not.toContain('Cannot reach');
 });
 
 test('walk rejects a non-adjacent room', async ({ page }) => {
   await page.goto(GAME);
   const { run, text } = driver(page);
   await run('walk CITYPARK'); // not adjacent to BEDROOM
-  expect(await text()).toContain("Can't walk to");
+  expect(await text()).toContain('Cannot reach CITYPARK from here.');
 });
 
 test('map lists only visited rooms, marking the current one', async ({ page }) => {
@@ -121,7 +121,7 @@ test('an unknown command is reported, not silently eaten', async ({ page }) => {
   await page.goto(GAME);
   const { run, text } = driver(page);
   await run('teleport FRONTLAWN');
-  expect(await text()).toContain('Unknown command: "TELEPORT FRONTLAWN"');
+  expect(await text()).toContain('Unknown command: TELEPORT FRONTLAWN.');
 });
 
 test('every room key is a single uppercase token and the graph is symmetric', async ({ page }) => {
