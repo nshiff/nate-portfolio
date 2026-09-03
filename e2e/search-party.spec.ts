@@ -124,6 +124,43 @@ test('an unknown command is reported, not silently eaten', async ({ page }) => {
   expect(await text()).toContain('Unknown command: TELEPORT FRONTLAWN.');
 });
 
+test('SEEK finds an item in exactly three of the six rooms', async ({ page }) => {
+  await page.goto(GAME);
+  const { run, text } = driver(page);
+
+  // Walk to each room in turn and SEEK there once. The walk hops
+  // needed to reach each room from the previous one -- start in
+  // BEDROOM, so it needs no walk before its SEEK.
+  const legs: Array<{ room: string; walk: string[] }> = [
+    { room: 'BEDROOM', walk: [] },
+    { room: 'LIVINGROOM', walk: ['walk LIVINGROOM'] },
+    { room: 'FRONTLAWN', walk: ['walk FRONTLAWN'] },
+    { room: 'DOWNTOWN', walk: ['walk DOWNTOWN'] },
+    { room: 'CITYPARK', walk: ['walk FRONTLAWN', 'walk CITYPARK'] },
+    { room: 'FOREST', walk: ['walk FRONTLAWN', 'walk FOREST'] },
+  ];
+
+  let hits = 0;
+  let misses = 0;
+  for (const leg of legs) {
+    for (const step of leg.walk) {
+      await run(step);
+    }
+    const before = (await text()).length;
+    await run('seek');
+    const block = (await text()).slice(before);
+    if (block.includes('You found')) {
+      hits++;
+    } else if (block.includes('Your search turned up nothing.')) {
+      misses++;
+    }
+  }
+
+  expect(hits + misses, 'every SEEK produced a recognised result').toBe(6);
+  expect(hits, 'three rooms held an item').toBe(3);
+  expect(misses, 'three rooms held nothing').toBe(3);
+});
+
 test('every room key is a single uppercase token and the graph is symmetric', async ({ page }) => {
   await page.goto(GAME);
   // walk everywhere, then assert map shows all six once each visited
@@ -131,7 +168,9 @@ test('every room key is a single uppercase token and the graph is symmetric', as
   for (const step of [
     'walk LIVINGROOM', 'walk FRONTLAWN', 'walk DOWNTOWN', 'walk FRONTLAWN',
     'walk CITYPARK', 'walk FRONTLAWN', 'walk FOREST', 'walk FRONTLAWN',
-  ]) await run(step);
+  ]) {
+    await run(step);
+  }
   await run('map');
   const m = await text();
   for (const r of ROOMS) {
