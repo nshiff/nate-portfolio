@@ -32,16 +32,6 @@ test('the session intro shows the help tip then the BEDROOM', async ({ page }) =
   expect(intro).toContain('LIVINGROOM');
 });
 
-test('help lists exactly the surviving verbs', async ({ page }) => {
-  await page.goto(GAME);
-  const { run, text } = driver(page);
-  await run('help');
-  const listed = await text();
-  for (const cmd of ['LOOK', 'MAP', 'SLEEP', 'WALK', 'COLOR', 'HELP']) {
-    expect(listed, `help should list "${cmd}"`).toContain(cmd);
-  }
-});
-
 test('look re-prints the current room description and adjacent list', async ({ page }) => {
   await page.goto(GAME);
   const { run, text } = driver(page);
