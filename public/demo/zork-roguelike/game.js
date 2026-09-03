@@ -89,6 +89,8 @@
   const SEEK_ITEM = pick(Object.keys(SEEKITEMS));
   let seekItemFound = false;
 
+  const SEEK_PRAISE = ["Congratulations!", "Way to go!", "Nice sleuthing!"];
+
   const SLEEP_FEELINGS = [
     "refreshed",
     "great, actually",
@@ -163,7 +165,7 @@
         if (currentRoom !== "CITYPARK") {
           return "Your search turned up nothing.";
         }
-        return `You found ${SEEKITEMS[SEEK_ITEM].description}\n\nCongratulations!`;
+        return `You found ${SEEKITEMS[SEEK_ITEM].description}\n\n${pick(SEEK_PRAISE)}`;
       },
     },
   };
