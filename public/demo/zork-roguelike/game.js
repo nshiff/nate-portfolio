@@ -95,7 +95,7 @@
     SEEK_PLACEMENTS[roomId] = seekItems[i];
   });
 
-  const SEEK_PRAISES = ["Nice sleuthing!", "Nice find!", "Good pick-up!"];
+  const foundItems = [];
 
   const SLEEP_FEELINGS = [
     "refreshed",
@@ -172,11 +172,22 @@
         if (!item) {
           return "Your search turned up nothing.";
         }
-        return `You found ${SEEKITEMS[item].description}\n\n${pick(SEEK_PRAISES)}`;
+        if (!foundItems.includes(item)) {
+          foundItems.push(item);
+        }
+        return `You found ${SEEKITEMS[item].description}`;
       },
     },
     ABOUT: {
       run: () => "Search Party\nA Zork-like sandbox game. Developed for the web by Nate Shiff with Claude Code.",
+    },
+    ITEMS: {
+      run: () => {
+        if (!foundItems.length) {
+          return "No items found.";
+        }
+        return [...foundItems].sort().join("\n");
+      },
     },
   };
 
