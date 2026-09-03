@@ -65,32 +65,29 @@
   let currentRoom = START_ROOM;
   const visited = new Set([START_ROOM]);
 
-  /* ----------------------------------------------------------
-     Findable items. Same shape as ROOMS — the key IS the
-     display name (uppercase, single-token), `description` is
-     one short line. One of these gets hidden in a random room.
-     ---------------------------------------------------------- */
-
   const SEEKITEMS = {
     GOLDBARS: {
-      description: "A small stack of solid GOLDBARS.",
+      description: "a small stack of solid GOLDBARS.",
     },
     FANCYSUIT: {
-      description: "A FANCYSUIT, and it's your size!",
+      description: "a FANCYSUIT, and it's your size!",
     },
     BURRITO: {
-      description: "A chunky BURRITO.",
+      description: "a chunky BURRITO.",
     },
     RUBBERDUCK: {
-      description: "A RUBBERDUCK. How quaint.",
+      description: "a RUBBERDUCK. How quaint.",
     },
     SUNGLASSES: {
-      description: "A pair of dark SUNGLASSES.",
+      description: "a pair of dark SUNGLASSES.",
     },
     SECRETRECIPE: {
-      description: "An index card containing a SECRETRECIPE.",
+      description: "an index card containing a SECRETRECIPE.",
     },
   };
+
+  const SEEK_ITEM = pick(Object.keys(SEEKITEMS));
+  let seekItemFound = false;
 
   const SLEEP_FEELINGS = [
     "refreshed",
@@ -154,7 +151,10 @@
           .join("\t"),
     },
     SEEK: {
-      run: () => "Your search turned up nothing.",
+      run: () => {
+        if (currentRoom !== "CITYPARK") return "Your search turned up nothing.";
+        return `You found ${SEEKITEMS[SEEK_ITEM].description}\n\nCongratulations!`;
+      },
     },
   };
 
