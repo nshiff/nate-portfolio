@@ -16,10 +16,6 @@ function driver(page: import('@playwright/test').Page) {
   };
 }
 
-/* Six rooms: a spine (BEDROOM <-> LIVINGROOM <-> FRONTLAWN) with a
-   three-way fork at the end (DOWNTOWN / CITYPARK / FOREST, each a
-   dead end). No case, no clock, no scanner -- just navigation. */
-
 const ROOMS = ['BEDROOM', 'LIVINGROOM', 'FRONTLAWN', 'DOWNTOWN', 'CITYPARK', 'FOREST'];
 
 test('the session intro shows the help tip then the BEDROOM', async ({ page }) => {
@@ -65,7 +61,7 @@ test('walk rejects a non-adjacent room', async ({ page }) => {
   await page.goto(GAME);
   const { run, text } = driver(page);
   await run('walk CITYPARK'); // not adjacent to BEDROOM
-  expect(await text()).toContain('Cannot reach CITYPARK from here.');
+  expect(await text()).toContain('Cannot walk to CITYPARK from here.');
 });
 
 test('map lists only visited rooms, marking the current one', async ({ page }) => {

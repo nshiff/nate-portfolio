@@ -140,7 +140,7 @@
           (id) => id === target,
         );
         if (!destination) {
-          return `Cannot reach ${target} from here.`;
+          return `Cannot walk to ${target} from here.`;
         }
         currentRoom = destination;
         visited.add(destination);
@@ -163,7 +163,7 @@
     HELP: {
       run: () =>
         Object.keys(COMMANDS)
-          .sort((a, b) => (a < b ? -1 : 1))
+          .sort()
           .join("\t"),
     },
     SEEK: {
@@ -174,6 +174,9 @@
         }
         return `You found ${SEEKITEMS[item].description}\n\n${pick(SEEK_PRAISES)}`;
       },
+    },
+    ABOUT: {
+      run: () => "Search Party\nA Zork-like sandbox game. Developed for the web by Nate Shiff with Claude Code.",
     },
   };
 
