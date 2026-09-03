@@ -16,10 +16,6 @@
     white: "#e8e8e8",
   };
 
-  function pick(list) {
-    return list[Math.floor(Math.random() * list.length)];
-  }
-
   function sample(list, count) {
     const pool = [...list];
     const out = [];
@@ -34,13 +30,11 @@
       description:
         "A small BEDROOM.\n\nSeveral rare playing cards sit unsleeved on the desk.",
       adjacent: ["LIVINGROOM"],
-      allowSleep: true,
     },
     LIVINGROOM: {
       description:
         "A cozy LIVINGROOM.\n\nA beautiful geometric rug adorns the LIVINGROOM.",
       adjacent: ["BEDROOM", "FRONTLAWN"],
-      allowSleep: true,
     },
     FRONTLAWN: {
       description:
@@ -59,7 +53,6 @@
     FOREST: {
       description: "A tranquil FOREST.\n\nThat is one big tree.",
       adjacent: ["FRONTLAWN"],
-      allowSleep: true,
     },
   };
 
@@ -97,14 +90,6 @@
 
   const foundItems = [];
 
-  const SLEEP_FEELINGS = [
-    "refreshed",
-    "great, actually",
-    "terrible",
-    "groggy",
-    "suspiciously good",
-  ];
-
   function describeRoom(id) {
     const room = ROOMS[id];
     return `Location:\n${room.description}\n\nAdjacent:\n${[...room.adjacent].sort().join(", ")}`;
@@ -121,14 +106,6 @@
           .sort()
           .map((id) => `${id}${id === currentRoom ? " (you are here)" : ""}`)
           .join("\n"),
-    },
-    SLEEP: {
-      run: () => {
-        if (!ROOMS[currentRoom].allowSleep) {
-          return "You can't sleep here.";
-        }
-        return `You awake feeling ${pick(SLEEP_FEELINGS)}.`;
-      },
     },
     WALK: {
       run: (arg) => {

@@ -78,23 +78,6 @@ test('map lists only visited rooms, marking the current one', async ({ page }) =
   expect(mapBlock, 'unvisited rooms are hidden').not.toContain('FRONTLAWN');
 });
 
-test('sleep works where allowed and is refused on the FRONTLAWN', async ({ page }) => {
-  await page.goto(GAME);
-  const { run, text } = driver(page);
-
-  await run('sleep'); // BEDROOM allows it
-  expect(await text()).toContain('You awake feeling');
-
-  await run('walk LIVINGROOM');
-  await run('walk FRONTLAWN');
-  await run('sleep');
-  expect(await text()).toContain("You can't sleep here.");
-
-  await run('walk FOREST');
-  await run('sleep'); // FOREST allows it
-  expect(await text()).toContain('You awake feeling');
-});
-
 test('color sets --fg for the session and resets to green on reload', async ({ page }) => {
   await page.goto(GAME);
   const { run } = driver(page);
