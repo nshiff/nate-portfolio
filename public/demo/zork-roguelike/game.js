@@ -116,18 +116,24 @@
     },
     SLEEP: {
       run: () => {
-        if (!ROOMS[currentRoom].allowSleep) return "You can't sleep here.";
+        if (!ROOMS[currentRoom].allowSleep) {
+          return "You can't sleep here.";
+        }
         return `You awake feeling ${pick(SLEEP_FEELINGS)}.`;
       },
     },
     WALK: {
       run: (arg) => {
         const target = (arg || "").trim().toUpperCase();
-        if (!target) return "Try: WALK ROOMNAME";
+        if (!target) {
+          return "Try: WALK ROOMNAME";
+        }
         const destination = ROOMS[currentRoom].adjacent.find(
           (id) => id === target,
         );
-        if (!destination) return `Cannot reach ${target} from here.`;
+        if (!destination) {
+          return `Cannot reach ${target} from here.`;
+        }
         currentRoom = destination;
         visited.add(destination);
         return describeRoom(destination);
@@ -136,10 +142,12 @@
     COLOR: {
       run: (arg) => {
         const name = (arg || "").trim().toLowerCase();
-        if (!name)
+        if (!name) {
           return "Try: COLOR COLORNAME\nAvailable colors: GREEN, AMBER, WHITE";
-        if (!COLORS[name])
+        }
+        if (!COLORS[name]) {
           return `Unknown color: ${name}. Try green, amber, or white.`;
+        }
         setColor(name);
         return `Color set to ${name}.`;
       },
@@ -152,14 +160,18 @@
     },
     SEEK: {
       run: () => {
-        if (currentRoom !== "CITYPARK") return "Your search turned up nothing.";
+        if (currentRoom !== "CITYPARK") {
+          return "Your search turned up nothing.";
+        }
         return `You found ${SEEKITEMS[SEEK_ITEM].description}\n\nCongratulations!`;
       },
     },
   };
 
   function setColor(name) {
-    if (!COLORS[name]) return;
+    if (!COLORS[name]) {
+      return;
+    }
     root.style.setProperty("--fg", COLORS[name]);
   }
 
@@ -180,7 +192,9 @@
 
   function handle(raw) {
     const trimmed = raw.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      return;
+    }
     print("\n");
     printEcho(trimmed);
 
@@ -196,7 +210,9 @@
   }
 
   input.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter") return;
+    if (e.key !== "Enter") {
+      return;
+    }
     const value = input.value;
     input.value = "";
     handle(value);
