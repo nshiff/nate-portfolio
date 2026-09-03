@@ -1,7 +1,6 @@
 /* ============================================================
    Search Party
-   A small text world: six rooms, a short spine with a fork at
-   the end. Walk it slowly. No case, no clock — just the town.
+   A small Zork-like text world.
    ============================================================ */
 
 (() => {
@@ -21,11 +20,14 @@
     return list[Math.floor(Math.random() * list.length)];
   }
 
-  /* ----------------------------------------------------------
-     World. Six rooms. The key IS the display name — uppercase,
-     single-token. `description` shows on entry (kept short,
-     mobile-first, spells the room name in caps as flavour).
-     ---------------------------------------------------------- */
+  function sample(list, count) {
+    const pool = [...list];
+    const out = [];
+    while (out.length < count && pool.length) {
+      out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    }
+    return out;
+  }
 
   const ROOMS = {
     BEDROOM: {
@@ -42,7 +44,7 @@
     },
     FRONTLAWN: {
       description:
-        "The FRONTLAWN gives you a good look at the neighborhood.\n\nThe grass could use a trim.",
+        "The grass on the FRONTLAWN could use a trim.",
       adjacent: ["LIVINGROOM", "DOWNTOWN", "CITYPARK", "FOREST"],
     },
     DOWNTOWN: {
@@ -86,8 +88,12 @@
     },
   };
 
-  const SEEK_ITEM = pick(Object.keys(SEEKITEMS));
-  let seekItemFound = false;
+  const SEEK_PLACEMENTS = {};
+  const seekRooms = sample(Object.keys(ROOMS), 3);
+  const seekItems = sample(Object.keys(SEEKITEMS), 3);
+  seekRooms.forEach((roomId, i) => {
+    SEEK_PLACEMENTS[roomId] = seekItems[i];
+  });
 
   const SEEK_PRAISE = ["Congratulations!", "Way to go!", "Nice sleuthing!"];
 
@@ -162,10 +168,11 @@
     },
     SEEK: {
       run: () => {
-        if (currentRoom !== "CITYPARK") {
+        const item = SEEK_PLACEMENTS[currentRoom];
+        if (!item) {
           return "Your search turned up nothing.";
         }
-        return `You found ${SEEKITEMS[SEEK_ITEM].description}\n\n${pick(SEEK_PRAISE)}`;
+        return `You found ${SEEKITEMS[item].description}\n\n${pick(SEEK_PRAISE)}`;
       },
     },
   };
