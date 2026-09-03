@@ -29,21 +29,25 @@
 
   const ROOMS = {
     BEDROOM: {
-      description: "A small BEDROOM.\n\nSeveral rare playing cards sit unsleeved on the desk.",
+      description:
+        "A small BEDROOM.\n\nSeveral rare playing cards sit unsleeved on the desk.",
       adjacent: ["LIVINGROOM"],
       allowSleep: true,
     },
     LIVINGROOM: {
-      description: "A cozy LIVINGROOM.\n\nA beautiful geometric rug adorns the LIVINGROOM.",
+      description:
+        "A cozy LIVINGROOM.\n\nA beautiful geometric rug adorns the LIVINGROOM.",
       adjacent: ["BEDROOM", "FRONTLAWN"],
       allowSleep: true,
     },
     FRONTLAWN: {
-      description: "The FRONTLAWN gives you a good look at the neighborhood.\n\nThe grass could use a trim.",
+      description:
+        "The FRONTLAWN gives you a good look at the neighborhood.\n\nThe grass could use a trim.",
       adjacent: ["LIVINGROOM", "DOWNTOWN", "CITYPARK", "FOREST"],
     },
     DOWNTOWN: {
-      description: "Feel the hustle and bustle of DOWNTOWN.\n\nAnyone who's anyone is downtown!",
+      description:
+        "Feel the hustle and bustle of DOWNTOWN.\n\nAnyone who's anyone is downtown!",
       adjacent: ["FRONTLAWN"],
     },
     CITYPARK: {
@@ -69,22 +73,22 @@
 
   const SEEKITEMS = {
     GOLDBARS: {
-      description: "A tidy stack of gold bars. Heavier than they look.",
+      description: "A small stack of solid GOLDBARS.",
     },
     FANCYSUIT: {
-      description: "A three-piece suit in your exact size. Suspicious.",
+      description: "A FANCYSUIT, and it's your size!",
     },
     BURRITO: {
-      description: "A warm burrito wrapped in foil. Someone's loss.",
+      description: "A chunky BURRITO.",
     },
     RUBBERDUCK: {
-      description: "A small rubber duck. It has seen things.",
+      description: "A RUBBERDUCK. How quaint.",
     },
     SUNGLASSES: {
-      description: "Sunglasses that make everything look cooler.",
+      description: "A pair of dark SUNGLASSES.",
     },
     SECRETRECIPE: {
-      description: "A folded index card marked \"DO NOT LOSE.\"",
+      description: "An index card containing a SECRETRECIPE.",
     },
   };
 
@@ -106,11 +110,12 @@
       run: () => describeRoom(currentRoom),
     },
     MAP: {
-      run: () => Object.keys(ROOMS)
-        .filter((id) => visited.has(id))
-        .sort()
-        .map((id) => `${id}${id === currentRoom ? " (you are here)" : ""}`)
-        .join("\n"),
+      run: () =>
+        Object.keys(ROOMS)
+          .filter((id) => visited.has(id))
+          .sort()
+          .map((id) => `${id}${id === currentRoom ? " (you are here)" : ""}`)
+          .join("\n"),
     },
     SLEEP: {
       run: () => {
@@ -122,7 +127,9 @@
       run: (arg) => {
         const target = (arg || "").trim().toUpperCase();
         if (!target) return "Try: WALK ROOMNAME";
-        const destination = ROOMS[currentRoom].adjacent.find((id) => id === target);
+        const destination = ROOMS[currentRoom].adjacent.find(
+          (id) => id === target,
+        );
         if (!destination) return `Cannot reach ${target} from here.`;
         currentRoom = destination;
         visited.add(destination);
@@ -132,16 +139,19 @@
     COLOR: {
       run: (arg) => {
         const name = (arg || "").trim().toLowerCase();
-        if (!name) return "Try: COLOR COLORNAME\nAvailable colors: GREEN, AMBER, WHITE";
-        if (!COLORS[name]) return `Unknown color: ${name}. Try green, amber, or white.`;
+        if (!name)
+          return "Try: COLOR COLORNAME\nAvailable colors: GREEN, AMBER, WHITE";
+        if (!COLORS[name])
+          return `Unknown color: ${name}. Try green, amber, or white.`;
         setColor(name);
         return `Color set to ${name}.`;
       },
     },
     HELP: {
-      run: () => Object.keys(COMMANDS)
-        .sort((a, b) => a < b ? -1 : 1)
-        .join("\t"),
+      run: () =>
+        Object.keys(COMMANDS)
+          .sort((a, b) => (a < b ? -1 : 1))
+          .join("\t"),
     },
     SEEK: {
       run: () => "Your search turned up nothing.",
@@ -177,7 +187,9 @@
     const [name, ...rest] = trimmed.split(/\s+/);
     const command = COMMANDS[name.toUpperCase()];
     if (!command) {
-      print(`Unknown command: ${trimmed.toUpperCase()}.\nRun HELP to list available commands.`);
+      print(
+        `Unknown command: ${trimmed.toUpperCase()}.\nRun HELP to list available commands.`,
+      );
       return;
     }
     print(command.run(rest.join(" ")));
@@ -190,7 +202,7 @@
     handle(value);
   });
 
-  print('Run help or HELP to list available commands.\n\n');
+  print("Run help or HELP to list available commands.\n\n");
   print(describeRoom(START_ROOM));
   input.focus();
 })();
