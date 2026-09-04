@@ -140,6 +140,44 @@ test('SEEK finds an item in exactly three of the six rooms', async ({ page }) =>
   expect(misses, 'three rooms held nothing').toBe(3);
 });
 
+test('a second SEEK in a room that held an item reports nothing else to find', async ({ page }) => {
+  await page.goto(GAME);
+  const { run, text } = driver(page);
+
+  // Sweep the map, SEEKing once per room, to locate a room that holds an item.
+  const legs: Array<{ walk: string[] }> = [
+    { walk: [] },
+    { walk: ['walk LIVINGROOM'] },
+    { walk: ['walk FRONTLAWN'] },
+    { walk: ['walk DOWNTOWN'] },
+    { walk: ['walk FRONTLAWN', 'walk CITYPARK'] },
+    { walk: ['walk FRONTLAWN', 'walk FOREST'] },
+  ];
+
+  let foundRoomReached = false;
+  for (const leg of legs) {
+    for (const step of leg.walk) {
+      await run(step);
+    }
+    let before = (await text()).length;
+    await run('seek');
+    if (!(await text()).slice(before).includes('You found')) {
+      continue;
+    }
+    foundRoomReached = true;
+
+    // A repeat SEEK in the same room no longer re-prints the item.
+    before = (await text()).length;
+    await run('seek');
+    const second = (await text()).slice(before);
+    expect(second).toContain('Nothing else to find here.');
+    expect(second).not.toContain('You found');
+    break;
+  }
+
+  expect(foundRoomReached, 'the sweep reached a room holding an item').toBe(true);
+});
+
 test('every room key is a single uppercase token and the graph is symmetric', async ({ page }) => {
   await page.goto(GAME);
   // walk everywhere, then assert map shows all six once each visited

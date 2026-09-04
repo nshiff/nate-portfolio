@@ -149,9 +149,10 @@
         if (!item) {
           return "Your search turned up nothing.";
         }
-        if (!foundItems.includes(item)) {
-          foundItems.push(item);
+        if (foundItems.includes(item)) {
+          return "Nothing else to find here.";
         }
+        foundItems.push(item);
         return `You found ${SEEKITEMS[item].description}`;
       },
     },
