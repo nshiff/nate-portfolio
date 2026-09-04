@@ -70,8 +70,8 @@
     SILVERCOIN: {
       description: "a shiny SILVERCOIN.",
     },
-    RUBBERDUCK: {
-      description: "a yellow RUBBERDUCK. How quaint.",
+    WRISTWATCH: {
+      description: "an expensive-looking WRISTWATCH.",
     },
     SUNGLASSES: {
       description: "a pair of reflective SUNGLASSES.",
