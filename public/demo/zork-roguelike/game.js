@@ -71,7 +71,7 @@
       description: "a shiny SILVERCOIN.",
     },
     WRISTWATCH: {
-      description: "an expensive-looking WRISTWATCH.",
+      description: "a snazzy WRISTWATCH.",
     },
     SUNGLASSES: {
       description: "a pair of reflective SUNGLASSES.",
