@@ -28,7 +28,7 @@
   const ROOMS = {
     BEDROOM: {
       description:
-        "A small BEDROOM.\n\nSeveral rare playing cards sit unsleeved on the desk.",
+        "A small BEDROOM.\n\nYou consider walking to the LIVINGROOM.",
       adjacent: ["LIVINGROOM"],
     },
     LIVINGROOM: {
@@ -96,9 +96,6 @@
   }
 
   const COMMANDS = {
-    LOOK: {
-      run: () => describeRoom(currentRoom),
-    },
     MAP: {
       run: () =>
         Object.keys(ROOMS)
@@ -219,7 +216,7 @@
     handle(value);
   });
 
-  print("Run help or HELP to list available commands.\n\n");
+  print("Welcome! Run HELP to list available commands.\n\n");
   print(describeRoom(START_ROOM));
   input.focus();
 })();

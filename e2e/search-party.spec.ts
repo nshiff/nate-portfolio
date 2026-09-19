@@ -28,18 +28,6 @@ test('the session intro shows the help tip then the BEDROOM', async ({ page }) =
   expect(intro).toContain('LIVINGROOM');
 });
 
-test('look re-prints the current room description and adjacent list', async ({ page }) => {
-  await page.goto(GAME);
-  const { run, text } = driver(page);
-  await run('walk LIVINGROOM');
-  await run('look');
-  const full = await text();
-  const lookBlock = full.slice(full.lastIndexOf('> LOOK') + '> LOOK'.length);
-  expect(lookBlock).toContain('A cozy LIVINGROOM.');
-  expect(lookBlock).toContain('Adjacent:');
-  expect(lookBlock).toContain('BEDROOM, FRONTLAWN');
-});
-
 test('walk the spine out to each fork leaf and back', async ({ page }) => {
   await page.goto(GAME);
   const { run, output, text } = driver(page);
