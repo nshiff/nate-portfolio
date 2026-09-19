@@ -154,7 +154,7 @@
       },
     },
     ABOUT: {
-      run: () => "Search Party\nA Zork-like sandbox game. Developed for the web by Nate Shiff with Claude Code.",
+      run: () => "Search Party\nA Zork-like sandbox game. Developed for the web by Nate with Claude Code.",
     },
     ITEMS: {
       run: () => {
