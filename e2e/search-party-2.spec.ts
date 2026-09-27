@@ -81,8 +81,12 @@ test('the terminal takes on each zone\'s colours as the player crosses into it',
   const { output, run } = terminal(page);
   const screen = output.locator('..');
 
-  await expect(screen).toHaveCSS('background-color', 'rgb(10, 10, 10)'); // SHIP
-  for (const room of ['CORRIDOR', 'ENGINEERING', 'AIRLOCK', 'HANGAR', 'SHUTTLE']) {
+  await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // BEDROOM
+  await expect(screen).toHaveCSS('background-color', 'rgb(10, 10, 10)');
+  await run('walk CORRIDOR');
+  await expect(screen).toHaveCSS('color', 'rgb(51, 255, 102)'); // SHIP
+  await expect(screen).toHaveCSS('background-color', 'rgb(10, 10, 10)');
+  for (const room of ['ENGINEERING', 'AIRLOCK', 'HANGAR', 'SHUTTLE']) {
     await run(`walk ${room}`);
   }
   await expect(screen).toHaveCSS('background-color', 'rgb(53, 40, 121)'); // SHUTTLE

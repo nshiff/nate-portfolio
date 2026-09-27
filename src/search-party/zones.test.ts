@@ -39,7 +39,8 @@ describe('zones', () => {
     }
   });
 
-  it('give the SHUTTLE a zone of its own', () => {
+  it('give the BEDROOM and the SHUTTLE a zone of their own', () => {
+    expect(roomsIn('BEDROOM')).toEqual(['BEDROOM']);
     expect(roomsIn('SHUTTLE')).toEqual(['SHUTTLE']);
   });
 
@@ -71,10 +72,12 @@ describe('zones', () => {
 
 describe('currentTheme', () => {
   it('follows the player from zone to zone', () => {
-    expect(currentTheme(START)).toBe(ZONES.SHIP);
+    expect(currentTheme(START)).toBe(ZONES.BEDROOM);
 
-    let state = START;
-    for (const step of ['walk CORRIDOR', 'walk ENGINEERING', 'walk AIRLOCK', 'walk HANGAR', 'walk SHUTTLE']) {
+    let state = respond(START, 'walk CORRIDOR')!.state;
+    expect(currentTheme(state)).toBe(ZONES.SHIP);
+
+    for (const step of ['walk ENGINEERING', 'walk AIRLOCK', 'walk HANGAR', 'walk SHUTTLE']) {
       state = respond(state, step)!.state;
     }
     expect(currentTheme(state)).toBe(ZONES.SHUTTLE);

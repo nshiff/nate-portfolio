@@ -18,7 +18,7 @@ export const ROOMS = {
   // --- The ship ---
   BEDROOM: {
     description: 'You find yourself in a tidy BEDROOM.',
-    zone: 'SHIP',
+    zone: 'BEDROOM',
     adjacent: ['CORRIDOR'],
     item: 'SECRETRECIPE',
   },
