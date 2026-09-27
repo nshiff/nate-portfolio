@@ -1,4 +1,6 @@
 import { Link } from 'react-router';
+import { Terminal } from '../search-party/Terminal';
+import { WELCOME, respond } from '../search-party/game';
 
 export function Project21() {
     return (
@@ -7,6 +9,17 @@ export function Project21() {
                 <Link to="/" style={{ display: 'inline-block', marginBottom: '2rem', color: 'var(--text-secondary)' }}>
                     &larr; Back to Portfolio
                 </Link>
+
+                <div
+                    className="viz-container-21"
+                    style={{
+                        width: '100%',
+                        borderRadius: '12px',
+                        marginBottom: '3rem',
+                        overflow: 'hidden',
+                    }}>
+                    <Terminal intro={WELCOME} onCommand={respond} />
+                </div>
 
                 <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 700, lineHeight: 1.2 }}>Search Party 2.0</h1>
 
@@ -18,7 +31,7 @@ export function Project21() {
 
                 <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px' }}>
                     <p>
-                        A Zork-like text adventure, rebuilt in React. Coming soon.
+                        A Zork-like text adventure, rebuilt in React.
                     </p>
                 </div>
             </div>
