@@ -7,15 +7,26 @@ type Line = {
   text: string;
 };
 
+export type TerminalTheme = {
+  fg: string;
+  bg: string;
+};
+
 type TerminalProps = {
   /** Printed once, before any input. */
   intro: string;
   /** Called with each non-blank submission; returns the text to print, or null to print nothing. */
   onCommand: (input: string) => string | null;
+  /** Text and background colours; a change fades in. */
+  theme?: TerminalTheme;
 };
 
 // Oldest lines are dropped past this, so a long session can't grow the DOM without bound.
 const MAX_LINES = 500;
+
+const DEFAULT_THEME: TerminalTheme = { fg: '#33ff66', bg: '#0a0a0a' };
+
+const FADE = 'background-color 0.4s, color 0.4s, border-color 0.4s';
 
 const TEXT: CSSProperties = {
   fontSize: '1.125rem',
@@ -23,7 +34,7 @@ const TEXT: CSSProperties = {
   lineHeight: 1.6,
 };
 
-export function Terminal({ intro, onCommand }: TerminalProps) {
+export function Terminal({ intro, onCommand, theme = DEFAULT_THEME }: TerminalProps) {
   const [lines, setLines] = useState<Line[]>([{ id: 0, kind: 'output', text: intro }]);
   const [value, setValue] = useState('');
   const [history, setHistory] = useState<string[]>([]);
@@ -100,16 +111,18 @@ export function Terminal({ intro, onCommand }: TerminalProps) {
     <div
       onClick={handleClick}
       style={{
-        '--bg': '#0a0a0a',
-        '--panel': '#111111',
-        '--border': '#2a2a2a',
-        '--fg': '#33ff66',
+        '--fg': theme.fg,
+        '--bg': theme.bg,
+        // The input bar and its border are tints of the theme, so a theme is just two colours.
+        '--panel': 'color-mix(in srgb, var(--fg) 6%, var(--bg))',
+        '--border': 'color-mix(in srgb, var(--fg) 20%, var(--bg))',
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
         background: 'var(--bg)',
         color: 'var(--fg)',
         fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+        transition: FADE,
       } as CSSProperties}
     >
       <div
@@ -145,6 +158,7 @@ export function Terminal({ intro, onCommand }: TerminalProps) {
           borderTop: '1px solid var(--border)',
           background: 'var(--panel)',
           flexShrink: 0,
+          transition: FADE,
         }}
       >
         <span aria-hidden="true" style={{ ...TEXT, marginRight: '0.5rem', userSelect: 'none' }}>&gt;</span>

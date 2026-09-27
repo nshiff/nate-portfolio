@@ -76,6 +76,24 @@ test('walking into a room picks up its item once, and ITEMS remembers it', async
   await expect(last).toHaveText(/^SECRETRECIPE\s+STARCHART$/);
 });
 
+test('the terminal takes on each zone\'s colours as the player crosses into it', async ({ page }) => {
+  await page.goto(PAGE);
+  const { output, run } = terminal(page);
+  const screen = output.locator('..');
+
+  await expect(screen).toHaveCSS('background-color', 'rgb(10, 10, 10)'); // SHIP
+  for (const room of ['CORRIDOR', 'ENGINEERING', 'AIRLOCK', 'HANGAR', 'SHUTTLE']) {
+    await run(`walk ${room}`);
+  }
+  await expect(screen).toHaveCSS('background-color', 'rgb(53, 40, 121)'); // SHUTTLE
+  await run('walk MARSPORT');
+  await expect(screen).toHaveCSS('background-color', 'rgb(92, 10, 10)'); // MARS
+  await expect(screen).toHaveCSS('color', 'rgb(255, 244, 236)');
+  await run('walk SHUTTLE');
+  await run('walk HANGAR');
+  await expect(screen).toHaveCSS('background-color', 'rgb(10, 10, 10)'); // back aboard
+});
+
 test('arrow keys step through command history', async ({ page }) => {
   await page.goto(PAGE);
   const { input, run } = terminal(page);

@@ -1,7 +1,8 @@
 import { COMMANDS } from './commands';
 import type { ItemId } from './items';
-import { enterRoom } from './rooms';
+import { ROOMS, enterRoom } from './rooms';
 import type { RoomId } from './rooms';
+import { ZONES } from './zones';
 
 export type GameState = {
   room: RoomId;
@@ -14,6 +15,11 @@ const opening = enterRoom({ room: 'BEDROOM', found: [] }, 'BEDROOM');
 export const START: GameState = opening.state;
 
 export const INTRO = `Welcome! Run HELP to list available commands.\n\n${opening.output}`;
+
+/** The terminal colours for the zone the player is in. */
+export function currentTheme(state: GameState) {
+  return ZONES[ROOMS[state.room].zone];
+}
 
 /**
  * Turn one line of player input into the text to print and the state that follows.
