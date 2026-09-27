@@ -173,6 +173,14 @@ export const projects: Project[] = [
     background: 'linear-gradient(135deg, #05080a 0%, #0d1f16 100%)',
     category: 'Miscellaneous',
   },
+  {
+    id: '21',
+    title: 'Search Party 2.0',
+    description: 'A Zork-like text adventure, rebuilt in React.',
+    emoji: '⌨️',
+    background: 'linear-gradient(135deg, #05080a 0%, #0d1a1f 100%)',
+    category: 'Miscellaneous',
+  },
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);
