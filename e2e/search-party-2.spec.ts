@@ -16,10 +16,11 @@ function terminal(page: import('@playwright/test').Page) {
   };
 }
 
-test('the session opens with the welcome line and a focused input', async ({ page }) => {
+test('the session opens with the welcome line, the BEDROOM, and a focused input', async ({ page }) => {
   await page.goto(PAGE);
   const { output, input } = terminal(page);
-  await expect(output).toHaveText('Welcome! Run HELP to list available commands.');
+  await expect(output).toContainText('Welcome! Run HELP to list available commands.');
+  await expect(output).toContainText('You find yourself in a tidy BEDROOM.');
   await expect(input).toBeFocused();
 });
 
@@ -28,7 +29,7 @@ test('a command is echoed, answered, and the input cleared', async ({ page }) =>
   const { output, input, run } = terminal(page);
   await run('help');
   await expect(output).toContainText('> help');
-  await expect(output.locator('div').last()).toHaveText('HELP');
+  await expect(output.locator('div').last()).toHaveText(/^HELP\s+ITEMS\s+SEEK$/);
   await expect(input).toHaveValue('');
 });
 
@@ -44,6 +45,21 @@ test('blank input prints nothing', async ({ page }) => {
   const { output, run } = terminal(page);
   await run('   ');
   await expect(output.locator('div')).toHaveCount(1);
+});
+
+test('an item found with SEEK stays found across commands', async ({ page }) => {
+  await page.goto(PAGE);
+  const { output, run } = terminal(page);
+  const last = output.locator('div').last();
+
+  await run('items');
+  await expect(last).toHaveText('No items found.');
+  await run('seek');
+  await expect(last).toHaveText('You found a worn index card containing a SECRETRECIPE.');
+  await run('seek');
+  await expect(last).toHaveText('Nothing else to find here.');
+  await run('items');
+  await expect(last).toHaveText('SECRETRECIPE');
 });
 
 test('arrow keys step through command history', async ({ page }) => {
