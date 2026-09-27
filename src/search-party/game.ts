@@ -1,6 +1,6 @@
 import { COMMANDS } from './commands';
 import type { ItemId } from './items';
-import { describeRoom } from './rooms';
+import { enterRoom } from './rooms';
 import type { RoomId } from './rooms';
 
 export type GameState = {
@@ -8,12 +8,12 @@ export type GameState = {
   found: ItemId[];
 };
 
-export const START: GameState = {
-  room: 'BEDROOM',
-  found: [],
-};
+// Starting the game counts as entering the BEDROOM, so its item is picked up at once.
+const opening = enterRoom({ room: 'BEDROOM', found: [] }, 'BEDROOM');
 
-export const INTRO = `Welcome! Run HELP to list available commands.\n\n${describeRoom(START.room)}`;
+export const START: GameState = opening.state;
+
+export const INTRO = `Welcome! Run HELP to list available commands.\n\n${opening.output}`;
 
 /**
  * Turn one line of player input into the text to print and the state that follows.

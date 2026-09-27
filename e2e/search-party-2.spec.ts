@@ -30,7 +30,7 @@ test('a command is echoed, answered, and the input cleared', async ({ page }) =>
   const { output, input, run } = terminal(page);
   await run('help');
   await expect(output).toContainText('> help');
-  await expect(output.locator('div').last()).toHaveText(/^HELP\s+ITEMS\s+SEEK\s+WALK$/);
+  await expect(output.locator('div').last()).toHaveText(/^HELP\s+ITEMS\s+WALK$/);
   await expect(input).toHaveValue('');
 });
 
@@ -48,22 +48,15 @@ test('blank input prints nothing', async ({ page }) => {
   await expect(output.locator('div')).toHaveCount(1);
 });
 
-test('an item found with SEEK stays found across commands', async ({ page }) => {
+test('the opening screen hands over the SECRETRECIPE', async ({ page }) => {
   await page.goto(PAGE);
   const { output, run } = terminal(page);
-  const last = output.locator('div').last();
-
+  await expect(output).toContainText('You find a worn index card containing a SECRETRECIPE.');
   await run('items');
-  await expect(last).toHaveText('No items found.');
-  await run('seek');
-  await expect(last).toHaveText('You find a worn index card containing a SECRETRECIPE.');
-  await run('seek');
-  await expect(last).toHaveText('Nothing else to find here.');
-  await run('items');
-  await expect(last).toHaveText('SECRETRECIPE');
+  await expect(output.locator('div').last()).toHaveText('SECRETRECIPE');
 });
 
-test('WALK moves between rooms, and the room decides what SEEK finds', async ({ page }) => {
+test('walking into a room picks up its item once, and ITEMS remembers it', async ({ page }) => {
   await page.goto(PAGE);
   const { output, run } = terminal(page);
   const last = output.locator('div').last();
@@ -72,10 +65,15 @@ test('WALK moves between rooms, and the room decides what SEEK finds', async ({ 
   await expect(last).toHaveText('Cannot walk to BRIDGE from here.');
   await run('walk corridor');
   await expect(last).toContainText('A narrow CORRIDOR.');
+  await expect(last).not.toContainText('You find');
+  await run('walk bridge');
+  await expect(last).toContainText('You find a folded STARCHART of an uncharted sector.');
+  await run('walk corridor');
   await run('walk bridge');
   await expect(last).toContainText('The BRIDGE.');
-  await run('seek');
-  await expect(last).toHaveText('You find a folded STARCHART of an uncharted sector.');
+  await expect(last, 'no second pickup').not.toContainText('You find');
+  await run('items');
+  await expect(last).toHaveText(/^SECRETRECIPE\s+STARCHART$/);
 });
 
 test('arrow keys step through command history', async ({ page }) => {

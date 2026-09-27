@@ -22,8 +22,15 @@ function play(...inputs: string[]) {
 const rooms: [string, Room][] = Object.entries(ROOMS);
 
 describe('the map', () => {
-  it('has six rooms', () => {
-    expect(rooms).toHaveLength(6);
+  it('has 64 rooms and 10 items', () => {
+    expect(rooms).toHaveLength(64);
+    expect(Object.keys(ITEMS)).toHaveLength(10);
+  });
+
+  it('keeps every Adjacent line short enough for a phone', () => {
+    for (const [id, room] of rooms) {
+      expect(room.adjacent.length, id).toBeLessThanOrEqual(6);
+    }
   });
 
   it('names every room and item with a single uppercase token', () => {
@@ -67,22 +74,24 @@ describe('the map', () => {
 });
 
 describe('INTRO', () => {
-  it('welcomes the player, then describes the BEDROOM and its neighbour', () => {
+  it('welcomes the player, then describes the BEDROOM, its item, and its neighbour', () => {
     expect(INTRO).toBe(
       'Welcome! Run HELP to list available commands.\n\n' +
-      'You find yourself in a tidy BEDROOM.\n\nAdjacent:\nCORRIDOR',
+      'You find yourself in a tidy BEDROOM.\n\n' +
+      'You find a worn index card containing a SECRETRECIPE.\n\n' +
+      'Adjacent:\nCORRIDOR',
     );
   });
 });
 
 describe('respond', () => {
   it('lists the available commands for HELP, A-Z', () => {
-    expect(play('HELP').output).toBe('HELP\tITEMS\tSEEK\tWALK');
+    expect(play('HELP').output).toBe('HELP\tITEMS\tWALK');
   });
 
   it('matches command names case-insensitively and ignores surrounding space', () => {
-    expect(play('help').output).toBe('HELP\tITEMS\tSEEK\tWALK');
-    expect(play('  Help  ').output).toBe('HELP\tITEMS\tSEEK\tWALK');
+    expect(play('help').output).toBe('HELP\tITEMS\tWALK');
+    expect(play('  Help  ').output).toBe('HELP\tITEMS\tWALK');
   });
 
   it('reports an unknown command in caps, with the HELP tip', () => {
@@ -98,7 +107,6 @@ describe('respond', () => {
 
   it('never mutates the state it is given', () => {
     const before = structuredClone(START);
-    respond(START, 'seek');
     respond(START, 'walk CORRIDOR');
     expect(START).toEqual(before);
   });
@@ -114,7 +122,7 @@ describe('WALK', () => {
     expect(state.room).toBe('CORRIDOR');
     expect(output).toBe(
       'A narrow CORRIDOR. The lights hum softly overhead.\n\n' +
-      'Adjacent:\nBEDROOM, BRIDGE, ENGINEERING, GALLEY',
+      'Adjacent:\nBEDROOM, BRIDGE, ENGINEERING, GALLEY, TURBOLIFT',
     );
   });
 
@@ -141,38 +149,38 @@ describe('WALK', () => {
   });
 });
 
-describe('SEEK and ITEMS', () => {
-  it('starts with no items', () => {
-    expect(play('items').output).toBe('No items found.');
+describe('picking up items', () => {
+  it('starts with the SECRETRECIPE from the BEDROOM', () => {
+    expect(START.found).toEqual(['SECRETRECIPE']);
+    expect(play('items').output).toBe('SECRETRECIPE');
   });
 
-  it('finds the SECRETRECIPE in the BEDROOM', () => {
-    const { state, output } = play('seek');
-    expect(output).toBe('You find a worn index card containing a SECRETRECIPE.');
+  it('picks up a room\'s item on the first visit, between description and neighbours', () => {
+    const { state, output } = play('walk CORRIDOR', 'walk BRIDGE');
+    expect(output).toBe(
+      'The BRIDGE. Stars drift slowly past the viewscreen.\n\n' +
+      'You find a folded STARCHART of an uncharted sector.\n\n' +
+      'Adjacent:\nCOMMSROOM, CORRIDOR, OBSERVATORY',
+    );
+    expect(state.found).toEqual(['SECRETRECIPE', 'STARCHART']);
+  });
+
+  it('finds nothing new on a return visit', () => {
+    const { state, output } = play('walk CORRIDOR', 'walk BRIDGE', 'walk CORRIDOR', 'walk BRIDGE');
+    expect(output).not.toContain('You find');
+    expect(state.found).toEqual(['SECRETRECIPE', 'STARCHART']);
+  });
+
+  it('says nothing about items in a room without one', () => {
+    const { state, output } = play('walk CORRIDOR');
+    expect(output).not.toContain('You find');
     expect(state.found).toEqual(['SECRETRECIPE']);
-  });
-
-  it('finds an item only once', () => {
-    const { state, output } = play('seek', 'seek');
-    expect(output).toBe('Nothing else to find here.');
-    expect(state.found).toEqual(['SECRETRECIPE']);
-  });
-
-  it('turns up nothing in a room without an item', () => {
-    const { state, output } = play('walk CORRIDOR', 'seek');
-    expect(output).toBe('Your search turned up nothing.');
-    expect(state.found).toEqual([]);
-  });
-
-  it('finds the item placed in the room you are in', () => {
-    expect(play('walk CORRIDOR', 'walk BRIDGE', 'seek').state.found).toEqual(['STARCHART']);
   });
 
   it('lists found items A-Z', () => {
     expect(play(
-      'seek',
-      'walk CORRIDOR', 'walk ENGINEERING', 'seek',
-      'walk CORRIDOR', 'walk BRIDGE', 'seek',
+      'walk CORRIDOR', 'walk ENGINEERING',
+      'walk CORRIDOR', 'walk BRIDGE',
       'items',
     ).output).toBe('PLASMAWRENCH\nSECRETRECIPE\nSTARCHART');
   });
