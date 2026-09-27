@@ -1,20 +1,7 @@
-import { useState } from 'react';
 import { Link } from 'react-router';
-import { Terminal } from '../search-party/Terminal';
-import { INTRO, START, currentTheme, respond } from '../search-party/game';
+import { SearchParty2 } from '../search-party/SearchParty2';
 
 export function Project21() {
-    const [game, setGame] = useState(START);
-
-    function handleCommand(input: string) {
-        const result = respond(game, input);
-        if (!result) {
-            return null;
-        }
-        setGame(result.state);
-        return result.output;
-    }
-
     return (
         <main style={{ flex: 1, padding: '2rem 0' }}>
             <div className="container">
@@ -30,7 +17,7 @@ export function Project21() {
                         marginBottom: '3rem',
                         overflow: 'hidden',
                     }}>
-                    <Terminal intro={INTRO} onCommand={handleCommand} theme={currentTheme(game)} />
+                    <SearchParty2 />
                 </div>
 
                 <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 700, lineHeight: 1.2 }}>Search Party 2.0</h1>
