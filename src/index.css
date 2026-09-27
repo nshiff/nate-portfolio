@@ -193,6 +193,16 @@ section {
   }
 }
 
+.viz-container-22 {
+  height: 75vh;
+}
+
+@media (min-width: 768px) {
+  .viz-container-22 {
+    min-height: 500px;
+  }
+}
+
 /* Card Interior Components */
 .card-link {
   display: block;

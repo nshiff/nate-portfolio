@@ -181,6 +181,14 @@ export const projects: Project[] = [
     background: 'linear-gradient(135deg, #05080a 0%, #0d1a1f 100%)',
     category: 'Miscellaneous',
   },
+  {
+    id: '22',
+    title: 'Web Audio API demo',
+    description: 'A demo of sound in the browser, via the Web Audio API.',
+    emoji: '🔊',
+    background: 'linear-gradient(135deg, #1a0b2e 0%, #3a1c5c 100%)',
+    category: 'Miscellaneous',
+  },
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);
