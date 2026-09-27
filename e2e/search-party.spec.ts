@@ -22,7 +22,7 @@ test('the session intro shows the help tip then the BEDROOM', async ({ page }) =
   await page.goto(GAME);
   const { text } = driver(page);
   const intro = await text();
-  expect(intro).toContain('Run help or HELP to list available commands.');
+  expect(intro).toContain('Welcome! Run HELP to list available commands.');
   expect(intro).toContain('A small BEDROOM.');
   expect(intro).toContain('Adjacent:');
   expect(intro).toContain('LIVINGROOM');
@@ -42,7 +42,7 @@ test('walk the spine out to each fork leaf and back', async ({ page }) => {
     await run(`walk ${leaf}`);
     await run('walk FRONTLAWN');
   }
-  expect(await text(), 'no move was rejected').not.toContain('Cannot reach');
+  expect(await text(), 'no move was rejected').not.toContain('Cannot walk to');
 });
 
 test('walk rejects a non-adjacent room', async ({ page }) => {
@@ -166,7 +166,7 @@ test('a second SEEK in a room that held an item reports nothing else to find', a
   expect(foundRoomReached, 'the sweep reached a room holding an item').toBe(true);
 });
 
-test('every room key is a single uppercase token and the graph is symmetric', async ({ page }) => {
+test('every room key is a single uppercase token and appears on the map once visited', async ({ page }) => {
   await page.goto(GAME);
   // walk everywhere, then assert map shows all six once each visited
   const { run, text } = driver(page);
