@@ -40,3 +40,7 @@ It's a **small text-adventure world**: two files, `index.html` (dark terminal UI
 - **Terseness / mobile:** The developer — "be very conservative with printing text to the screen; most users are on mobile." Short, mobile-first, no paragraph where a line does.
 - **After any `ROOMS` edit:** `node -c game.js`, and check `adjacent` targets exist and are symmetric.
 - Product copy in `src/pages/Project20.tsx` / `src/data/projects.ts` ("A Zork-like text adventure") is accurate — leave it.
+
+## Project 21 — Search Party 2.0
+
+Project 21 a/k/a Search Party 2.0 is an experiment with building a portfolio piece with Claude Code directly. React was selected as the technology of choice, as a deliberate exception to the iframe-demo default.
