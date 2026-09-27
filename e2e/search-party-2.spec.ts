@@ -21,6 +21,7 @@ test('the session opens with the welcome line, the BEDROOM, and a focused input'
   const { output, input } = terminal(page);
   await expect(output).toContainText('Welcome! Run HELP to list available commands.');
   await expect(output).toContainText('You find yourself in a tidy BEDROOM.');
+  await expect(output).toContainText('Adjacent:');
   await expect(input).toBeFocused();
 });
 
@@ -29,7 +30,7 @@ test('a command is echoed, answered, and the input cleared', async ({ page }) =>
   const { output, input, run } = terminal(page);
   await run('help');
   await expect(output).toContainText('> help');
-  await expect(output.locator('div').last()).toHaveText(/^HELP\s+ITEMS\s+SEEK$/);
+  await expect(output.locator('div').last()).toHaveText(/^HELP\s+ITEMS\s+SEEK\s+WALK$/);
   await expect(input).toHaveValue('');
 });
 
@@ -55,11 +56,26 @@ test('an item found with SEEK stays found across commands', async ({ page }) => 
   await run('items');
   await expect(last).toHaveText('No items found.');
   await run('seek');
-  await expect(last).toHaveText('You found a worn index card containing a SECRETRECIPE.');
+  await expect(last).toHaveText('You find a worn index card containing a SECRETRECIPE.');
   await run('seek');
   await expect(last).toHaveText('Nothing else to find here.');
   await run('items');
   await expect(last).toHaveText('SECRETRECIPE');
+});
+
+test('WALK moves between rooms, and the room decides what SEEK finds', async ({ page }) => {
+  await page.goto(PAGE);
+  const { output, run } = terminal(page);
+  const last = output.locator('div').last();
+
+  await run('walk BRIDGE');
+  await expect(last).toHaveText('Cannot walk to BRIDGE from here.');
+  await run('walk corridor');
+  await expect(last).toContainText('A narrow CORRIDOR.');
+  await run('walk bridge');
+  await expect(last).toContainText('The BRIDGE.');
+  await run('seek');
+  await expect(last).toHaveText('You find a folded STARCHART of an uncharted sector.');
 });
 
 test('arrow keys step through command history', async ({ page }) => {

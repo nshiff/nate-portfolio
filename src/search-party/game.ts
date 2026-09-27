@@ -1,6 +1,6 @@
 import { COMMANDS } from './commands';
 import type { ItemId } from './items';
-import { ROOMS } from './rooms';
+import { describeRoom } from './rooms';
 import type { RoomId } from './rooms';
 
 export type GameState = {
@@ -13,7 +13,7 @@ export const START: GameState = {
   found: [],
 };
 
-export const INTRO = `Welcome! Run HELP to list available commands.\n\n${ROOMS[START.room].description}`;
+export const INTRO = `Welcome! Run HELP to list available commands.\n\n${describeRoom(START.room)}`;
 
 /**
  * Turn one line of player input into the text to print and the state that follows.

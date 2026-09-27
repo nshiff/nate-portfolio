@@ -1,5 +1,5 @@
 import { ITEMS } from './items';
-import { ROOMS } from './rooms';
+import { ROOMS, describeRoom, isRoomId } from './rooms';
 import type { Room } from './rooms';
 import type { GameState } from './game';
 
@@ -26,6 +26,22 @@ export const COMMANDS: Record<string, Command> = {
       return {
         output: `You find ${ITEMS[item].description}`,
         state: { ...state, found: [...state.found, item] },
+      };
+    },
+  },
+  WALK: {
+    run: (state, arg) => {
+      const target = arg.trim().toUpperCase();
+      if (!target) {
+        return { output: 'Try: WALK ROOMNAME' };
+      }
+      const room: Room = ROOMS[state.room];
+      if (!isRoomId(target) || !room.adjacent.includes(target)) {
+        return { output: `Cannot walk to ${target} from here.` };
+      }
+      return {
+        output: describeRoom(target),
+        state: { ...state, room: target },
       };
     },
   },
