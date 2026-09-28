@@ -86,14 +86,13 @@ describe('INTRO', () => {
 
 describe('respond', () => {
   it('lists the available commands for HELP, A-Z', () => {
-    expect(play('HELP').output).toBe('HELP\tITEMS\tWALK');
+    expect(play('HELP').output).toBe('ABOUT\tHELP\tITEMS\tWALK');
   });
 
   it('matches command names case-insensitively and ignores surrounding space', () => {
-    expect(play('help').output).toBe('HELP\tITEMS\tWALK');
-    expect(play('  Help  ').output).toBe('HELP\tITEMS\tWALK');
+    expect(play('help').output).toBe('ABOUT\tHELP\tITEMS\tWALK');
+    expect(play('  Help  ').output).toBe('ABOUT\tHELP\tITEMS\tWALK');
   });
-
   it('reports an unknown command in caps, with the HELP tip', () => {
     expect(play('teleport forest').output).toBe(
       'Unknown command: TELEPORT FOREST.\nRun HELP to list available commands.',

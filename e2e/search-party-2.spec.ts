@@ -30,7 +30,7 @@ test('a command is echoed, answered, and the input cleared', async ({ page }) =>
   const { output, input, run } = terminal(page);
   await run('help');
   await expect(output).toContainText('> help');
-  await expect(output.locator('div').last()).toHaveText(/^HELP\s+ITEMS\s+WALK$/);
+  await expect(output.locator('div').last()).toHaveText(/^ABOUT\s+HELP\s+ITEMS\s+WALK$/);
   await expect(input).toHaveValue('');
 });
 

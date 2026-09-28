@@ -9,6 +9,13 @@ export type Command = {
 
 // The key is the command's name as typed, and doubles as its HELP entry.
 export const COMMANDS: Record<string, Command> = {
+  ABOUT: {
+    run: () => ({
+      output:
+        'Search Party 2.0\n' +
+        'A Zork-like game in React and TypeScript inspired by the original Search Party.',
+    }),
+  },
   HELP: {
     run: () => ({ output: Object.keys(COMMANDS).sort().join('\t') }),
   },
