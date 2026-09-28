@@ -44,6 +44,7 @@ export function Home() {
           />
           <ProjectSection title="Science" projects={projectsByCategory('Science')} />
           <ProjectSection title="Mathematics" projects={projectsByCategory('Mathematics')} />
+          <ProjectSection title="Audio" projects={projectsByCategory('Audio')} />
           <ProjectSection title="Miscellaneous" projects={projectsByCategory('Miscellaneous')} />
         </div>
       </section>

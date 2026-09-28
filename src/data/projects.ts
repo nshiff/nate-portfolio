@@ -5,7 +5,7 @@ export interface Project {
   emoji: string;
   emojiSize?: string;
   background: string;
-  category: 'Science' | 'Mathematics' | 'Miscellaneous';
+  category: 'Science' | 'Mathematics' | 'Audio' | 'Miscellaneous';
   featured?: boolean;
   overlayGrid?: boolean;
   emojiStyle?: React.CSSProperties;
@@ -105,8 +105,24 @@ export const projects: Project[] = [
     description: 'A browser-based modular synthesizer built with React and the Web Audio API, featuring dynamic routing and interactive modules.',
     emoji: '🎛️',
     background: 'linear-gradient(to right, #1f2937, #111827)',
-    category: 'Miscellaneous',
+    category: 'Audio',
     overlayGrid: true,
+  },
+  {
+    id: '16',
+    title: 'Chord Progression Generator',
+    description: 'An interactive tool for generating and exploring chord progressions.',
+    emoji: '🎵',
+    background: 'linear-gradient(135deg, #1a0a2e 0%, #3b1f5e 100%)',
+    category: 'Audio',
+  },
+  {
+    id: '22',
+    title: 'Web Audio API demo',
+    description: 'A demo of sound in the browser, via the Web Audio API.',
+    emoji: '🔊',
+    background: 'linear-gradient(135deg, #1a0b2e 0%, #3a1c5c 100%)',
+    category: 'Audio',
   },
   {
     id: '07',
@@ -142,14 +158,6 @@ export const projects: Project[] = [
     category: 'Miscellaneous',
   },
   {
-    id: '16',
-    title: 'Chord Progression Generator',
-    description: 'An interactive tool for generating and exploring chord progressions.',
-    emoji: '🎵',
-    background: 'linear-gradient(135deg, #1a0a2e 0%, #3b1f5e 100%)',
-    category: 'Miscellaneous',
-  },
-  {
     id: '18',
     title: 'Space-Filling Curves',
     description: 'An interactive visualization of Hilbert, Peano, and Moore space-filling curves across multiple iterations.',
@@ -179,14 +187,6 @@ export const projects: Project[] = [
     description: 'A Zork-like text adventure, rebuilt in React.',
     emoji: '⌨️',
     background: 'linear-gradient(135deg, #05080a 0%, #0d1a1f 100%)',
-    category: 'Miscellaneous',
-  },
-  {
-    id: '22',
-    title: 'Web Audio API demo',
-    description: 'A demo of sound in the browser, via the Web Audio API.',
-    emoji: '🔊',
-    background: 'linear-gradient(135deg, #1a0b2e 0%, #3a1c5c 100%)',
     category: 'Miscellaneous',
   },
 ];
