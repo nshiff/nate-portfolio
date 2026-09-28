@@ -119,7 +119,7 @@ describe('WALK', () => {
     const { state, output } = play('walk LIVINGROOM');
     expect(state.room).toBe('LIVINGROOM');
     expect(output).toBe(
-      'A cozy LIVINGROOM. A sofa faces a wide window.\n\n' +
+      'A geometric rug adorns the LIVINGROOM.\n\n' +
       'Adjacent:\nBEDROOM, HALLWAY',
     );
   });

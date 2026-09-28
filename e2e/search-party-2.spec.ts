@@ -29,7 +29,8 @@ test('a command is echoed, answered, and the input cleared', async ({ page }) =>
   await page.goto(PAGE);
   const { output, input, run } = terminal(page);
   await run('help');
-  await expect(output).toContainText('> help');
+  // The text itself is uppercase (not just CSS), so copying it gives what is shown.
+  await expect(output).toContainText('> HELP');
   await expect(output.locator('div').last()).toHaveText(/^ABOUT\s+HELP\s+ITEMS\s+WALK$/);
   await expect(input).toHaveValue('');
 });
@@ -81,7 +82,7 @@ test('walking moves between adjacent rooms, and refuses the rest', async ({ page
   await run('walk CORRIDOR');
   await expect(last).toHaveText('Cannot walk to CORRIDOR from here.');
   await run('walk livingroom');
-  await expect(last).toContainText('A cozy LIVINGROOM.');
+  await expect(last).toContainText('A geometric rug adorns the LIVINGROOM.');
   await run('walk bedroom');
   await expect(last).toContainText('You find yourself in a tidy BEDROOM.');
 });

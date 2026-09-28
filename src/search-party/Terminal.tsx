@@ -142,10 +142,11 @@ export function Terminal({ intro, onCommand, theme = DEFAULT_THEME }: TerminalPr
           <div
             key={line.id}
             style={line.kind === 'echo'
-              ? { marginTop: '1.6em', opacity: 0.7, textTransform: 'uppercase' }
+              ? { marginTop: '1.6em', opacity: 0.7 }
               : undefined}
           >
-            {line.kind === 'echo' ? `> ${line.text}` : line.text}
+            {/* Uppercased in the text, not with CSS, so a copied echo matches what is shown. */}
+            {line.kind === 'echo' ? `> ${line.text.toUpperCase()}` : line.text}
           </div>
         ))}
       </div>
