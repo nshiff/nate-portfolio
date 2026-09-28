@@ -11,6 +11,8 @@ export type Room = {
   adjacent: string[];
   // Picked up automatically the first time the player enters.
   item?: ItemId;
+  // A room with special rules: a line printed on every entry, after any pickup.
+  onEnter?: (found: ItemId[]) => string;
 };
 
 // The key is the room's display name: uppercase, single token.
@@ -36,7 +38,7 @@ export const ROOMS = {
     description: 'A compact GALLEY. Something smells delicious.',
     zone: 'SHIP',
     adjacent: ['HALLWAY'],
-    item: 'SECRETRECIPE',
+    item: 'ACCESSKEY',
   },
   HANGAR: {
     description: 'A busy HANGAR. A SHUTTLE waits, engines warm.',
@@ -47,6 +49,9 @@ export const ROOMS = {
     description: 'A small SHUTTLE. The console blinks patiently.',
     zone: 'SHUTTLE',
     adjacent: ['HANGAR'],
+    onEnter: (found) => found.includes('ACCESSKEY')
+      ? 'Oh good, you\'ve found the ACCESSKEY.'
+      : 'You\'re missing something ... are you sure you\'ve looked everywhere?',
   },
 } satisfies Record<string, Room>;
 
@@ -58,20 +63,24 @@ export function isRoomId(id: string): id is RoomId {
 
 /**
  * Move the player into a room: describe it, pick up its item if not yet found,
- * then list its neighbours, A-Z.
+ * apply any special rules, then list its neighbours, A-Z.
  */
 export function enterRoom(state: GameState, id: RoomId) {
   const room: Room = ROOMS[id];
   const item = room.item && !state.found.includes(room.item) ? room.item : undefined;
+  const found = item ? [...state.found, item] : state.found;
 
   const output = [room.description];
   if (item) {
     output.push(`You find ${ITEMS[item].description}`);
   }
+  if (room.onEnter) {
+    output.push(room.onEnter(found));
+  }
   output.push(`Adjacent:\n${[...room.adjacent].sort().join(', ')}`);
 
   return {
     output: output.join('\n\n'),
-    state: { room: id, found: item ? [...state.found, item] : state.found },
+    state: { room: id, found },
   };
 }

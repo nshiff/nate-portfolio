@@ -65,13 +65,13 @@ test('walking into a room picks up its item once, and ITEMS remembers it', async
   await run('walk hallway');
   await expect(last).not.toContainText('You find');
   await run('walk galley');
-  await expect(last).toContainText('You find a worn index card containing a SECRETRECIPE.');
+  await expect(last).toContainText('You find an ACCESSKEY on a frayed lanyard.');
   await run('walk hallway');
   await run('walk galley');
   await expect(last).toContainText('A compact GALLEY.');
   await expect(last, 'no second pickup').not.toContainText('You find');
   await run('items');
-  await expect(last).toHaveText('SECRETRECIPE');
+  await expect(last).toHaveText('ACCESSKEY');
 });
 
 test('walking moves between adjacent rooms, and refuses the rest', async ({ page }) => {
@@ -85,6 +85,21 @@ test('walking moves between adjacent rooms, and refuses the rest', async ({ page
   await expect(last).toContainText('A geometric rug adorns the LIVINGROOM.');
   await run('walk bedroom');
   await expect(last).toContainText('You find yourself in a tidy BEDROOM.');
+});
+
+test('the SHUTTLE checks for the ACCESSKEY', async ({ page }) => {
+  await page.goto(PAGE);
+  const { output, run } = terminal(page);
+  const last = output.locator('div').last();
+
+  for (const room of ['LIVINGROOM', 'HALLWAY', 'HANGAR', 'SHUTTLE']) {
+    await run(`walk ${room}`);
+  }
+  await expect(last).toContainText('You\'re missing something ... are you sure you\'ve looked everywhere?');
+  for (const room of ['HANGAR', 'HALLWAY', 'GALLEY', 'HALLWAY', 'HANGAR', 'SHUTTLE']) {
+    await run(`walk ${room}`);
+  }
+  await expect(last).toContainText('Oh good, you\'ve found the ACCESSKEY.');
 });
 
 test('the terminal takes on each zone\'s colours as the player crosses into it', async ({ page }) => {

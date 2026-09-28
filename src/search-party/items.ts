@@ -5,8 +5,8 @@ export type Item = {
 
 // The key is the item's display name: uppercase, single token.
 export const ITEMS = {
-  SECRETRECIPE: {
-    description: 'a worn index card containing a SECRETRECIPE.',
+  ACCESSKEY: {
+    description: 'an ACCESSKEY on a frayed lanyard.',
   },
 } satisfies Record<string, Item>;
 

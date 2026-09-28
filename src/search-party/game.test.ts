@@ -151,6 +151,26 @@ describe('WALK', () => {
   });
 });
 
+describe('the SHUTTLE', () => {
+  it('sends the player back to look without the ACCESSKEY', () => {
+    expect(play('walk LIVINGROOM', 'walk HALLWAY', 'walk HANGAR', 'walk SHUTTLE').output).toBe(
+      'A small SHUTTLE. The console blinks patiently.\n\n' +
+      'You\'re missing something ... are you sure you\'ve looked everywhere?\n\n' +
+      'Adjacent:\nHANGAR',
+    );
+  });
+
+  it('is pleased once the player has the ACCESSKEY', () => {
+    expect(play(
+      'walk LIVINGROOM', 'walk HALLWAY', 'walk GALLEY', 'walk HALLWAY', 'walk HANGAR', 'walk SHUTTLE',
+    ).output).toBe(
+      'A small SHUTTLE. The console blinks patiently.\n\n' +
+      'Oh good, you\'ve found the ACCESSKEY.\n\n' +
+      'Adjacent:\nHANGAR',
+    );
+  });
+});
+
 describe('picking up items', () => {
   it('starts empty', () => {
     expect(START.found).toEqual([]);
@@ -161,10 +181,10 @@ describe('picking up items', () => {
     const { state, output } = play('walk LIVINGROOM', 'walk HALLWAY', 'walk GALLEY');
     expect(output).toBe(
       'A compact GALLEY. Something smells delicious.\n\n' +
-      'You find a worn index card containing a SECRETRECIPE.\n\n' +
+      'You find an ACCESSKEY on a frayed lanyard.\n\n' +
       'Adjacent:\nHALLWAY',
     );
-    expect(state.found).toEqual(['SECRETRECIPE']);
+    expect(state.found).toEqual(['ACCESSKEY']);
   });
 
   it('finds nothing new on a return visit', () => {
@@ -172,7 +192,7 @@ describe('picking up items', () => {
       'walk LIVINGROOM', 'walk HALLWAY', 'walk GALLEY', 'walk HALLWAY', 'walk GALLEY',
     );
     expect(output).not.toContain('You find');
-    expect(state.found).toEqual(['SECRETRECIPE']);
+    expect(state.found).toEqual(['ACCESSKEY']);
   });
 
   it('says nothing about items in a room without one', () => {
@@ -182,6 +202,6 @@ describe('picking up items', () => {
   });
 
   it('lists found items', () => {
-    expect(play('walk LIVINGROOM', 'walk HALLWAY', 'walk GALLEY', 'items').output).toBe('SECRETRECIPE');
+    expect(play('walk LIVINGROOM', 'walk HALLWAY', 'walk GALLEY', 'items').output).toBe('ACCESSKEY');
   });
 });
