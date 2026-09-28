@@ -5,15 +5,22 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nate Shiff — Interactive Web Projects</title>
-  <meta name="description" content="Nate Shiff's portfolio of interactive web projects: physics simulations, math visualizations, audio experiments, and text adventures, many built with AI tools." />
-  <meta property="og:title" content="Nate Shiff — Interactive Web Projects" />
-  <meta property="og:description" content="Nate Shiff's portfolio of interactive web projects: physics simulations, math visualizations, audio experiments, and text adventures, many built with AI tools." />
+  <!--app-head-->
+  <script>
+    // Apply the saved or system theme before first paint, so prerendered pages don't flash light.
+    try {
+      var theme = localStorage.getItem('portfolio-theme');
+      if (theme !== 'light' && theme !== 'dark') {
+        theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.classList.add(theme);
+    } catch (e) {}
+  </script>
   <script defer src="https://cloud.umami.is/script.js" data-website-id="16eddb66-15b9-4207-9d3d-1abf99727001"></script>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root"><!--app-html--></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

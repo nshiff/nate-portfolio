@@ -12,11 +12,19 @@ export function ThemeProvider({
   defaultTheme = 'system',
   storageKey = 'portfolio-theme',
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  // Null until mounted: the prerendered HTML can't know the saved theme, so the first
+  // browser render must match it. The inline script in index.html paints the right
+  // colours before then.
+  const [storedTheme, setTheme] = useState<Theme | null>(null);
+  const theme = storedTheme ?? defaultTheme;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read once after hydration
+    setTheme((localStorage.getItem(storageKey) as Theme) || defaultTheme);
+  }, [storageKey, defaultTheme]);
+
+  useEffect(() => {
+    if (storedTheme === null) return;
     const root = window.document.documentElement;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -41,7 +49,7 @@ export function ThemeProvider({
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
+  }, [theme, storedTheme]);
 
   const value = {
     theme,

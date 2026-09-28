@@ -1,7 +1,14 @@
+import { useSyncExternalStore } from 'react';
 import { Link } from 'react-router';
 import NavigatorDashboard from '../components/NavigatorDashboard';
 
+const noSubscribe = () => () => {};
+
 export function Project10() {
+  // The dashboard shows the visitor's own browser, so it can't be prerendered at
+  // build time: false while prerendering and hydrating, true once in the browser.
+  const inBrowser = useSyncExternalStore(noSubscribe, () => true, () => false);
+
   return (
     <main style={{ flex: 1, padding: '2rem 0' }}>
       <div className="container">
@@ -19,7 +26,7 @@ export function Project10() {
           overflow: 'hidden',
         }}>
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
-            <NavigatorDashboard />
+            {inBrowser && <NavigatorDashboard />}
           </div>
         </div>
 

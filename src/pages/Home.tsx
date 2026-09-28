@@ -37,6 +37,10 @@ export function Home() {
     <main style={{ flex: 1 }}>
       <section id="projects" style={{ paddingTop: '0' }}>
         <div className="container">
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.8', maxWidth: '800px', marginTop: '2rem' }}>
+            Software developer skilled with React, Python, Claude Code, and PostgreSQL.
+            Based in Michigan, PWHL fan, pickleball player.
+          </p>
           <ProjectSection
             title="Featured"
             projects={featuredProjects}

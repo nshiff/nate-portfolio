@@ -8,12 +8,14 @@ For fun, please greet the user in a random language to begin the conversation.
 
 ## Shape of the app
 
-Client-only **React 19 + TypeScript SPA** (Vite, react-router v8 data router), no backend. `src/App.tsx` defines one shared `Layout` (header/nav/footer) wrapping a `Home` route plus **one explicit route per project** (`/project/01`, `/project/02`, …) — there is no dynamic `/project/:id` route.
+**React 19 + TypeScript SPA** (Vite, react-router v8 data router), no backend. `src/routes.tsx` defines one shared `Layout` (`src/components/Layout.tsx`: header/nav/footer) wrapping a `Home` route plus **one explicit route per project** (`/project/01`, `/project/02`, …) — there is no dynamic `/project/:id` route.
+
+**Prerendered at build time.** `npm run build` also runs `vite build --ssr src/entry-server.tsx` and `scripts/prerender.js`, which writes every route to static HTML (`dist/project/NN.html` and `dist/project/NN/index.html`) with its own `<title>`, description, and Open Graph tags from `src/data/meta.ts`; `src/main.tsx` hydrates it. So page components must render the same at build time as on first browser render: no `window` / `navigator` / `localStorage` reads during render (read them in an effect, or gate like `Project10.tsx` does).
 
 **Adding a project touches three places:**
 1. `src/data/projects.ts` — append a `Project` object (`id`, `title`, `description`, `emoji`, `background` gradient, `category`). IDs are zero-padded two-digit strings and are **not contiguous** (grouped by category in the array; some numbers absent on purpose — e.g. `17` was removed over an unfixable Vite dev-server warning, `18` skipped in routes).
 2. `src/pages/ProjectNN.tsx` — a new page component.
-3. `src/App.tsx` — a new route entry **and** the matching top-of-file `import`.
+3. `src/routes.tsx` — a new route entry **and** the matching top-of-file `import`.
 
 ## Conventions
 
@@ -24,7 +26,7 @@ Client-only **React 19 + TypeScript SPA** (Vite, react-router v8 data router), n
 
 ## Testing (Playwright)
 
-- `@playwright/test` is a real devDependency (Chromium in `~/.cache/ms-playwright`). Run with `npm run test:e2e`. `playwright.config.ts` auto-starts `npm run dev` and points at `http://localhost:5173`.
+- `@playwright/test` is a real devDependency (Chromium in `~/.cache/ms-playwright`). Run with `npm run test:e2e`. `playwright.config.ts` has two projects: `dev` (auto-starts `npm run dev` on `:5173`, all specs but one) and `prerender` (builds, then `vite preview` on `:4173`, runs only `e2e/prerender.spec.ts` — raw-HTML metadata/content checks, and a no-console-errors hydration check per page).
 - A Playwright script only resolves `@playwright/test` from **inside the repo tree** (needs `node_modules`) — a `/tmp` or scratchpad script fails with `ERR_MODULE_NOT_FOUND`. Put throwaway specs in `e2e/` (e.g. `e2e/_tmp-*.spec.ts`), run them, then delete them — or, if one is a genuinely good regression guard, keep it.
 - `e2e/home.spec.ts` is a smoke spec. `e2e/search-party.spec.ts` is the permanent suite for the Project 20 demo (`public/demo/zork-roguelike/`).
 - e2e specs pin **exact substrings** of demo output. Re-run the relevant spec after any copy/text change in a demo, not just logic changes.
