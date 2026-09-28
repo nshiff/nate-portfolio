@@ -13,7 +13,7 @@ export const COMMANDS: Record<string, Command> = {
     run: () => ({
       output:
         'Search Party 2.0\n' +
-        'A Zork-like game in React and TypeScript inspired by the original Search Party.',
+        'A Zork-like game in React and TypeScript. Inspired by the original Search Party.',
     }),
   },
   HELP: {

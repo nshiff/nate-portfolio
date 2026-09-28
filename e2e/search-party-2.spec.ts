@@ -48,12 +48,11 @@ test('blank input prints nothing', async ({ page }) => {
   await expect(output.locator('div')).toHaveCount(1);
 });
 
-test('the opening screen hands over the SECRETRECIPE', async ({ page }) => {
+test('ITEMS starts empty', async ({ page }) => {
   await page.goto(PAGE);
   const { output, run } = terminal(page);
-  await expect(output).toContainText('You find a worn index card containing a SECRETRECIPE.');
   await run('items');
-  await expect(output.locator('div').last()).toHaveText('SECRETRECIPE');
+  await expect(output.locator('div').last()).toHaveText('No items found.');
 });
 
 test('walking into a room picks up its item once, and ITEMS remembers it', async ({ page }) => {
@@ -61,19 +60,30 @@ test('walking into a room picks up its item once, and ITEMS remembers it', async
   const { output, run } = terminal(page);
   const last = output.locator('div').last();
 
-  await run('walk BRIDGE');
-  await expect(last).toHaveText('Cannot walk to BRIDGE from here.');
-  await run('walk corridor');
-  await expect(last).toContainText('A narrow CORRIDOR.');
+  await run('walk livingroom');
+  await run('walk hallway');
   await expect(last).not.toContainText('You find');
-  await run('walk bridge');
-  await expect(last).toContainText('You find a folded STARCHART of an uncharted sector.');
-  await run('walk corridor');
-  await run('walk bridge');
-  await expect(last).toContainText('The BRIDGE.');
+  await run('walk galley');
+  await expect(last).toContainText('You find a worn index card containing a SECRETRECIPE.');
+  await run('walk hallway');
+  await run('walk galley');
+  await expect(last).toContainText('A compact GALLEY.');
   await expect(last, 'no second pickup').not.toContainText('You find');
   await run('items');
-  await expect(last).toHaveText(/^SECRETRECIPE\s+STARCHART$/);
+  await expect(last).toHaveText('SECRETRECIPE');
+});
+
+test('walking moves between adjacent rooms, and refuses the rest', async ({ page }) => {
+  await page.goto(PAGE);
+  const { output, run } = terminal(page);
+  const last = output.locator('div').last();
+
+  await run('walk CORRIDOR');
+  await expect(last).toHaveText('Cannot walk to CORRIDOR from here.');
+  await run('walk livingroom');
+  await expect(last).toContainText('A cozy LIVINGROOM.');
+  await run('walk bedroom');
+  await expect(last).toContainText('You find yourself in a tidy BEDROOM.');
 });
 
 test('the terminal takes on each zone\'s colours as the player crosses into it', async ({ page }) => {
@@ -81,21 +91,21 @@ test('the terminal takes on each zone\'s colours as the player crosses into it',
   const { output, run } = terminal(page);
   const screen = output.locator('..');
 
-  await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // BEDROOM
+  await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // QUARTERS
   await expect(screen).toHaveCSS('background-color', 'rgb(10, 10, 10)');
-  await run('walk CORRIDOR');
+  await run('walk LIVINGROOM');
+  await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // still QUARTERS
+  await run('walk HALLWAY');
   await expect(screen).toHaveCSS('color', 'rgb(51, 255, 102)'); // SHIP
-  await expect(screen).toHaveCSS('background-color', 'rgb(10, 10, 10)');
-  for (const room of ['ENGINEERING', 'AIRLOCK', 'HANGAR', 'SHUTTLE']) {
-    await run(`walk ${room}`);
-  }
-  await expect(screen).toHaveCSS('background-color', 'rgb(53, 40, 121)'); // SHUTTLE
-  await run('walk MARSPORT');
-  await expect(screen).toHaveCSS('background-color', 'rgb(92, 10, 10)'); // MARS
-  await expect(screen).toHaveCSS('color', 'rgb(255, 244, 236)');
-  await run('walk SHUTTLE');
   await run('walk HANGAR');
-  await expect(screen).toHaveCSS('background-color', 'rgb(10, 10, 10)'); // back aboard
+  await run('walk SHUTTLE');
+  await expect(screen).toHaveCSS('background-color', 'rgb(53, 40, 121)'); // SHUTTLE
+  await expect(screen).toHaveCSS('color', 'rgb(212, 208, 255)');
+  await run('walk HANGAR');
+  await expect(screen).toHaveCSS('color', 'rgb(51, 255, 102)'); // back aboard
+  await run('walk HALLWAY');
+  await run('walk LIVINGROOM');
+  await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // back in QUARTERS
 });
 
 test('arrow keys step through command history', async ({ page }) => {

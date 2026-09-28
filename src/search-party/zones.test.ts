@@ -33,20 +33,20 @@ function blend(fg: string, bg: string, opacity: number) {
 }
 
 describe('zones', () => {
-  it('each hold at least one room', () => {
-    for (const zone of Object.keys(ZONES)) {
-      expect(roomsIn(zone), zone).not.toHaveLength(0);
-    }
+  it('put the BEDROOM and LIVINGROOM in the QUARTERS', () => {
+    expect(roomsIn('QUARTERS')).toEqual(['BEDROOM', 'LIVINGROOM']);
   });
 
-  it('give the BEDROOM and the SHUTTLE a zone of their own', () => {
-    expect(roomsIn('BEDROOM')).toEqual(['BEDROOM']);
+  it('give the SHUTTLE a zone of its own', () => {
     expect(roomsIn('SHUTTLE')).toEqual(['SHUTTLE']);
   });
 
   it('are each one connected region, walkable without leaving the zone', () => {
     for (const zone of Object.keys(ZONES)) {
       const members = roomsIn(zone);
+      if (!members.length) {
+        continue;
+      }
       const seen = new Set([members[0]]);
       const queue = [members[0]];
       while (queue.length) {
@@ -72,17 +72,13 @@ describe('zones', () => {
 
 describe('currentTheme', () => {
   it('follows the player from zone to zone', () => {
-    expect(currentTheme(START)).toBe(ZONES.BEDROOM);
-
-    let state = respond(START, 'walk CORRIDOR')!.state;
+    expect(currentTheme(START)).toBe(ZONES.QUARTERS);
+    let state = respond(START, 'walk LIVINGROOM')!.state;
+    expect(currentTheme(state)).toBe(ZONES.QUARTERS);
+    state = respond(state, 'walk HALLWAY')!.state;
     expect(currentTheme(state)).toBe(ZONES.SHIP);
-
-    for (const step of ['walk ENGINEERING', 'walk AIRLOCK', 'walk HANGAR', 'walk SHUTTLE']) {
-      state = respond(state, step)!.state;
-    }
+    state = respond(state, 'walk HANGAR')!.state;
+    state = respond(state, 'walk SHUTTLE')!.state;
     expect(currentTheme(state)).toBe(ZONES.SHUTTLE);
-
-    state = respond(state, 'walk MARSPORT')!.state;
-    expect(currentTheme(state)).toBe(ZONES.MARS);
   });
 });

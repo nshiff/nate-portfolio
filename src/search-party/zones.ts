@@ -3,7 +3,7 @@ import type { TerminalTheme } from './Terminal';
 // Each zone always shows the same terminal colours, so the player can feel
 // the world change as they cross into it.
 export const ZONES = {
-  BEDROOM: { fg: '#ffffff', bg: '#0a0a0a' },  // white on black
+  QUARTERS: { fg: '#ffffff', bg: '#0a0a0a' }, // white on black
   SHIP: { fg: '#33ff66', bg: '#0a0a0a' },     // green on black
   SHUTTLE: { fg: '#d4d0ff', bg: '#352879' },  // Commodore 64 blues
   MOON: { fg: '#1c1c1c', bg: '#d6d6d0' },     // graphite on moon-dust grey

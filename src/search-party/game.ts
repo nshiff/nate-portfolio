@@ -9,7 +9,7 @@ export type GameState = {
   found: ItemId[];
 };
 
-// Starting the game counts as entering the BEDROOM, so its item is picked up at once.
+// Starting the game counts as entering the BEDROOM, so any item there is picked up at once.
 const opening = enterRoom({ room: 'BEDROOM', found: [] }, 'BEDROOM');
 
 export const START: GameState = opening.state;
