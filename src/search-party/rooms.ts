@@ -21,14 +21,14 @@ export const ROOMS = {
     adjacent: ['LIVINGROOM'],
   },
   LIVINGROOM: {
-    description: 'A cozy LIVINGROOM. A sofa faces a wide window.',
+    description: 'A geometric rug adorns the LIVINGROOM.',
     zone: 'QUARTERS',
     adjacent: ['BEDROOM', 'HALLWAY'],
   },
 
   // --- The ship ---
   HALLWAY: {
-    description: 'A long HALLWAY. Doors line both walls.',
+    description: 'A HALLWAY lit by fluorescent lights.',
     zone: 'SHIP',
     adjacent: ['LIVINGROOM', 'GALLEY', 'HANGAR'],
   },
