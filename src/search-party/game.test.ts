@@ -22,8 +22,8 @@ function play(...inputs: string[]) {
 const rooms: [string, Room][] = Object.entries(ROOMS);
 
 describe('the map', () => {
-  it('has 6 rooms and 1 item', () => {
-    expect(rooms).toHaveLength(6);
+  it('has 7 rooms and 1 item', () => {
+    expect(rooms).toHaveLength(7);
     expect(Object.keys(ITEMS)).toHaveLength(1);
   });
 
@@ -151,22 +151,22 @@ describe('WALK', () => {
   });
 });
 
-describe('the SHUTTLE', () => {
-  it('sends the player back to look without the ACCESSKEY', () => {
-    expect(play('walk LIVINGROOM', 'walk HALLWAY', 'walk HANGAR', 'walk SHUTTLE').output).toBe(
-      'A small SHUTTLE. The console blinks patiently.\n\n' +
-      'You\'re missing something ... are you sure you\'ve looked everywhere?\n\n' +
-      'Adjacent:\nHANGAR',
-    );
+describe('the WEIRDPORTAL', () => {
+  it('is entered from the HANGAR, whatever the player has found', () => {
+    for (const route of [[], ['walk GALLEY', 'walk HALLWAY']]) {
+      expect(play('walk LIVINGROOM', 'walk HALLWAY', ...route, 'walk HANGAR', 'walk WEIRDPORTAL').output).toBe(
+        'You just walked into a WEIRDPORTAL. Better not dilly dally, I suppose.\n\n' +
+        'Adjacent:\nHANGAR, SPACEDECK',
+      );
+    }
   });
 
-  it('is pleased once the player has the ACCESSKEY', () => {
-    expect(play(
-      'walk LIVINGROOM', 'walk HALLWAY', 'walk GALLEY', 'walk HALLWAY', 'walk HANGAR', 'walk SHUTTLE',
-    ).output).toBe(
-      'A small SHUTTLE. The console blinks patiently.\n\n' +
-      'Oh good, you\'ve found the ACCESSKEY.\n\n' +
-      'Adjacent:\nHANGAR',
+  it('leads on to the SPACEDECK', () => {
+    const { state, output } = play('walk LIVINGROOM', 'walk HALLWAY', 'walk HANGAR', 'walk WEIRDPORTAL', 'walk SPACEDECK');
+    expect(state.room).toBe('SPACEDECK');
+    expect(output).toBe(
+      'A chilly SPACEDECK. Jupiter fills half the sky.\n\n' +
+      'Adjacent:\nWEIRDPORTAL',
     );
   });
 });
@@ -181,10 +181,10 @@ describe('picking up items', () => {
     const { state, output } = play('walk LIVINGROOM', 'walk HALLWAY', 'walk GALLEY');
     expect(output).toBe(
       'A compact GALLEY. Something smells delicious.\n\n' +
-      'You find an ACCESSKEY on a frayed lanyard.\n\n' +
+      'You find a worn index card containing a SECRETRECIPE.\n\n' +
       'Adjacent:\nHALLWAY',
     );
-    expect(state.found).toEqual(['ACCESSKEY']);
+    expect(state.found).toEqual(['SECRETRECIPE']);
   });
 
   it('finds nothing new on a return visit', () => {
@@ -192,7 +192,7 @@ describe('picking up items', () => {
       'walk LIVINGROOM', 'walk HALLWAY', 'walk GALLEY', 'walk HALLWAY', 'walk GALLEY',
     );
     expect(output).not.toContain('You find');
-    expect(state.found).toEqual(['ACCESSKEY']);
+    expect(state.found).toEqual(['SECRETRECIPE']);
   });
 
   it('says nothing about items in a room without one', () => {
@@ -202,6 +202,6 @@ describe('picking up items', () => {
   });
 
   it('lists found items', () => {
-    expect(play('walk LIVINGROOM', 'walk HALLWAY', 'walk GALLEY', 'items').output).toBe('ACCESSKEY');
+    expect(play('walk LIVINGROOM', 'walk HALLWAY', 'walk GALLEY', 'items').output).toBe('SECRETRECIPE');
   });
 });

@@ -65,13 +65,13 @@ test('walking into a room picks up its item once, and ITEMS remembers it', async
   await run('walk hallway');
   await expect(last).not.toContainText('You find');
   await run('walk galley');
-  await expect(last).toContainText('You find an ACCESSKEY on a frayed lanyard.');
+  await expect(last).toContainText('You find a worn index card containing a SECRETRECIPE.');
   await run('walk hallway');
   await run('walk galley');
   await expect(last).toContainText('A compact GALLEY.');
   await expect(last, 'no second pickup').not.toContainText('You find');
   await run('items');
-  await expect(last).toHaveText('ACCESSKEY');
+  await expect(last).toHaveText('SECRETRECIPE');
 });
 
 test('walking moves between adjacent rooms, and refuses the rest', async ({ page }) => {
@@ -87,19 +87,17 @@ test('walking moves between adjacent rooms, and refuses the rest', async ({ page
   await expect(last).toContainText('You find yourself in a tidy BEDROOM.');
 });
 
-test('the SHUTTLE checks for the ACCESSKEY', async ({ page }) => {
+test('the WEIRDPORTAL leads from the HANGAR to the SPACEDECK', async ({ page }) => {
   await page.goto(PAGE);
   const { output, run } = terminal(page);
   const last = output.locator('div').last();
 
-  for (const room of ['LIVINGROOM', 'HALLWAY', 'HANGAR', 'SHUTTLE']) {
+  for (const room of ['LIVINGROOM', 'HALLWAY', 'HANGAR', 'WEIRDPORTAL']) {
     await run(`walk ${room}`);
   }
-  await expect(last).toContainText('You\'re missing something ... are you sure you\'ve looked everywhere?');
-  for (const room of ['HANGAR', 'HALLWAY', 'GALLEY', 'HALLWAY', 'HANGAR', 'SHUTTLE']) {
-    await run(`walk ${room}`);
-  }
-  await expect(last).toContainText('Oh good, you\'ve found the ACCESSKEY.');
+  await expect(last).toContainText('You just walked into a WEIRDPORTAL. Better not dilly dally, I suppose.');
+  await run('walk spacedeck');
+  await expect(last).toContainText('A chilly SPACEDECK.');
 });
 
 test('the terminal takes on each zone\'s colours as the player crosses into it', async ({ page }) => {
@@ -107,21 +105,25 @@ test('the terminal takes on each zone\'s colours as the player crosses into it',
   const { output, run } = terminal(page);
   const screen = output.locator('..');
 
-  await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // QUARTERS
+  await expect(screen).toHaveCSS('color', 'rgb(51, 255, 102)'); // QUARTERS
   await expect(screen).toHaveCSS('background-color', 'rgb(10, 10, 10)');
   await run('walk LIVINGROOM');
-  await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // still QUARTERS
+  await expect(screen).toHaveCSS('color', 'rgb(51, 255, 102)'); // still QUARTERS
   await run('walk HALLWAY');
-  await expect(screen).toHaveCSS('color', 'rgb(51, 255, 102)'); // SHIP
+  await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // HOMEBASE
   await run('walk HANGAR');
-  await run('walk SHUTTLE');
-  await expect(screen).toHaveCSS('background-color', 'rgb(53, 40, 121)'); // SHUTTLE
+  await run('walk WEIRDPORTAL');
+  await expect(screen).toHaveCSS('background-color', 'rgb(53, 40, 121)'); // WEIRDPORTAL
   await expect(screen).toHaveCSS('color', 'rgb(212, 208, 255)');
+  await run('walk SPACEDECK');
+  await expect(screen).toHaveCSS('background-color', 'rgb(11, 34, 51)'); // EUROPA
+  await expect(screen).toHaveCSS('color', 'rgb(191, 244, 255)');
+  await run('walk WEIRDPORTAL');
   await run('walk HANGAR');
-  await expect(screen).toHaveCSS('color', 'rgb(51, 255, 102)'); // back aboard
+  await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // back aboard
   await run('walk HALLWAY');
   await run('walk LIVINGROOM');
-  await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // back in QUARTERS
+  await expect(screen).toHaveCSS('color', 'rgb(51, 255, 102)'); // back in QUARTERS
 });
 
 test('arrow keys step through command history', async ({ page }) => {

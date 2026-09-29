@@ -37,8 +37,8 @@ describe('zones', () => {
     expect(roomsIn('QUARTERS')).toEqual(['BEDROOM', 'LIVINGROOM']);
   });
 
-  it('give the SHUTTLE a zone of its own', () => {
-    expect(roomsIn('SHUTTLE')).toEqual(['SHUTTLE']);
+  it('give the WEIRDPORTAL a zone of its own', () => {
+    expect(roomsIn('WEIRDPORTAL')).toEqual(['WEIRDPORTAL']);
   });
 
   it('are each one connected region, walkable without leaving the zone', () => {
@@ -76,9 +76,11 @@ describe('currentTheme', () => {
     let state = respond(START, 'walk LIVINGROOM')!.state;
     expect(currentTheme(state)).toBe(ZONES.QUARTERS);
     state = respond(state, 'walk HALLWAY')!.state;
-    expect(currentTheme(state)).toBe(ZONES.SHIP);
+    expect(currentTheme(state)).toBe(ZONES.HOMEBASE);
     state = respond(state, 'walk HANGAR')!.state;
-    state = respond(state, 'walk SHUTTLE')!.state;
-    expect(currentTheme(state)).toBe(ZONES.SHUTTLE);
+    state = respond(state, 'walk WEIRDPORTAL')!.state;
+    expect(currentTheme(state)).toBe(ZONES.WEIRDPORTAL);
+    state = respond(state, 'walk SPACEDECK')!.state;
+    expect(currentTheme(state)).toBe(ZONES.EUROPA);
   });
 });
