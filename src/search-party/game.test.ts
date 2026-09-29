@@ -22,8 +22,8 @@ function play(...inputs: string[]) {
 const rooms: [string, Room][] = Object.entries(ROOMS);
 
 describe('the map', () => {
-  it('has 7 rooms and 2 items', () => {
-    expect(rooms).toHaveLength(7);
+  it('has 12 rooms and 2 items', () => {
+    expect(rooms).toHaveLength(12);
     expect(Object.keys(ITEMS)).toHaveLength(2);
   });
 
@@ -157,7 +157,7 @@ describe('the WEIRDPORTAL', () => {
       expect(play('walk LIVINGROOM', 'walk HALLWAY', ...route, 'walk HANGAR', 'walk WEIRDPORTAL').output).toBe(
         'You just walked into a WEIRDPORTAL. Better not dilly dally, I suppose.\n\n' +
         'You find a SHINYCOIN. Your lucky day!\n\n' +
-        'Adjacent:\nHANGAR, SPACEDECK',
+        'Adjacent:\nHANGAR, MARSBASE, SPACEDECK',
       );
     }
   });
@@ -167,7 +167,7 @@ describe('the WEIRDPORTAL', () => {
     expect(state.room).toBe('SPACEDECK');
     expect(output).toBe(
       'A chilly SPACEDECK. Jupiter fills half the sky.\n\n' +
-      'Adjacent:\nWEIRDPORTAL',
+      'Adjacent:\nICETUNNEL, WEIRDPORTAL',
     );
   });
 });

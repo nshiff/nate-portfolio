@@ -46,7 +46,7 @@ export const ROOMS = {
   WEIRDPORTAL: {
     description: 'You just walked into a WEIRDPORTAL. Better not dilly dally, I suppose.',
     zone: 'WEIRDPORTAL',
-    adjacent: ['HANGAR', 'SPACEDECK'],
+    adjacent: ['HANGAR', 'SPACEDECK', 'MARSBASE'],
     item: 'SHINYCOIN',
   },
 
@@ -54,7 +54,34 @@ export const ROOMS = {
   SPACEDECK: {
     description: 'A chilly SPACEDECK. Jupiter fills half the sky.',
     zone: 'EUROPA',
-    adjacent: ['WEIRDPORTAL'],
+    adjacent: ['WEIRDPORTAL', 'ICETUNNEL'],
+  },
+  ICETUNNEL: {
+    description: 'A narrow ICETUNNEL. The walls glow a faint blue.',
+    zone: 'EUROPA',
+    adjacent: ['SPACEDECK', 'DRILLSITE'],
+  },
+  DRILLSITE: {
+    description: 'A noisy DRILLSITE. The ocean lies somewhere below.',
+    zone: 'EUROPA',
+    adjacent: ['ICETUNNEL'],
+  },
+
+  // --- Mars ---
+  MARSBASE: {
+    description: 'A dusty MARSBASE. Red sand piles against every window.',
+    zone: 'MARS',
+    adjacent: ['WEIRDPORTAL', 'GREENHOUSE', 'ROVERBAY'],
+  },
+  GREENHOUSE: {
+    description: 'A warm GREENHOUSE. Potato plants fill every bench.',
+    zone: 'MARS',
+    adjacent: ['MARSBASE'],
+  },
+  ROVERBAY: {
+    description: 'A cluttered ROVERBAY. One rover is missing a wheel.',
+    zone: 'MARS',
+    adjacent: ['MARSBASE'],
   },
 } satisfies Record<string, Room>;
 

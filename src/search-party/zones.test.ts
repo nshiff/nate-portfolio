@@ -41,6 +41,11 @@ describe('zones', () => {
     expect(roomsIn('WEIRDPORTAL')).toEqual(['WEIRDPORTAL']);
   });
 
+  it('keep EUROPA and MARS small, beyond the WEIRDPORTAL', () => {
+    expect(roomsIn('EUROPA')).toEqual(['SPACEDECK', 'ICETUNNEL', 'DRILLSITE']);
+    expect(roomsIn('MARS')).toEqual(['MARSBASE', 'GREENHOUSE', 'ROVERBAY']);
+  });
+
   it('are each one connected region, walkable without leaving the zone', () => {
     for (const zone of Object.keys(ZONES)) {
       const members = roomsIn(zone);
@@ -82,5 +87,8 @@ describe('currentTheme', () => {
     expect(currentTheme(state)).toBe(ZONES.WEIRDPORTAL);
     state = respond(state, 'walk SPACEDECK')!.state;
     expect(currentTheme(state)).toBe(ZONES.EUROPA);
+    state = respond(state, 'walk WEIRDPORTAL')!.state;
+    state = respond(state, 'walk MARSBASE')!.state;
+    expect(currentTheme(state)).toBe(ZONES.MARS);
   });
 });

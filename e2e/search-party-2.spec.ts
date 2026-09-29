@@ -120,6 +120,10 @@ test('the terminal takes on each zone\'s colours as the player crosses into it',
   await expect(screen).toHaveCSS('background-color', 'rgb(11, 34, 51)'); // EUROPA
   await expect(screen).toHaveCSS('color', 'rgb(191, 244, 255)');
   await run('walk WEIRDPORTAL');
+  await run('walk MARSBASE');
+  await expect(screen).toHaveCSS('background-color', 'rgb(92, 10, 10)'); // MARS
+  await expect(screen).toHaveCSS('color', 'rgb(255, 244, 236)');
+  await run('walk WEIRDPORTAL');
   await run('walk HANGAR');
   await expect(screen).toHaveCSS('color', 'rgb(255, 255, 255)'); // back aboard
   await run('walk HALLWAY');
