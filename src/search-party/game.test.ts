@@ -22,9 +22,9 @@ function play(...inputs: string[]) {
 const rooms: [string, Room][] = Object.entries(ROOMS);
 
 describe('the map', () => {
-  it('has 7 rooms and 1 item', () => {
+  it('has 7 rooms and 2 items', () => {
     expect(rooms).toHaveLength(7);
-    expect(Object.keys(ITEMS)).toHaveLength(1);
+    expect(Object.keys(ITEMS)).toHaveLength(2);
   });
 
   it('keeps every Adjacent line short enough for a phone', () => {
@@ -156,6 +156,7 @@ describe('the WEIRDPORTAL', () => {
     for (const route of [[], ['walk GALLEY', 'walk HALLWAY']]) {
       expect(play('walk LIVINGROOM', 'walk HALLWAY', ...route, 'walk HANGAR', 'walk WEIRDPORTAL').output).toBe(
         'You just walked into a WEIRDPORTAL. Better not dilly dally, I suppose.\n\n' +
+        'You find a SHINYCOIN. Your lucky day!\n\n' +
         'Adjacent:\nHANGAR, SPACEDECK',
       );
     }

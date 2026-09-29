@@ -96,6 +96,7 @@ test('the WEIRDPORTAL leads from the HANGAR to the SPACEDECK', async ({ page }) 
     await run(`walk ${room}`);
   }
   await expect(last).toContainText('You just walked into a WEIRDPORTAL. Better not dilly dally, I suppose.');
+  await expect(last).toContainText('You find a SHINYCOIN. Your lucky day!');
   await run('walk spacedeck');
   await expect(last).toContainText('A chilly SPACEDECK.');
 });

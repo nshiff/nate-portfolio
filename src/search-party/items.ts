@@ -8,6 +8,9 @@ export const ITEMS = {
   SECRETRECIPE: {
     description: 'a worn index card containing a SECRETRECIPE.',
   },
+  SHINYCOIN: {
+    description: 'a SHINYCOIN. Your lucky day!',
+  },
 } satisfies Record<string, Item>;
 
 export type ItemId = keyof typeof ITEMS;

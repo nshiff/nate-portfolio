@@ -47,6 +47,7 @@ export const ROOMS = {
     description: 'You just walked into a WEIRDPORTAL. Better not dilly dally, I suppose.',
     zone: 'WEIRDPORTAL',
     adjacent: ['HANGAR', 'SPACEDECK'],
+    item: 'SHINYCOIN',
   },
 
   // --- Europa ---
