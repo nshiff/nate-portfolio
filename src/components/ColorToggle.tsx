@@ -75,6 +75,107 @@ function pickFortune(): string {
   return FORTUNES[i];
 }
 
+/* ------------------------------------------------------------------ */
+/* Busy beaver Turing machines, ported from Prof. David Brailsford's   */
+/* C demo (University of Nottingham). Card decks are kept verbatim.    */
+/* Each rule is "IWSN": If reading I, Write W, Shift (0=left 1=right), */
+/* then go to card N. Card 0 is the halt state.                        */
+/* ------------------------------------------------------------------ */
+
+interface BusyBeaver {
+  name: string;
+  note: string;
+  /** cards[i] = [rule when reading 0, rule when reading 1] for card i+1 */
+  cards: [string, string][];
+}
+
+const BUSY_BEAVERS: Record<number, BusyBeaver[]> = {
+  1: [
+    { name: "tm1a", note: "Loops off to the right", cards: [["0111", "1111"]] },
+    { name: "tm1b", note: "Loops off to the left", cards: [["0101", "1101"]] },
+    { name: "tm1c", note: "Prints a single 1 and moves left", cards: [["0100", "1000"]] },
+    { name: "tm1d", note: "Prints a single 1 and moves right", cards: [["0110", "1000"]] },
+  ],
+  2: [
+    { name: "tm2", note: "2-state champion: score 4", cards: [["0112", "1102"], ["1101", "1110"]] },
+  ],
+  3: [
+    {
+      name: "tm3a",
+      note: "Classic 3-state champion: score 6",
+      cards: [["0102", "1113"], ["0111", "1102"], ["0112", "1100"]],
+    },
+    {
+      name: "tm3aa",
+      note: "Another 3-state machine with score 6",
+      cards: [["0112", "1110"], ["0013", "1112"], ["0103", "1101"]],
+    },
+    {
+      name: "tm3b",
+      note: "Permutation of 3 1 that never halts",
+      cards: [["0112", "1100"], ["0111", "1102"], ["0102", "1113"]],
+    },
+    {
+      name: "tm3c",
+      note: "Permutation of 3 1 that halts with score 2",
+      cards: [["0102", "1113"], ["0112", "1100"], ["0111", "1102"]],
+    },
+  ],
+  4: [
+    {
+      name: "tm4",
+      note: "Classic 4-state champion: score 13 in 107 steps",
+      cards: [["0112", "1102"], ["0101", "1003"], ["0110", "1104"], ["0114", "1011"]],
+    },
+  ],
+};
+
+const BB_TAPE_LENGTH = 23;
+const BB_MAX_STEPS = 10_000;
+
+function listBusyBeavers(): string {
+  const rows = Object.entries(BUSY_BEAVERS).flatMap(([cards, machines]) =>
+    machines.map((m, i) => `  BB ${cards} ${i + 1}  ${m.note}`)
+  );
+  return ["Usage: BB <cards> [machine]", "", "Available machines:", ...rows].join("\n");
+}
+
+function runBusyBeaver(bb: BusyBeaver): string {
+  const tape: number[] = Array(BB_TAPE_LENGTH).fill(0);
+  let head = Math.floor(BB_TAPE_LENGTH / 2);
+  let card = 1;
+  let steps = 0;
+
+  const show = () =>
+    tape.map((c) => `${c}  `).join("").trimEnd() + "\n" + " ".repeat(head * 3) + "^";
+
+  const out: string[] = [
+    ...bb.cards.map(([zero, one], i) => `Card ${i + 1} is ${zero}  ${one}`),
+    "",
+    "Initial tape (^ marks the head):",
+    show(),
+    "",
+    "Game started",
+  ];
+
+  while (card !== 0) {
+    if (head < 0 || head >= BB_TAPE_LENGTH || steps >= BB_MAX_STEPS) {
+      out.push("Tape too short and/or TM may be looping");
+      return out.join("\n");
+    }
+    const rule = bb.cards[card - 1][tape[head]];
+    tape[head] = Number(rule[1]);
+    steps++;
+    out.push(show());
+    head += rule[2] === "0" ? -1 : 1;
+    card = Number(rule[3]);
+  }
+
+  const score = tape.filter((c) => c === 1).length;
+  out.push("The TM has halted", "", `steps = ${steps}    score = ${score}`);
+  return out.join("\n");
+}
+
 interface Command {
   /** How to call it, shown in HELP. Omit for commands that take no args. */
   usage?: string;
@@ -87,6 +188,21 @@ const commands: Record<string, Command> = {
   ABOUT: {
     description: "Show what this is",
     run: () => "A TypeScript experiment from Opus 5.5",
+  },
+
+  BB: {
+    usage: "<cards> [machine]",
+    description: "Run a busy beaver Turing machine",
+    run: (args) => {
+      if (args.length === 0) return listBusyBeavers();
+      if (args.length > 2) throw new CommandError(listBusyBeavers());
+
+      const machines = BUSY_BEAVERS[Number(args[0])];
+      const machine = machines?.[Number(args[1] ?? "1") - 1];
+      if (!machine) throw new CommandError(listBusyBeavers());
+
+      return runBusyBeaver(machine);
+    },
   },
 
   COLOR: {
