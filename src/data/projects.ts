@@ -192,7 +192,7 @@ export const projects: Project[] = [
   {
     id: '23',
     title: 'Color Toggle',
-    description: 'A minimal React component that toggles text between red and blue.',
+    description: 'A small REPL, vibe-coded with the Claude web interface',
     emoji: '🎨',
     background: 'linear-gradient(135deg, #3b0a0a 0%, #0a1a3b 100%)',
     category: 'Miscellaneous',
