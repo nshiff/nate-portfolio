@@ -32,15 +32,6 @@ export const projects: Project[] = [
     category: 'Science',
   },
   {
-    id: '05',
-    title: 'Double Slit Experiment',
-    description: 'An interactive visualization of wave interference in the famous double slit experiment.',
-    emoji: '〰️',
-    background: 'linear-gradient(135deg, #09203f 0%, #537895 100%)',
-    category: 'Science',
-    featured: true,
-  },
-  {
     id: '06',
     title: "Maxwell's Demon",
     description: 'An interactive simulation exploring entropy and the second law of thermodynamics.',
@@ -98,15 +89,6 @@ export const projects: Project[] = [
     emoji: '🌌',
     background: 'linear-gradient(135deg, #0f1520 0%, #000000 100%)',
     category: 'Mathematics',
-  },
-  {
-    id: '03',
-    title: 'WebModular Synth',
-    description: 'A browser-based modular synthesizer built with React and the Web Audio API, featuring dynamic routing and interactive modules.',
-    emoji: '🎛️',
-    background: 'linear-gradient(to right, #1f2937, #111827)',
-    category: 'Audio',
-    overlayGrid: true,
   },
   {
     id: '16',

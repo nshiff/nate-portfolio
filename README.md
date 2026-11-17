@@ -10,7 +10,7 @@ npm install
 npm run dev
 ```
 
-As of this writing, there are over a dozen browser-based demos across topics in science, math, and technology. Featured mini-apps include a double slit experiment simulation, a 3D Platonic solids viewer, and a TI-83-themed fortune teller program.
+As of this writing, there are over a dozen browser-based demos across topics in science, math, and technology. Featured mini-apps include an interactive text adventure, a 3D Platonic solids viewer, and a TI-83-themed fortune teller program.
 
 ## Data Flow and Architecture (AI-authored overview)
 

@@ -3,9 +3,7 @@ import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Project01 } from './pages/Project01';
 import { Project02 } from './pages/Project02';
-import { Project03 } from './pages/Project03';
 import { Project04 } from './pages/Project04';
-import { Project05 } from './pages/Project05';
 import { Project06 } from './pages/Project06';
 import { Project07 } from './pages/Project07';
 import { Project08 } from './pages/Project08';
@@ -43,16 +41,8 @@ export const routes: RouteObject[] = [
         element: <Project02 />,
       },
       {
-        path: "/project/03",
-        element: <Project03 />,
-      },
-      {
         path: "/project/04",
         element: <Project04 />,
-      },
-      {
-        path: "/project/05",
-        element: <Project05 />,
       },
       {
         path: "/project/06",

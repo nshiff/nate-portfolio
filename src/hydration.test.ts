@@ -14,7 +14,6 @@ import { pageMeta } from './data/meta';
 
 // happy-dom has no canvas implementation, so 2D drawing code would crash on a
 // null context. A no-op context lets those components run their real code path.
-// WebGL is left null: components log their own "not supported" fallback instead.
 // Animation frames are dropped too: they only drive post-hydration redraws, and
 // letting them fire just sprays act() warnings after the test has finished.
 beforeAll(() => {
@@ -35,10 +34,6 @@ beforeAll(() => {
     ) as unknown as CanvasRenderingContext2D;
   });
 });
-
-// happy-dom has no GPU, so this is DoubleSlitVisualization's designed fallback
-// (DoubleSlitVisualization.jsx:188), not a page defect.
-const EXPECTED_WITHOUT_GPU = [/^WebGL not supported$/];
 
 function clientApp(pathname: string) {
   const router = createMemoryRouter(routes, { initialEntries: [pathname] });
@@ -91,11 +86,8 @@ afterAll(() => {
 describe('hydration', () => {
   it.each(PATHS)('%s hydrates without a mismatch', async (pathname) => {
     const { errors, cleanup } = await hydrate(pathname);
-    const unexpected = errors.filter(
-      (message) => !EXPECTED_WITHOUT_GPU.some((pattern) => pattern.test(message)),
-    );
     try {
-      expect(unexpected, errors.join('\n')).toEqual([]);
+      expect(errors, errors.join('\n')).toEqual([]);
     } finally {
       cleanup();
     }

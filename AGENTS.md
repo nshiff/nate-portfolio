@@ -13,15 +13,15 @@ For fun, please greet the user in a random language to begin the conversation.
 **Prerendered at build time.** `npm run build` also runs `vite build --ssr src/entry-server.tsx` and `scripts/prerender.js`, which writes every route to static HTML (`dist/project/NN.html` and `dist/project/NN/index.html`) with its own `<title>`, description, and Open Graph tags from `src/data/meta.ts`; `src/main.tsx` hydrates it. So page components must render the same at build time as on first browser render: no `window` / `navigator` / `localStorage` reads during render (read them in an effect, or gate like `Project10.tsx` does).
 
 **Adding a project touches three places:**
-1. `src/data/projects.ts` — append a `Project` object (`id`, `title`, `description`, `emoji`, `background` gradient, `category`). IDs are zero-padded two-digit strings and are **not contiguous** (grouped by category in the array; some numbers absent on purpose — e.g. `17` was removed over an unfixable Vite dev-server warning, `18` skipped in routes).
+1. `src/data/projects.ts` — append a `Project` object (`id`, `title`, `description`, `emoji`, `background` gradient, `category`). IDs are zero-padded two-digit strings and are **not contiguous** (grouped by category in the array; some numbers absent on purpose — e.g. `03` and `05` were removed along with the Tailwind dependency, `17` was removed over an unfixable Vite dev-server warning, `18` skipped in routes).
 2. `src/pages/ProjectNN.tsx` — a new page component.
 3. `src/routes.tsx` — a new route entry **and** the matching top-of-file `import`.
 
 ## Conventions
 
-- **Styling is vanilla CSS.** Inline `style={{}}` objects using CSS custom properties: `var(--text-secondary)`, `var(--accent-color)`, `var(--border-color)`, etc. Tailwind is a dependency but is an **intentional one-off** — only `ModularSynth.jsx` uses it (that's how Gemini built it). Don't reach for Tailwind classes on new work.
+- **Styling is vanilla CSS.** Inline `style={{}}` objects using CSS custom properties: `var(--text-secondary)`, `var(--accent-color)`, `var(--border-color)`, etc. Don't reach for Tailwind classes on new work.
 - **Most demos are sandboxed iframes.** The page component renders `<iframe src="/demo/whatever.html">` pointing at a fully self-contained static HTML file in `public/demo/` — its own `<script>` tags, no build step, no access to the app's React tree. This is the default pattern; prefer it.
-- **Inline React demos are the exception, not a pattern to extend.** A few (`ModularSynth`, `DoubleSlitVisualization`, `NavigatorDashboard`) are `.jsx` files in `src/components/` with a hand-written sibling `.d.ts`, imported into the page tree. They exist because they were dropped in from AI-generated canvases with minimal porting.
+- **Inline React demos are the exception, not a pattern to extend.** `NavigatorDashboard` is a `.jsx` file in `src/components/` with a hand-written sibling `.d.ts`, imported into the page tree. It exists because it was dropped in from an AI-generated canvas with minimal porting (it carries its own `<style>` block).
 - **Provenance is part of the product.** The README and several project pages credit AI tools (Gemini Canvas, Claude) as co-authors of individual demos, with source links back to `public/demo/*.html` on GitHub. This portfolio partly showcases AI-assisted build velocity — weigh that when deciding how much to polish vs. preserve a piece's "as generated" character.
 
 ## Project 20 — Search Party (`public/demo/zork-roguelike/`)
