@@ -176,6 +176,54 @@ function runBusyBeaver(bb: BusyBeaver): string {
   return out.join("\n");
 }
 
+const MARINADE_INGREDIENTS = [
+  "2 cups fresh context",
+  "1 tbsp sleep",
+  "a pinch of rubber duck",
+  "3 cloves of skepticism, minced",
+  "1 long walk, roughly chopped",
+  "a splash of git blame",
+  "1/2 cup stack traces, strained",
+  "a generous drizzle of coffee",
+  "zest of one whiteboard",
+  "1 shower thought, whole",
+  "a dash of README nobody read",
+  "salt and pepper to taste",
+];
+
+const MARINADE_INSTRUCTIONS = [
+  "Cover and refrigerate. Do not stir.",
+  "Let it sit overnight. Resist the urge to check on it.",
+  "Leave it alone. Opening the lid resets the timer.",
+  "Walk away. Do something else. It knows.",
+];
+
+function pickDistinct<T>(items: readonly T[], count: number): T[] {
+  const pool = [...items];
+  const picked: T[] = [];
+  while (picked.length < count && pool.length > 0) {
+    picked.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  }
+  return picked;
+}
+
+function marinate(subject: string): string {
+  const hours = 4 + Math.floor(Math.random() * 9); // 4 to 12 hours
+  const ready = new Date(Date.now() + hours * 60 * 60 * 1000).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  const [instruction] = pickDistinct(MARINADE_INSTRUCTIONS, 1);
+  return [
+    `Marinating ${subject}...`,
+    "",
+    ...pickDistinct(MARINADE_INGREDIENTS, 3).map((item) => `  + ${item}`),
+    "",
+    instruction,
+    `Ready in about ${hours} hours (around ${ready}).`,
+  ].join("\n");
+}
+
 interface Command {
   /** How to call it, shown in HELP. Omit for commands that take no args. */
   usage?: string;
@@ -232,6 +280,12 @@ const commands: Record<string, Command> = {
       if (args.length > 0) throw new CommandError("Usage: FORTUNE");
       return pickFortune();
     },
+  },
+
+  MARINATE: {
+    usage: "[idea]",
+    description: "Let an idea sit for a while",
+    run: (args) => marinate(args.length > 0 ? `"${args.join(" ")}"` : "your thoughts"),
   },
 
   HELP: {
