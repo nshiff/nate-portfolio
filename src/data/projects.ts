@@ -189,6 +189,14 @@ export const projects: Project[] = [
     background: 'linear-gradient(135deg, #05080a 0%, #0d1a1f 100%)',
     category: 'Miscellaneous',
   },
+  {
+    id: '23',
+    title: 'Color Toggle',
+    description: 'A minimal React component that toggles text between red and blue.',
+    emoji: '🎨',
+    background: 'linear-gradient(135deg, #3b0a0a 0%, #0a1a3b 100%)',
+    category: 'Miscellaneous',
+  },
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);
