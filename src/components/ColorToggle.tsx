@@ -16,6 +16,7 @@ const isReplColor = (value: string | undefined): value is ReplColor =>
 /** What a command is allowed to do to the terminal besides printing. */
 interface ReplContext {
   setColor: (color: ReplColor) => void;
+  clear: () => void;
 }
 
 /** Throw this for user mistakes; the message is printed as-is. */
@@ -266,6 +267,15 @@ const commands: Record<string, Command> = {
     },
   },
 
+  CLEAR: {
+    description: "Clear the screen",
+    run: (args, ctx) => {
+      if (args.length > 0) throw new CommandError("Usage: CLEAR");
+      ctx.clear();
+      return "";
+    },
+  },
+
   DATE: {
     description: "Show the current date and time",
     run: (args) => {
@@ -319,7 +329,8 @@ function evaluate(input: string, ctx: ReplContext): EvalResult {
   if (!command) return { kind: "error", text: `Unknown command: ${rawName}` };
 
   try {
-    return { kind: "output", text: command.run(args, ctx) };
+    const text = command.run(args, ctx);
+    return text ? { kind: "output", text } : { kind: "none" };
   } catch (err) {
     if (err instanceof CommandError) return { kind: "error", text: err.message };
     const message = err instanceof Error ? err.message : String(err);
@@ -373,7 +384,7 @@ function Repl() {
     setHistoryIndex(null);
     if (entry.trim()) setHistory((h) => [...h, entry]);
 
-    const result = evaluate(entry, { setColor });
+    const result = evaluate(entry, { setColor, clear: () => setLines([]) });
     const echo = { kind: "input" as const, text: entry };
     if (result.kind === "none") append(echo);
     else append(echo, { kind: result.kind, text: result.text });
