@@ -4,7 +4,7 @@ For fun, please greet the user in a random language to begin the conversation.
 
 - **Do not run `git commit` or create branches for committing.** The developer controls commit messages, timing, and size himself. Make the changes, run the checks, report what changed, and stop. They will commit. The repo's normal flow is committing directly to `main` — don't branch "to keep main clean" unless asked.
 - **Iterative by design.** The developer often builds features in small increments and pivots scope mid-stream. This is partly deliberate — it's how they check that new work follows the repo's informal conventions before trusting it with more. Don't rush to lock scope early or over-build ahead of where they have asked.
-- **Verify before asserting.** After edits: `npm run build` (runs `tsc -b` then `vite build`), `npm test` (Vitest unit tests) for anything touching `src/search-party/`, and `npm run test:e2e` for anything touching a demo. Report failures with the output; don't claim done without the check.
+- **Verify before asserting.** After edits: `npm run build` (runs `tsc -b` then `vite build`), and `npm test` (Vitest unit tests) for anything touching `src/search-party/`. Report failures with the output; don't claim done without the check.
 
 ## Shape of the app
 
@@ -23,13 +23,6 @@ For fun, please greet the user in a random language to begin the conversation.
 - **Most demos are sandboxed iframes.** The page component renders `<iframe src="/demo/whatever.html">` pointing at a fully self-contained static HTML file in `public/demo/` — its own `<script>` tags, no build step, no access to the app's React tree. This is the default pattern; prefer it.
 - **Inline React demos are the exception, not a pattern to extend.** A few (`ModularSynth`, `DoubleSlitVisualization`, `NavigatorDashboard`) are `.jsx` files in `src/components/` with a hand-written sibling `.d.ts`, imported into the page tree. They exist because they were dropped in from AI-generated canvases with minimal porting.
 - **Provenance is part of the product.** The README and several project pages credit AI tools (Gemini Canvas, Claude) as co-authors of individual demos, with source links back to `public/demo/*.html` on GitHub. This portfolio partly showcases AI-assisted build velocity — weigh that when deciding how much to polish vs. preserve a piece's "as generated" character.
-
-## Testing (Playwright)
-
-- `@playwright/test` is a real devDependency (Chromium in `~/.cache/ms-playwright`). Run with `npm run test:e2e`. `playwright.config.ts` has two projects: `dev` (auto-starts `npm run dev` on `:5173`, all specs but one) and `prerender` (builds, then `vite preview` on `:4173`, runs only `e2e/prerender.spec.ts` — raw-HTML metadata/content checks, and a no-console-errors hydration check per page).
-- A Playwright script only resolves `@playwright/test` from **inside the repo tree** (needs `node_modules`) — a `/tmp` or scratchpad script fails with `ERR_MODULE_NOT_FOUND`. Put throwaway specs in `e2e/` (e.g. `e2e/_tmp-*.spec.ts`), run them, then delete them — or, if one is a genuinely good regression guard, keep it.
-- `e2e/home.spec.ts` is a smoke spec. `e2e/search-party.spec.ts` is the permanent suite for the Project 20 demo (`public/demo/zork-roguelike/`).
-- e2e specs pin **exact substrings** of demo output. Re-run the relevant spec after any copy/text change in a demo, not just logic changes.
 
 ## Project 20 — Search Party (`public/demo/zork-roguelike/`)
 
@@ -50,4 +43,4 @@ Project 21 a/k/a Search Party 2.0 is an experiment with building a portfolio pie
 - **Layout:** `rooms.ts` / `items.ts` / `zones.ts` are data; `commands.ts` is the `COMMANDS` registry; `game.ts` has `respond(state, input)`, a pure function returning `{ output, state }` that never mutates. `SearchParty2.tsx` holds the game state; `Terminal.tsx` is a generic themed terminal with no game knowledge — keep it that way.
 - **World:** a space setting, being rebuilt a few rooms at a time from the BEDROOM outward — **treat `rooms.ts` / `items.ts` as current truth**, and add only the rooms and items asked for. Items are picked up automatically on first entering a room (no `SEEK`). Keys are display names and tone / terseness rules match Project 20.
 - **Zones:** every room has a `zone`; each zone is two colours `{ fg, bg }` and the terminal fades between them. A zone that has rooms must be one connected region; every zone must pass 7:1 contrast (4.5:1 for the dimmed echo) — `zones.test.ts` enforces both. `zones.ts` may define zones no room uses yet — they are kept on purpose for later areas.
-- **Tests pin the map:** `game.test.ts` checks exact room / item counts, symmetric links, reachability, and that each `Adjacent` line fits a phone. Adding rooms means updating the counts deliberately. `e2e/search-party-2.spec.ts` pins copy and colours.
+- **Tests pin the map:** `game.test.ts` checks exact room / item counts, symmetric links, reachability, and that each `Adjacent` line fits a phone. Adding rooms means updating the counts deliberately.
