@@ -21,7 +21,7 @@
   padding: 1rem 1.25rem;
   border-radius: 0.5rem;
   border: 1px solid color-mix(in srgb, var(--accent, #22d3ee) 25%, transparent);
-  background: color-mix(in srgb, black 35%, transparent);
+  background: #0b0f19;
   color: var(--repl-fg, var(--repl-text, #d1d5db));
   cursor: text;
   transition: border-color 0.2s ease, color 0.2s ease;
