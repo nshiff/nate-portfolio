@@ -21,6 +21,7 @@ import { Project20 } from './pages/Project20';
 import { Project21 } from './pages/Project21';
 import { Project22 } from './pages/Project22';
 import { Project23 } from './pages/Project23';
+import { Project24 } from './pages/Project24';
 
 // Shared by the browser router (main.tsx) and the build-time prerender (entry-server.tsx)
 export const routes: RouteObject[] = [
@@ -111,6 +112,10 @@ export const routes: RouteObject[] = [
       {
         path: "/project/23",
         element: <Project23 />,
+      },
+      {
+        path: "/project/24",
+        element: <Project24 />,
       },
     ],
   },

@@ -32,6 +32,14 @@ export const projects: Project[] = [
     category: 'Science',
   },
   {
+    id: '24',
+    title: 'Stable Fluids 2.0',
+    description: 'A GPU-accelerated fluid simulation, rebuilt mobile-first with adaptive WebGL quality scaling.',
+    emoji: '🌀',
+    background: 'linear-gradient(135deg, #001529 0%, #0b6e8a 100%)',
+    category: 'Science',
+  },
+  {
     id: '06',
     title: "Maxwell's Demon",
     description: 'An interactive simulation exploring entropy and the second law of thermodynamics.',
