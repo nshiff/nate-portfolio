@@ -38,6 +38,7 @@ export const projects: Project[] = [
     emoji: '🌀',
     background: 'linear-gradient(135deg, #001529 0%, #0b6e8a 100%)',
     category: 'Science',
+    featured: true,
   },
   {
     id: '06',
