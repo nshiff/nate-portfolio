@@ -188,6 +188,14 @@ export const projects: Project[] = [
     background: 'linear-gradient(135deg, #3b0a0a 0%, #0a1a3b 100%)',
     category: 'Miscellaneous',
   },
+  {
+    id: '25',
+    title: 'Nexus Live Wallpaper',
+    description: 'A Canvas 2D recreation of the Android 2.1 Nexus live wallpaper. Tap to send out pulses of light.',
+    emoji: '✨',
+    background: 'linear-gradient(135deg, #050505 0%, #1a1a1a 100%)',
+    category: 'Miscellaneous',
+  },
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);

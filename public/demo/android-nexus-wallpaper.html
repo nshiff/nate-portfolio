@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nexus Live Wallpaper</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background: #050505;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="wall" role="img" aria-label="Animated grid of glowing light pulses; tap to send out more"></canvas>
+
+    <script>
+        {
+            /**
+             * Nexus live wallpaper — a framework-free Canvas 2D recreation of the
+             * Android 2.1 "Nexus" live wallpaper: colored light pulses gliding straight
+             * across a studded pyramid grid. Tap or click to send out a burst of pulses.
+             *
+             * Plain JavaScript, no dependencies; everything lives in this one file.
+             *
+             *   const stop = startNexusWallpaper(canvas, { cellSize: 18 });
+             *   // later: stop();
+             *
+             * Size the canvas with CSS (e.g. width/height 100%); the module watches it
+             * with a ResizeObserver and handles devicePixelRatio itself.
+             */
+
+            /** @typedef {[number, number, number]} RGB */
+
+            /**
+             * @typedef {Object} NexusOptions
+             * @property {number} [cellSize]   Stud size in CSS pixels.
+             * @property {RGB[]}  [colors]     Pulse colors.
+             * @property {number} [density]    Ambient pulses per 1000 grid cells.
+             * @property {number} [minPulses]  Floor on ambient pulses for small screens.
+             * @property {[number, number]} [speed]   Speed range, cells per second.
+             * @property {[number, number]} [length]  Trail length range, in cells.
+             * @property {boolean} [interactive]      Tap/click spawns a burst.
+             * @property {number} [burstSize]  Pulses per tap: 4 fans out in every direction.
+             */
+
+            /** @type {Required<NexusOptions>} */
+            const DEFAULTS = {
+                cellSize: 18,
+                colors: [
+                    [255, 40, 40], // red
+                    [40, 255, 70], // green
+                    [40, 150, 255], // blue
+                    [255, 220, 40], // yellow
+                ],
+                density: 4,
+                minPulses: 3,
+                speed: [4, 8],
+                length: [5, 13],
+                interactive: true,
+                burstSize: 4,
+            };
+
+            // Directions: 0 = right, 1 = down, 2 = left, 3 = up
+            const DX = [1, 0, -1, 0];
+            const DY = [0, 1, 0, -1];
+
+            const rand = (min, max) => min + Math.random() * (max - min);
+            const randInt = (n) => Math.floor(Math.random() * n);
+            const rgba = ([r, g, b], a) =>
+                `rgba(${r},${g},${b},${Math.max(0, Math.min(1, a)).toFixed(3)})`;
+
+            function makeCanvas(w, h) {
+                const canvas = document.createElement("canvas");
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) throw new Error("Canvas 2D not supported");
+                return { canvas, ctx };
+            }
+
+            /** Draws one pyramid stud: four triangular faces meeting at the center. */
+            function drawStud(ctx, s, faces) {
+                ctx.fillStyle = faces.gap;
+                ctx.fillRect(0, 0, s, s);
+                const inset = Math.max(1, Math.round(s * 0.07));
+                const x0 = inset;
+                const y0 = inset;
+                const x1 = s - inset;
+                const y1 = s - inset;
+                const c = s / 2;
+                const tri = (ax, ay, bx, by, color) => {
+                    ctx.beginPath();
+                    ctx.moveTo(ax, ay);
+                    ctx.lineTo(bx, by);
+                    ctx.lineTo(c, c);
+                    ctx.closePath();
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                };
+                tri(x0, y0, x1, y0, faces.top);
+                tri(x1, y0, x1, y1, faces.right);
+                tri(x1, y1, x0, y1, faces.bottom);
+                tri(x0, y1, x0, y0, faces.left);
+            }
+
+            /** Fills a w×h canvas with copies of a stud tile. */
+            function tileGrid(w, h, cell, tile) {
+                const { canvas, ctx } = makeCanvas(w, h);
+                for (let y = 0; y < h; y += cell) {
+                    for (let x = 0; x < w; x += cell) ctx.drawImage(tile, x, y);
+                }
+                return canvas;
+            }
+
+            /**
+             * Starts the wallpaper on a canvas.
+             * @param {HTMLCanvasElement} canvas
+             * @param {NexusOptions} [options]
+             * @returns {() => void} Stops the animation and removes listeners.
+             */
+            function startNexusWallpaper(canvas, options = {}) {
+                const opts = { ...DEFAULTS, ...options };
+                const ctx = canvas.getContext("2d");
+                if (!ctx) throw new Error("Canvas 2D not supported");
+
+                const reducedMotion =
+                    typeof matchMedia === "function" &&
+                    matchMedia("(prefers-reduced-motion: reduce)").matches;
+                const speedScale = reducedMotion ? 0.35 : 1;
+
+                // Everything below is in device pixels; grid positions are in cells,
+                // with cell centers on integers.
+                let dpr = 1;
+                let cell = 0; // integer stud size in device px, so tiles never seam
+                let cols = 0;
+                let rows = 0;
+                let background = null; // the dark studded grid
+                let shading = null; // per-face brightness mask for the light
+                let light = makeCanvas(1, 1); // offscreen buffer the pulses glow into
+                let pulses = [];
+                let spawnTimer = 0;
+
+                const offScreen = (x, y) => x < -1 || x > cols || y < -1 || y > rows;
+                const ambientTarget = () =>
+                    Math.max(opts.minPulses, Math.round((cols * rows * opts.density) / 1000));
+
+                function resize() {
+                    dpr = window.devicePixelRatio || 1;
+                    const w = Math.max(1, Math.round(canvas.clientWidth * dpr));
+                    const h = Math.max(1, Math.round(canvas.clientHeight * dpr));
+                    canvas.width = w;
+                    canvas.height = h;
+
+                    cell = Math.max(4, Math.round(opts.cellSize * dpr));
+                    cols = Math.ceil(w / cell);
+                    rows = Math.ceil(h / cell);
+
+                    const darkTile = makeCanvas(cell, cell);
+                    drawStud(darkTile.ctx, cell, {
+                        gap: "#050505",
+                        top: "#363636",
+                        left: "#262626",
+                        right: "#1a1a1a",
+                        bottom: "#111111",
+                    });
+                    background = tileGrid(w, h, cell, darkTile.canvas);
+
+                    // Grayscale mask: light catches the top face most and pools dimly in the grooves.
+                    const shadeTile = makeCanvas(cell, cell);
+                    drawStud(shadeTile.ctx, cell, {
+                        gap: "#3a3a3a",
+                        top: "#ffffff",
+                        left: "#c4c4c4",
+                        right: "#929292",
+                        bottom: "#6e6e6e",
+                    });
+                    shading = tileGrid(w, h, cell, shadeTile.canvas);
+
+                    light = makeCanvas(w, h);
+                }
+
+                function addPulse(x, y, dir, ambient, color) {
+                    pulses.push({
+                        x, // head position
+                        y,
+                        ox: x, // where it started; the trail never extends past this
+                        oy: y,
+                        dir,
+                        ambient,
+                        speed: rand(opts.speed[0], opts.speed[1]),
+                        length: rand(opts.length[0], opts.length[1]),
+                        color: color || opts.colors[randInt(opts.colors.length)],
+                    });
+                }
+
+                /** An ambient pulse enters from a random edge and crosses the screen. */
+                function spawnAmbient(prewarm = false) {
+                    const dir = randInt(4);
+                    let x;
+                    let y;
+                    if (dir === 0) [x, y] = [-1, randInt(rows)];
+                    else if (dir === 2) [x, y] = [cols, randInt(rows)];
+                    else if (dir === 1) [x, y] = [randInt(cols), -1];
+                    else[x, y] = [randInt(cols), rows];
+                    addPulse(x, y, dir, true);
+
+                    // On startup, scatter pulses mid-flight so the screen isn't empty.
+                    if (prewarm) {
+                        const p = pulses[pulses.length - 1];
+                        const d = rand(0, dir % 2 === 0 ? cols : rows);
+                        p.x += DX[dir] * d;
+                        p.y += DY[dir] * d;
+                    }
+                }
+
+                /** A tap sends pulses outward from the touched stud. */
+                function burst(col, row) {
+                    const n = Math.max(1, Math.min(4, opts.burstSize));
+                    // Pick n distinct directions, starting at a random one.
+                    const start = randInt(4);
+                    for (let i = 0; i < n; i++) {
+                        addPulse(col, row, (start + i) % 4, false);
+                    }
+                }
+
+                function onPointerDown(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    const col = Math.floor(((e.clientX - rect.left) * dpr) / cell);
+                    const row = Math.floor(((e.clientY - rect.top) * dpr) / cell);
+                    if (col >= 0 && col < cols && row >= 0 && row < rows) burst(col, row);
+                }
+
+                const toPx = (g) => (g + 0.5) * cell;
+
+                /** Draws one pulse's trail and head into the light buffer. */
+                function drawPulse(lctx, p) {
+                    // The trail runs back from the head, but never past the start point.
+                    const traveled = Math.abs(p.x - p.ox) + Math.abs(p.y - p.oy);
+                    const len = Math.min(p.length, traveled);
+                    const hx = toPx(p.x);
+                    const hy = toPx(p.y);
+
+                    if (len > 0) {
+                        const tx = toPx(p.x - DX[p.dir] * len);
+                        const ty = toPx(p.y - DY[p.dir] * len);
+                        // Brightness falls off toward the tail; a young trail is cut off sooner.
+                        const tailAlpha = Math.max(0, 1 - len / p.length) ** 1.6;
+                        const grad = lctx.createLinearGradient(hx, hy, tx, ty);
+                        grad.addColorStop(0, rgba(p.color, 1));
+                        grad.addColorStop(0.35, rgba(p.color, 0.55 + 0.45 * tailAlpha));
+                        grad.addColorStop(1, rgba(p.color, tailAlpha));
+                        lctx.strokeStyle = grad;
+
+                        lctx.beginPath();
+                        lctx.moveTo(hx, hy);
+                        lctx.lineTo(tx, ty);
+                        lctx.globalAlpha = 0.35;
+                        lctx.lineWidth = cell * 0.95;
+                        lctx.stroke();
+                        lctx.globalAlpha = 1;
+                        lctx.lineWidth = cell * 0.42;
+                        lctx.stroke();
+                    }
+
+                    // The head: a hot, blurred square with a white core.
+                    const hs = cell * 0.62;
+                    lctx.shadowColor = rgba(p.color, 1);
+                    lctx.shadowBlur = cell * 1.4;
+                    lctx.fillStyle = rgba(p.color, 1);
+                    lctx.fillRect(hx - hs / 2, hy - hs / 2, hs, hs);
+                    lctx.shadowBlur = 0;
+                    const core = hs * 0.5;
+                    lctx.fillStyle = "rgba(255,255,255,0.85)";
+                    lctx.fillRect(hx - core / 2, hy - core / 2, core, core);
+                }
+
+                function render() {
+                    if (!background || !shading) return;
+                    const lctx = light.ctx;
+
+                    // 1. Pulses glow additively onto a black buffer.
+                    lctx.globalCompositeOperation = "source-over";
+                    lctx.fillStyle = "#000";
+                    lctx.fillRect(0, 0, light.canvas.width, light.canvas.height);
+                    lctx.globalCompositeOperation = "lighter";
+                    lctx.lineCap = "butt";
+                    for (const p of pulses) drawPulse(lctx, p);
+
+                    // 2. Multiply by the face mask so the light picks up the pyramid facets.
+                    lctx.globalCompositeOperation = "multiply";
+                    lctx.drawImage(shading, 0, 0);
+
+                    // 3. Dark grid, then add the light on top.
+                    ctx.globalCompositeOperation = "source-over";
+                    ctx.drawImage(background, 0, 0);
+                    ctx.globalCompositeOperation = "lighter";
+                    ctx.drawImage(light.canvas, 0, 0);
+                    ctx.globalCompositeOperation = "source-over";
+                }
+
+                let last = performance.now();
+                let frame = 0;
+
+                function tick(now) {
+                    const dt = Math.min(0.05, (now - last) / 1000); // clamp after tab switches
+                    last = now;
+
+                    for (const p of pulses) {
+                        const step = p.speed * speedScale * dt;
+                        p.x += DX[p.dir] * step;
+                        p.y += DY[p.dir] * step;
+                    }
+                    // Remove a pulse once its whole trail has left the screen.
+                    pulses = pulses.filter((p) => {
+                        const tx = p.x - DX[p.dir] * p.length;
+                        const ty = p.y - DY[p.dir] * p.length;
+                        return !(offScreen(p.x, p.y) && offScreen(tx, ty));
+                    });
+
+                    // Taps don't count toward the ambient total, so bursts are pure extra.
+                    spawnTimer -= dt;
+                    const ambient = pulses.reduce((n, p) => n + (p.ambient ? 1 : 0), 0);
+                    if (ambient < ambientTarget() && spawnTimer <= 0) {
+                        spawnAmbient();
+                        spawnTimer = rand(0.3, 1.2);
+                    }
+
+                    render();
+                    frame = requestAnimationFrame(tick);
+                }
+
+                resize();
+                for (let i = 0; i < ambientTarget(); i++) spawnAmbient(true);
+
+                const observer = new ResizeObserver(() => resize());
+                observer.observe(canvas);
+                if (opts.interactive) {
+                    canvas.addEventListener("pointerdown", onPointerDown);
+                    canvas.style.touchAction = "manipulation";
+                }
+                frame = requestAnimationFrame(tick);
+
+                return () => {
+                    cancelAnimationFrame(frame);
+                    observer.disconnect();
+                    canvas.removeEventListener("pointerdown", onPointerDown);
+                };
+            }
+
+            startNexusWallpaper(document.getElementById("wall"));
+        }
+    </script>
+</body>
+
+</html>
